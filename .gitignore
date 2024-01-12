@@ -1,0 +1,11 @@
+# vscode files
+.vscode/
+
+# The executable
+Webserv
+
+# obj files
+*.o
+
+# debug files
+*.dSYM
