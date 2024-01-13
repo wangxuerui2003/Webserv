@@ -9,3 +9,6 @@ Webserv
 
 # debug files
 *.dSYM
+
+# testing config file
+test.conf
