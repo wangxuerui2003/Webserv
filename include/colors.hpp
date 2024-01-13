@@ -1,28 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   webserv.hpp                                        :+:      :+:    :+:   */
+/*   colors.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/13 16:01:20 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/13 18:12:06 by wxuerui          ###   ########.fr       */
+/*   Created: 2024/01/13 16:04:48 by wxuerui           #+#    #+#             */
+/*   Updated: 2024/01/13 16:08:07 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef WEBSERV_HPP
-#define WEBSERV_HPP
+#ifndef COLORS_HPP
+#define COLORS_HPP
 
-#include "Parser.hpp"
-#include "Path.hpp"
-#include "ConnectionHandler.hpp"
-
-#include "colors.hpp"
-#include "utils.hpp"
-
-#include <cstdlib>
-
-#define USAGE "Usage: ./webserv <config_file>"
-#define DEFAULT_CONFIG "./conf/test.conf"
+# define BOLD		"\x1b[1m"
+# define RED		"\x1b[31m"
+# define GREEN 		"\x1b[32m"
+# define YELLOW		"\x1b[33m"
+# define BLUE		"\x1b[34m"
+# define MAGENTA	"\x1b[35m"
+# define CYAN		"\x1b[36m"
+# define RESET		"\x1b[0m"
 
 #endif

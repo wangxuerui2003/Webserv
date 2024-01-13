@@ -6,7 +6,7 @@
 #    By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/12 11:48:29 by wxuerui           #+#    #+#              #
-#    Updated: 2024/01/12 12:54:18 by wxuerui          ###   ########.fr        #
+#    Updated: 2024/01/13 18:11:11 by wxuerui          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,7 +30,11 @@ vpath %.cpp	$(SRC_DIR)
 vpath %.h	$(INC_DIR)
 vpath %.o	$(OBJ_DIR)
 
-SRC_FILES	=	main
+SRC_FILES	=	main \
+				Parser \
+				Path \
+				ConnectionHandler \
+				utils
 
 SRC			=	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(SRC_FILES)))
 OBJ			=	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_FILES)))
@@ -55,7 +59,7 @@ RESET		=	\033[0m
 all:
 	@make obj_dir_create
 	@make $(NAME)
-	# @make ascii_art
+	@make ascii_art
 
 ifeq ($(DB), 1)
 	@echo "$(YELLOW)ASAN MODE$(RESET)"
@@ -81,13 +85,13 @@ re:	fclean all
 
 ascii_art:
 	@clear
-	@echo ""
-	@echo " __      __      ___.                              "
-	@echo "/  \    /  \ ____\_ |__   ______ ______________  __"
-	@echo "\   \/\/   // __ \| __ \ /  ___// __ \_  __ \  \/ /"
-	@echo " \        /\  ___/| \_\ \\___ \\  ___/|  | \/\   / "
-	@echo "  \__/\  /  \___  >___  /____  >\___  >__|    \_/  "
-	@echo "       \/       \/    \/     \/     \/             "
-	@echo ""
+	@echo ''
+	@echo ' __      __      ___.                              '
+	@echo '/  \    /  \ ____\_ |__   ______ ______________  __'
+	@echo '\   \/\/   // __ \| __ \ /  ___// __ \_  __ \  \/ /'
+	@echo ' \        /\  ___/| \_\ \\___ \\  ___/|  | \/\   / '
+	@echo '  \__/\  /  \___  >___  /____  >\___  >__|    \_/  '
+	@echo '       \/       \/    \/     \/     \/             '
+	@echo ''
 
 .PHONY: all clean fclean re obj_dir_create

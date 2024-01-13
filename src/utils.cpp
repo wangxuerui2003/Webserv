@@ -1,28 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   webserv.hpp                                        :+:      :+:    :+:   */
+/*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/13 16:01:20 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/13 18:12:06 by wxuerui          ###   ########.fr       */
+/*   Created: 2024/01/13 16:02:56 by wxuerui           #+#    #+#             */
+/*   Updated: 2024/01/13 16:11:14 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef WEBSERV_HPP
-#define WEBSERV_HPP
+#include "webserv.hpp"
 
-#include "Parser.hpp"
-#include "Path.hpp"
-#include "ConnectionHandler.hpp"
+// namespace wsutils {
 
-#include "colors.hpp"
-#include "utils.hpp"
-
-#include <cstdlib>
-
-#define USAGE "Usage: ./webserv <config_file>"
-#define DEFAULT_CONFIG "./conf/test.conf"
-
-#endif
+	void wsutils::errorExit(const char *msg) {
+		std::cerr << RED << msg << RESET << std::endl;
+		exit(1);
+	}
+	
+// }
