@@ -2,7 +2,7 @@
 .vscode/
 
 # The executable
-Webserv
+webserv
 
 # obj files
 *.o
