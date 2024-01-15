@@ -3,20 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:02:56 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/13 16:11:14 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/15 16:53:01 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 
-// namespace wsutils {
-
-	void wsutils::errorExit(const char *msg) {
-		std::cerr << RED << msg << RESET << std::endl;
-		exit(1);
-	}
-	
-// }
+void wsutils::errorExit(const char *msg) {
+	std::cerr << RED << msg << RESET << std::endl;
+	exit(1);
+}
