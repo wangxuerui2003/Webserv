@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/15 18:45:00 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/15 22:32:20 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,6 @@
 // TODO: Decide how to check if request is dynamic or static (based on file extension?)
 bool ResponseHandler::isCgiRequest(const std::string& path) {
     // Check if the request path corresponds to CGI scripts.
-    // You may implement this based on your server's CGI handling criteria.
-    // For example, checking if the path starts with "/cgi-bin/" or has a specific file extension.
-    // Modify this function according to your project requirements.
 
     // Example: Check if the path starts with "/cgi-bin/"
     return (path.substr(0, 9) == "/cgi-bin/");
@@ -26,7 +23,6 @@ bool ResponseHandler::isCgiRequest(const std::string& path) {
 // IF static content, then just return string using readFile
 std::string ResponseHandler::handleStaticContent(const Request& httpRequest) {
     // Handle static content based on the requested path.
-    // This is a placeholder; replace it with your actual static content handling logic.
 
     std::string path = httpRequest.getPath().substr(1);  // Remove the leading '/' from the path.
 
