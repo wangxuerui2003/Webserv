@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/13 18:28:57 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/15 20:48:14 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,17 @@
 
 #include "Parser.hpp"
 #include "Path.hpp"
+#include "utils.hpp"
+
+#include <algorithm>
+
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <sys/types.h>
+#include <cstring>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <unistd.h>
 
 class ConnectionHandler {
 	public:
@@ -22,8 +33,9 @@ class ConnectionHandler {
 		~ConnectionHandler();
 
 		int createListenSocket(const Server& config) const;
+		void createNewConnection(int listenSocket);
 
-		void listen(void);
+		void serverListen(void);
 
 		// TODO: Add the connection handling function,
 		// 		which is called when the listen function has a new connection or event from existing connection
@@ -31,7 +43,14 @@ class ConnectionHandler {
 		// TODO: 
 
 	private:
+		// connectionSocket => Read buffer (waiting for full http request end with \r\n\r\n)
+		std::map<int, std::string> _activeConnections;
+
+		// listenSocket => Server config struct
 		std::map<int, Server> _servers;
+		
+		fd_set _readFds;
+		int _maxFd;
 
 
 };
