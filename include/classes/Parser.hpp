@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 17:55:47 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/13 18:18:12 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/15 17:29:31 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ struct Location {
 struct Server {
 	Server();
 
-	short port;
+	std::string port;
 	std::string host;
 	std::string server_name;
 	Path root;
@@ -53,7 +53,7 @@ class Parser {
 		void parse(std::string configFilePath);
 
 	private:
-		Parser(void);
+		Parser();
 
 		// Disable copying
 		Parser(const Parser& copy);
