@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/13 18:19:38 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/15 17:40:26 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void Parser::parse(std::string configFilePath) {
 	Server dummy;
 	dummy.root = Path("./www", DIRECTORY);
 	dummy.host = "127.0.0.1";
-	dummy.port = 8080;
+	dummy.port = "8080";
 	dummy.index.push_back("index.html");
 	dummy.error_pages[404] = Path("./www/404.html", REG_FILE);
 

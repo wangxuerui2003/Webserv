@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:47:59 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/13 18:22:38 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/15 17:30:07 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ int main(int ac, char **av) {
 	delete parser;
 
 	// Infinite loop handle connections
-	handler.listen();
+	handler.serverListen();
 
 	return 0;
 }
