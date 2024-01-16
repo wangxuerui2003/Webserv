@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/15 17:45:43 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/16 14:58:11 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,12 @@ std::string Request::getVersion() const {
 }
 
 std::string Request::getHeader(const std::string& headerName) const {
-    for (const auto& header : _headers) {
-        if (header.first == headerName) {
-            return header.second;
+    // Need to copu into a temp because _headers is intepreted as const_iterator?
+    std::map<std::string, std::string> temp = _headers;
+    for (std::map<std::string, std::string>::iterator head = temp.begin(); head != temp.end(); ++head) {
+        if (head->first == headerName) {
+            return (head->second);
+            break; // Exit the loop once the header is found
         }
     }
     return (""); // When header not found
@@ -69,5 +72,5 @@ void Request::parseHeaders(const std::string& headerPart) {
     std::string headerName, headerValue;
     std::getline(headerStream, headerName, ':');
     std::getline(headerStream, headerValue);
-    _headers.emplace_back(headerName, headerValue);
+    _headers.insert(std::make_pair(headerName, headerValue));
 }

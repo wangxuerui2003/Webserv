@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/15 21:41:00 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/16 16:20:54 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,10 +95,14 @@ void ConnectionHandler::serverListen(void) {
 					size_t terminator = _activeConnections[connectionSocket].find(HTTP_REQUEST_TERMINATOR);
 					while (terminator != std::string::npos) {
 						// TODO: Pass the full HTTP request string to wong's ResponseHandler
-						// Response ResponseHandler::generateResponse(_activeConnections[connectionSocket].substr(0, terminator + 4));
-						std::cout << _activeConnections[connectionSocket].substr(0, terminator + 4) << std::endl;
+						std::string response = ResponseHandler::generateResponse(_activeConnections[connectionSocket].substr(0, terminator + 4));
 
-						send(connectionSocket, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello, World!", 79, 0);
+						std::cout << _activeConnections[connectionSocket].substr(0, terminator + 4) << std::endl;
+						
+						// Print response from ResponseHandler which includes Content-Type and Content-Length
+						std::cout << "RESPONSE:\n" << response << std::endl;
+						send(connectionSocket, response.c_str(), response.length(), 0);
+						// send(connectionSocket, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello, World!", 79, 0);
 
 						_activeConnections[connectionSocket] = _activeConnections[connectionSocket].substr(terminator + 4);
 						terminator = _activeConnections[connectionSocket].find(HTTP_REQUEST_TERMINATOR);

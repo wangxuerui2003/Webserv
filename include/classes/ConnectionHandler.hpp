@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/15 20:48:14 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/16 15:02:10 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "Parser.hpp"
 #include "Path.hpp"
 #include "utils.hpp"
+#include "ResponseHandler.hpp"
 
 #include <algorithm>
 

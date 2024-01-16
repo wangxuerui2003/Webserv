@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:16:57 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/15 17:45:43 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/16 11:15:54 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <iostream>
+#include <map>
+#include <algorithm>
 
 class Request {
 public:
@@ -31,7 +34,7 @@ private:
     std::string _method;
     std::string _path;
     std::string _httpVersion;
-    std::vector<std::pair<std::string, std::string>> _headers;
+    std::map<std::string, std::string> _headers;
     std::string _body;
 
     void parseRequest(const std::string& rawReqString);
