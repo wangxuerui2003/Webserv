@@ -13,56 +13,63 @@
 struct Location {
 	Location();
 	
-	std::string url;
-	Path root;
+	std::vector<std::string> path;
+	std::vector<std::string> root;
 	// std::vector<std::string> allowedHttpMethods;
 	// bool directory_listing;
-	std::vector<std::string> index;
+	// std::vector<std::string> index;
 };
 
 struct Server {
 	Server();
 
-	std::vector<std::string> port;
-	std::vector<std::string> host;
-	std::vector<std::string> server_name;
-	Path root;
+	std::vector<std::string> listen;
+	std::vector<std::string> root;
 	std::vector<std::string> index;
-	std::map<int, Path> error_pages;
+	std::vector<std::string> server_name;
+	std::vector<std::string> error_pages;
 	// size_t max_client_body_size;
 
 	std::vector<Location> locations;
 };
 
-void getKeywordValues(std::string keyword, std::map<std::string, std::vector<std::string> > &serverValues, std::vector<std::string> lines) {
-    for (size_t i = 0; i < lines.size(); ++i) {
+
+Server::Server() {}
+
+Location::Location() {}
+
+std::vector<std::string> getKeywordValues(std::string keyword, std::vector<std::string> serverLines) {
+    std::vector<std::string> values;
+    for (size_t i = 0; i < serverLines.size(); ++i) {
         std::string value;
-        if (lines[i].find(keyword) != std::string::npos) {
-            std::vector<std::string> values;
-            std::istringstream iss(lines[i]);
+        if (serverLines[i].find(keyword) != std::string::npos) {
+            std::istringstream iss(serverLines[i]);
             iss >> value;
-            while (!iss.eof()) {
-                iss >> value;
-                if (iss.eof() && value.back() == ';')
-                    values.push_back(value.substr(0, value.size() - 1));
-                else
-                    values.push_back(value);
-            }
-            serverValues[keyword] = values;
+            if (value == keyword)
+                while (!iss.eof()) {
+                    iss >> value;
+                    if (iss.eof() && value.back() == ';')
+                        values.push_back(value.substr(0, value.size() - 1));
+                    else
+                        values.push_back(value);
+                }
         }
     }
+    return values;
 }
 
 int main(void)
 {
-    // open config file
+    std::vector<Server> servers;
+
+    // Open config file.
     std::ifstream configFile("./conf/example.conf");
 	if (!configFile.is_open()) {
         std::cerr << "Error opening config file." << std::endl;
         return 1;
     }
 
-    // stores lines into a vector
+    // Store whole config file line by line into a vector.
     std::vector<std::string> configLines;
 	std::string line;
 	while (std::getline(configFile, line))
@@ -70,20 +77,41 @@ int main(void)
     configFile.close();
 
     // check for server blocks
+    std::vector<std::string> serverLines;
+    // while (std::getline(configFile, line)) {
+    //     if (line.find("server {") != std::string::npos) {
+    //         while (line.find("}") == std::string::npos)
+    //             serverLines.push_back(line);
+    //     }
+    // }
+    bool in_block = false;
+    for (size_t i = 0; i < configLines.size(); i++) {
+        if (configLines[i].find("server {") != std::string::npos)
+            in_block = true;
+        else if (configLines[i].find("location")) {
+            
+        }
+        else if (configLines[i].find("}") != std::string::npos)
+            break ;
+        if (in_block == true)
+            serverLines.push_back(line);
+    }
+    for (size_t i = 0; i < serverLines.size(); i++)
+        std::cout << serverLines[i] << std::endl;
 
-    // add keyword and values to a map
-    std::map<std::string, std::vector<std::string> > serverValues;
-    getKeywordValues("listen", serverValues, configLines);
-    getKeywordValues("root", serverValues, configLines);
-    getKeywordValues("index", serverValues, configLines);
-    getKeywordValues("location", serverValues, configLines);
+    // Add values to struct and add to servers vector.
+    Server _server;
+    _server.listen = getKeywordValues("listen", configLines);
+    _server.root = getKeywordValues("root", configLines);
+    _server.index = getKeywordValues("index", configLines);
 
-    // iterrate the parsed values
-    std::map<std::string, std::vector<std::string> >::iterator iter;
-    for (iter = serverValues.begin(); iter != serverValues.end(); ++iter) {
-        std::cout << "Key: " << iter->first << " | Values: ";
-        for (size_t i = 0; i < iter->second.size(); ++i) {
-            std::cout << iter->second[i] << " ";
+    servers.push_back(_server);
+
+    // Iterator
+    for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
+        std::cout << "index: ";
+        for (std::vector<std::string>::iterator it2 = it->index.begin(); it2 != it->index.end(); ++it2) {
+            std::cout << *it2 << " ";
         }
         std::cout << std::endl;
     }
