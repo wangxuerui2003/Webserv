@@ -6,62 +6,51 @@
 
 int main(void)
 {
+    // open config file
     std::ifstream configFile("./example.conf");
-	if (!configFile.is_open())
-	{
+	if (!configFile.is_open()) {
         std::cerr << "Error opening config file." << std::endl;
         return 1;
     }
-    std::vector <std::string> configLines; // Stores each line of the config file in the vector
+
+    // stores lines into a vector
+    std::vector<std::string> configLines;
 	std::string line;
 	while (std::getline(configFile, line))
         configLines.push_back(line);
     configFile.close();
 
-    std::map<std::string, std::string> configValues;
+    // check for server blocks
 
-    for (size_t i = 0; i < configLines.size(); ++i)
-    {
-        std::string keyword, value;
-        if (configLines[i].find("listen") != std::string::npos)
-        {
+    // add keyword and values to a map
+    std::map<std::string, std::vector<std::string> > serverValues;
+    std::string keyword = "listen";
+
+    for (size_t i = 0; i < configLines.size(); ++i) {
+
+        std::string value;
+        if (configLines[i].find(keyword) != std::string::npos) {
+            std::vector<std::string> values;
             std::istringstream iss(configLines[i]);
-            iss >> keyword >> value;
-            configValues[keyword] = value.substr(0, value.size() - 1);
-        }
-        if (configLines[i].find("root") != std::string::npos)
-        {
-            std::istringstream iss(configLines[i]);
-            iss >> keyword >> value;
-            configValues[keyword] = value.substr(0, value.size() - 1);
+            iss >> value;
+            while (!iss.eof()) {
+                iss >> value;
+                if (iss.eof())
+                    values.push_back(value.substr(0, value.size() - 1));
+                else
+                    values.push_back(value);
+            }
+            serverValues[keyword] = values;
         }
     }
-     std::cout << configValues["listen"] << std::endl;
-     std::cout << configValues["root"] << std::endl;
 
-    // // Process the configuration lines
-    // std::map<std::string, std::string> configValues;
+    // Access the parsed values
+    std::vector<std::string> listenValues = serverValues[keyword];
+    std::cout << "Values: ";
+    for (size_t i = 0; i < listenValues.size(); ++i) {
+        std::cout << listenValues[i] << " ";
+    }
+    std::cout << std::endl;
 
-    // for (size_t i = 0; i < configLines.size(); ++i) {
-    //     if (configLines[i].find("listen") != std::string::npos) {
-    //         // Example: listen 127.0.0.1:8080;
-    //         std::istringstream iss(configLines[i]);
-    //         std::string keyword, address;
-    //         iss >> keyword >> address;
-    //         configValues["listen"] = address;
-    //     } else if (configLines[i].find("root") != std::string::npos) {
-    //         // Example: root /var/www/html/;
-    //         std::istringstream iss(configLines[i]);
-    //         std::string keyword, rootPath;
-    //         iss >> keyword >> rootPath;
-    //         configValues["root"] = rootPath;
-    //     }
-    //     // Add more conditions for other configuration parameters...
-    // }
-
-    // // Access the parsed values
-    // std::cout << "Listen Address: " << configValues["listen"] << std::endl;
-    // std::cout << "Root Path: " << configValues["root"] << std::endl;
-
-    // return 0;
+    return 0;
 }
