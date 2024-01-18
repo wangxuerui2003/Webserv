@@ -27,7 +27,7 @@ struct Server {
 	std::vector<std::string> root;
 	std::vector<std::string> index;
 	std::vector<std::string> server_name;
-	std::vector<std::string> error_pages;
+	std::vector<std::string> error_page;
 	// size_t max_client_body_size;
 
 	std::vector<Location> locations;
@@ -60,8 +60,6 @@ std::vector<std::string> getKeywordValues(std::string keyword, std::vector<std::
 
 int main(void)
 {
-    std::vector<Server> servers;
-
     // Open config file.
     std::ifstream configFile("./conf/example.conf");
 	if (!configFile.is_open()) {
@@ -76,14 +74,20 @@ int main(void)
         configLines.push_back(line);
     configFile.close();
 
+
+    std::vector<Server> servers;
     Server _server;
+    Location _location;
+
     // check for server blocks
     for (size_t i = 0; i < configLines.size(); i++) {
         // START OF SERVER BLOCK
         if (configLines[i].find("server {") != std::string::npos) {
             std::cout << i << " start of server: " << configLines[i] << std::endl;
+            std::vector<std::string> serverLines;
             // START OF LOCATION BLOCK
             while (++i < configLines.size()) {
+                serverLines.push_back(configLines[i]);
                 if (configLines[i].find("location") != std::string::npos) {
                     std::cout << i << " start of location: " << configLines[i] << std::endl;
                     // END OF LOCATION BLOCK
@@ -98,6 +102,12 @@ int main(void)
                 // END OF SERVER BLOCK
                 if (configLines[i].find("}") != std::string::npos) {
                     std::cout << i << " end of server: " << configLines[i] << std::endl;
+                    Server _server;
+                    _server.listen = getKeywordValues("listen", serverLines);
+                    _server.root = getKeywordValues("root", serverLines);
+                    _server.index = getKeywordValues("index", serverLines);
+                    _server.server_name = getKeywordValues("server_name", serverLines);
+                    _server.error_page = getKeywordValues("error_page", serverLines);
                     servers.push_back(_server);
                     i++;
                     break ;
@@ -106,21 +116,36 @@ int main(void)
         }
     }
 
+    // for (size_t i = 0; i < serverLines.size(); i++)
+    //     std::cout << serverLines[i] << std::endl;
+
     // Add values to struct and add to servers vector.
     // Server _server;
     // _server.listen = getKeywordValues("listen", configLines);
     // _server.root = getKeywordValues("root", configLines);
     // _server.index = getKeywordValues("index", configLines);
     // _server.server_name = getKeywordValues("server_name", configLines);
-
     // servers.push_back(_server);
 
-    // Iterator
     for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
-        std::cout << "server_name: ";
-        for (std::vector<std::string>::iterator it2 = it->server_name.begin(); it2 != it->server_name.end(); ++it2) {
+        int i;
+        i++;
+        std::cout << "Server " << i << " - ";
+        std::cout << "| listen: ";
+        for (std::vector<std::string>::iterator it2 = it->listen.begin(); it2 != it->listen.end(); ++it2)
             std::cout << *it2 << " ";
-        }
+        std::cout << "| root: ";
+        for (std::vector<std::string>::iterator it2 = it->root.begin(); it2 != it->root.end(); ++it2)
+            std::cout << *it2 << " ";
+        std::cout << "| index: ";
+        for (std::vector<std::string>::iterator it2 = it->index.begin(); it2 != it->index.end(); ++it2)
+            std::cout << *it2 << " ";
+        std::cout << "| server_name: ";
+        for (std::vector<std::string>::iterator it2 = it->server_name.begin(); it2 != it->server_name.end(); ++it2)
+            std::cout << *it2 << " ";
+        std::cout << "| error_page: ";
+        for (std::vector<std::string>::iterator it2 = it->error_page.begin(); it2 != it->error_page.end(); ++it2)
+            std::cout << *it2 << " ";
         std::cout << std::endl;
     }
 
