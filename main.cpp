@@ -76,41 +76,49 @@ int main(void)
         configLines.push_back(line);
     configFile.close();
 
+    Server _server;
     // check for server blocks
-    std::vector<std::string> serverLines;
-    // while (std::getline(configFile, line)) {
-    //     if (line.find("server {") != std::string::npos) {
-    //         while (line.find("}") == std::string::npos)
-    //             serverLines.push_back(line);
-    //     }
-    // }
-    bool in_block = false;
     for (size_t i = 0; i < configLines.size(); i++) {
-        if (configLines[i].find("server {") != std::string::npos)
-            in_block = true;
-        else if (configLines[i].find("location")) {
-            
+        // START OF SERVER BLOCK
+        if (configLines[i].find("server {") != std::string::npos) {
+            std::cout << i << " start of server: " << configLines[i] << std::endl;
+            // START OF LOCATION BLOCK
+            while (++i < configLines.size()) {
+                if (configLines[i].find("location") != std::string::npos) {
+                    std::cout << i << " start of location: " << configLines[i] << std::endl;
+                    // END OF LOCATION BLOCK
+                    while (++i < configLines.size()) {
+                        if (configLines[i].find("}") != std::string::npos) {
+                            std::cout << i << " end of location: " << configLines[i] << std::endl;
+                            i++;
+                            break;
+                        }
+                    }
+                }
+                // END OF SERVER BLOCK
+                if (configLines[i].find("}") != std::string::npos) {
+                    std::cout << i << " end of server: " << configLines[i] << std::endl;
+                    servers.push_back(_server);
+                    i++;
+                    break ;
+                }
+            }
         }
-        else if (configLines[i].find("}") != std::string::npos)
-            break ;
-        if (in_block == true)
-            serverLines.push_back(line);
     }
-    for (size_t i = 0; i < serverLines.size(); i++)
-        std::cout << serverLines[i] << std::endl;
 
     // Add values to struct and add to servers vector.
-    Server _server;
-    _server.listen = getKeywordValues("listen", configLines);
-    _server.root = getKeywordValues("root", configLines);
-    _server.index = getKeywordValues("index", configLines);
+    // Server _server;
+    // _server.listen = getKeywordValues("listen", configLines);
+    // _server.root = getKeywordValues("root", configLines);
+    // _server.index = getKeywordValues("index", configLines);
+    // _server.server_name = getKeywordValues("server_name", configLines);
 
-    servers.push_back(_server);
+    // servers.push_back(_server);
 
     // Iterator
     for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
-        std::cout << "index: ";
-        for (std::vector<std::string>::iterator it2 = it->index.begin(); it2 != it->index.end(); ++it2) {
+        std::cout << "server_name: ";
+        for (std::vector<std::string>::iterator it2 = it->server_name.begin(); it2 != it->server_name.end(); ++it2) {
             std::cout << *it2 << " ";
         }
         std::cout << std::endl;
