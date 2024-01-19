@@ -6,7 +6,7 @@
 #    By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/12 11:48:29 by wxuerui           #+#    #+#              #
-#    Updated: 2024/01/16 11:03:21 by zwong            ###   ########.fr        #
+#    Updated: 2024/01/19 16:44:35 by zwong            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,7 +35,7 @@ SRC_FILES	=	main \
 				Path \
 				ConnectionHandler \
 				Request	\
-				ResponseHandler	\
+				Response \
 				utils
 
 SRC			=	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(SRC_FILES)))

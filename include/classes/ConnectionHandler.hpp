@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/16 15:02:10 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/19 16:59:58 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "Parser.hpp"
 #include "Path.hpp"
 #include "utils.hpp"
-#include "ResponseHandler.hpp"
+#include "Response.hpp"
 
 #include <algorithm>
 

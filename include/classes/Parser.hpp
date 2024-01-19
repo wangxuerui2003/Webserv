@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 17:55:47 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/15 17:29:31 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/17 15:49:48 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,12 @@ struct Location {
 	Location();
 	
 	std::string url;
-	Path root;
+	std::string root;
+	std::vector<std::string> index;
+	std::string cgi_pass;
+	// Path root;
 	// std::vector<std::string> allowedHttpMethods;
 	// bool directory_listing;
-	std::vector<std::string> index;
 };
 
 struct Server {
@@ -38,7 +40,7 @@ struct Server {
 	Path root;
 	std::vector<std::string> index;
 	std::map<int, Path> error_pages;
-	// size_t max_client_body_size;
+	size_t max_client_body_size;
 
 	std::vector<Location> locations;
 };

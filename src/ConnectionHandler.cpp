@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/16 16:20:54 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/19 17:25:07 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,8 @@ void ConnectionHandler::serverListen(void) {
 					size_t terminator = _activeConnections[connectionSocket].find(HTTP_REQUEST_TERMINATOR);
 					while (terminator != std::string::npos) {
 						// TODO: Pass the full HTTP request string to wong's ResponseHandler
-						std::string response = ResponseHandler::generateResponse(_activeConnections[connectionSocket].substr(0, terminator + 4));
+					    Request request(_activeConnections[connectionSocket].substr(0, terminator + 4));
+						std::string response = Response::generateResponse(request, this->_servers);
 
 						std::cout << _activeConnections[connectionSocket].substr(0, terminator + 4) << std::endl;
 						

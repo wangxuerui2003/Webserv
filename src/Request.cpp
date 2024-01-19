@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/16 14:58:11 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/19 17:26:18 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,14 @@ std::string Request::getPath() const {
 
 std::string Request::getVersion() const {
     return (_httpVersion);
+}
+
+std::string Request::getHost() const {
+    return (_host);
+}
+
+std::string Request::getPort() const {
+    return (_port);
 }
 
 std::string Request::getHeader(const std::string& headerName) const {
@@ -69,8 +77,40 @@ void Request::parseRequest(const std::string& rawReqString) {
 
 void Request::parseHeaders(const std::string& headerPart) {
     std::istringstream headerStream(headerPart);
-    std::string headerName, headerValue;
-    std::getline(headerStream, headerName, ':');
-    std::getline(headerStream, headerValue);
-    _headers.insert(std::make_pair(headerName, headerValue));
+    std::string line;
+
+    while (std::getline(headerStream, line)) {
+        size_t colonPos = line.find(':');
+
+        if (colonPos != std::string::npos) {
+            std::string headerName = line.substr(0, colonPos);
+            std::string headerValue = line.substr(colonPos + 1);
+
+            // Extract Host and Port variable
+            if (headerName == "Host") {
+                size_t hostColonPos = headerValue.find(':');
+                if (hostColonPos != std::string::npos) {
+                    this->_host = headerValue.substr(0, hostColonPos);
+                    this->_port = headerValue.substr(hostColonPos + 1);
+                } else {
+                    this->_host = headerValue;
+                }
+                continue ;
+            }
+            
+            // Trim leading and trailing whitespaces from headerValue
+            headerValue.erase(0, headerValue.find_first_not_of(" \t"));
+            headerValue.erase(headerValue.find_last_not_of(" \t") + 1);
+
+            _headers.insert(std::make_pair(headerName, headerValue));
+        }
+    }
 }
+
+// void Request::parseHeaders(const std::string& headerPart) {
+//     std::istringstream headerStream(headerPart);
+//     std::string headerName, headerValue;
+//     std::getline(headerStream, headerName, ':');
+//     std::getline(headerStream, headerValue);
+//     _headers.insert(std::make_pair(headerName, headerValue));
+// }
