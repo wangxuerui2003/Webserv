@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/18 21:21:18 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/20 12:39:31 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,11 +65,13 @@ class Path {
 		bool isExecutable(void) const;
 
 		class InvalidPathException : public std::exception {
-			const char *what() const throw();
+			public:
+				const char *what() const throw();
 		};
 
 		class InvalidOperationException : public std::exception {
-			const char *what() const throw();
+			public:
+				const char *what() const throw();
 		};
 
 	private:
