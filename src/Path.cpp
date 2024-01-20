@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/18 21:32:46 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/20 12:59:49 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,13 +257,13 @@ Path Path::mapURLToFS(Path& requestUri, Path& uriPrefix, Path& root) {
  * 
  * @return Path * - the path pointer to the best fit uri prefix. NULL for no match
 */
-Path *Path::getBestFitLocation(std::vector<Path>& locations, Path& requestUri) {
-	Path *bestFit = NULL;
+Location *Path::getBestFitLocation(std::vector<Location>& locations, Path& requestUri) {
+	Location *bestFit = NULL;
 	size_t layersMatched = 0;
 
 	for (size_t i = 0; i < locations.size(); ++i) {
 		const std::string& uriRef = requestUri.getPath();
-		const std::string& uriPrefixRef = locations[i].getPath();
+		const std::string& uriPrefixRef = locations[i].uri.getPath();
 		size_t start = 0;
 		size_t layersMatchedTemp = 0;
 		

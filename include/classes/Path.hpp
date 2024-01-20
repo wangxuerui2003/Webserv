@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/20 12:39:31 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/20 12:56:10 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <sys/types.h>
 
 #include "utils.hpp"
+#include "Parser.hpp"
 
 enum pathType {
 	REG_FILE,
@@ -50,7 +51,7 @@ class Path {
 
 		static Path mapURLToFS(Path& reqestUri, Path& uriPrefix, Path& root);
 
-		static Path *getBestFitLocation(std::vector<Path>& locations, Path& requestUri);
+		static Location *getBestFitLocation(std::vector<Location>& locations, Path& requestUri);
 
 		static enum pathType getFileType(const char *path);
 
