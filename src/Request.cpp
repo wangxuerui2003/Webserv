@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/19 17:26:18 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/22 09:54:26 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ std::string Request::getMethod() const {
     return (_method);
 }
 
-std::string Request::getPath() const {
+Path Request::getPath() const {
     return (_path);
 }
 
@@ -62,7 +62,10 @@ std::string Request::getBody() const {
 // Accept-Charset: I
 void Request::parseRequest(const std::string& rawReqString) {
     std::istringstream requestStream(rawReqString);
-    requestStream >> _method >> _path >> _httpVersion; // extraction operator splits by whitespaces
+    std::string temp_path;
+    requestStream >> _method >> temp_path >> _httpVersion; // extraction operator splits by whitespaces
+
+    _path = Path(temp_path, URI);
 
     // Read headers until an empty line is encountered
     std::string line;

@@ -6,11 +6,48 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/22 09:48:54 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/22 10:37:40 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
+
+std::string Response::parse_custom_error_pages(std::string error, std::map<int, Path> &error_pages) {
+	std::map<int, Path>::iterator head = error_pages.begin();
+	std::map<int, Path>::iterator end = error_pages.end();
+	std::string buffer;
+	std::string temp_msg_body;
+
+	for (; head != end; head++) {
+		if (head->first == std::stoi(error)) {
+			std::string path = "." + head->second.getPath();
+			std::fstream fs(path, std::fstream::in);
+			if (fs.is_open()) {
+				while(std::getline(fs, buffer, '\n'))
+					temp_msg_body += buffer;
+				fs.close();
+			}
+		}
+	}
+	return temp_msg_body;
+}
+
+std::string Response::parse_error_pages(std::string error, std::string description, Server &server) {
+	std::string temp_msg_body = parse_custom_error_pages(error, server.error_pages);
+    std::string temp_msg_body;
+    std::string data;
+    
+    if (temp_msg_body == "")
+        temp_msg_body.append("<html><head><title>").append(error).append(" ").append(description).append("</title></head><body><center><h1>")\
+        .append(error).append(" ").append(description).append("</h1></center></body></html>");
+	
+    data = "HTTP/1.1 " + error + " " + description + "\r\n";
+    
+    data.append("Content-Type: text/html\r\n").append("Content-Length: ").append(std::to_string(temp_msg_body.length())).append("\r\n").append("\r\n");
+    data.append(temp_msg_body);
+    data.append("\r\n");
+    return (data);
+}
 
 std::string Response::getContentType(const std::string& filePath) {
     // Map file extensions to MIME types
@@ -36,10 +73,10 @@ std::string Response::getContentType(const std::string& filePath) {
     }
 
     // Default to plain text if the MIME type is not found
-    return "text/plain";
+    return ("text/plain");
 }
 
-std::string Response::readFile(const std::string& filename) {
+std::string Response::readFile(const std::string& filename, Server &server) {
     std::string response;
     std::ifstream file(filename);
     if (file) {
@@ -53,89 +90,37 @@ std::string Response::readFile(const std::string& filename) {
         // std::cout << "FINAL STR: " << response << std::endl;
         return (response);
     }
-    return "HTTP/1.1 404 Not Found\r\n\r\nFile not found.";
+    return (parse_error_pages("404", "File not found.", server));
+}
+
+bool Response::isStaticContent(Location *location) {
+	return (location->cgi_pass.getPath() == "");
 }
 
 // IF static content, then just return string using readFile
-// TODO: Use PATH object to handle static content
-std::string Response::handleStaticContent(const Request& request) {
+std::string Response::handleStaticContent(const Request& request, Location *location, Server &server) { // add argument location (so that I can use prepend root)
     // Handle static content based on the requested path.
     std::cout << "Handling static content..." << std::endl;
 
-    std::string path = "www/" + request.getPath().substr(1);  // Remove the leading '/' from the path.
-    std::cout << "FILE PATH: " << path << std::endl;
-    // You may implement more sophisticated logic here, such as serving files based on the path.
-    return (readFile(path));
+    try {
+        Path request_uri = request.getPath();
+        Path abs_path = Path::mapURLToFS(request_uri, location->uri, location->root);
+        std::cout << "ABSOLUTE FILE PATH FORM LOCATION IS: " << abs_path.getPath() << std::endl;
+        return (readFile(abs_path.getPath(), server));
+    } catch (Path::InvalidOperationException &err) {
+        return (parse_error_pages("501", err.what(), server));
+    }
     // std::string resource_path = get_resource_path(request, *location);
     // parse_resource()
     // if (this->data = "")
     // return (error);
 }
 
-// Take params of Request and std::vector<Server> servers
-// Then find the server that corresponds to this request
-std::string Response::generateResponse(Request &request, std::map<int, Server> &servers) {
-
-    std::string method = request.getMethod();
-    std::string path = request.getPath();
-    std::string version = request.getVersion();
-    
-    Server server = find_server(request, servers);
-
-    if (method != "GET" && method != "POST" && method != "DELETE")
-        return (parse_error_pages("501", "Method not implemented", server));
-
-    // Processing response    
-	Location * location = get_location(request, server);
-    
-    if (location == NULL)
-        return (parse_error_pages("403", "Forbidden", server));
-    
-    // if ((*location).get_return() != "") 
-			// this->handle_return((*location).get_return());
-
-    // Check if the resource is a static file
-    if (isStaticContent(location)) {
-        if (request.getMethod() == "GET")
-            handleStaticContent(request);
-        else
-            return (parse_error_pages("405", "Method not allowed", server));
-    }
-    else {
-        // Proceed with handling dynamic content with CGI
-        if (request.getMethod() == "GET")
-            handle_GET_request(request, server);
-        else if (request.getMethod() == "POST")
-            return (handle_POST_request(request, server));
-        else if (request.getMethod() == "DELETE")
-            handle_DELETE_request(request, server);
-    }
+std::string Response::handle_GET_request(Request &request, Location *location, Server &server) {
+    return ;
 }
 
-// std::string	Response::get_resource_path(Request &request, Location &location) {
-// 	std::string encodedString = request.getPath(); // find out route in Request header aka path
-//     std::string decodedString = urlDecode(encodedString);
-// 	std::string resource_path = ".";
-
-// 	if (location.root != "")
-// 		resource_path += location.root;
-// 	resource_path += decodedString;
-// 	return (resource_path);
-// }
-
-bool Response::isStaticContent(Location &location) {
-	return (location.cgi_pass.getPath() == "");
-}
-
-// EXAMPLE OF CGI_PASS
-// location /dynamic {
-//     # Specify the CGI endpoint for handling dynamic content
-//     cgi_pass http://localhost:8080/cgi-bin;
-// }
-// TODO: Get location from server
-std::string Response::handle_POST_request(Request &request, Server &server) {
-    Location *location = get_location(request, server);
-
+std::string Response::handle_POST_request(Request &request, Location *location, Server &server) {
     if (location->cgi_pass.getPath() == "")
         return (parse_error_pages("405", "Method not allowed ", server));
     else if (request.getHeader("Content-Length") != "" && server.max_client_body_size != NULL && // CHECK: max_client_body_size when not defined?
@@ -147,31 +132,8 @@ std::string Response::handle_POST_request(Request &request, Server &server) {
     }
 }
 
-// std::string	Response::parse_resource_path(Request & request, Location & location) {
-// 	std::string encodedString = request.get_route();
-//     std::string decodedString = urlDecode(encodedString);
-// 	std::string resource_path = ".";
-
-// 	if (location.get_root() != "")
-// 		resource_path += location.get_root();
-// 	resource_path += decodedString;
-// 	return resource_path;
-// }
-
-Location *Response::get_location(Request& request, Server& server) {
-    const std::string& req_path = request.getPath();
-
-    for (size_t index = 0; index < server.locations.size(); ++index) {
-        const Location& location = server.locations[index];
-        const std::string& location_root = location.root.getPath();
-
-        if (req_path.find(location_root) == 1) {
-            // Found a matching location
-            return const_cast<Location*>(&location);
-        }
-    }
-
-    return (NULL);  // No matching location found
+std::string Response::handle_DELETE_request(Request &request, Location *location, Server &server) {
+    return ;
 }
 
 Server &Response::find_server(Request& request, std::map<int, Server>& servers) {
@@ -186,24 +148,47 @@ Server &Response::find_server(Request& request, std::map<int, Server>& servers) 
             return const_cast<Server&>(currentServer);
         }
     }
-
     // If no exact match is found, return the server with the same index as the first server checked
     return (servers.begin()->second);
 }
 
-// TODO: Get custom error page from server
-std::string Response::parse_error_pages(std::string error, std::string description, Server &server) {
-	// std::string temp_message_body = this->parse_custom_error_pages(error, server.error_pages);
-    std::string temp_msg_body;
-    std::string data;
+// START HERE - MAIN RESPONSE FUNCTION
+std::string Response::generateResponse(Request &request, std::map<int, Server> &servers) {
+
+    // Find the correct server based the host and port 192.168.0.1:8080
+    Server server = find_server(request, servers);
+    std::string method = request.getMethod();
+    Path path = request.getPath();
+
+    if (method != "GET" && method != "POST" && method != "DELETE")
+        return (parse_error_pages("501", "Method not implemented", server));
+
+    // PROCESSING RESPONSE
+    // FIND the correct location block
+    // e.g. _path = HTTP/1.1 /images/1.png GET
+    Location *location = Path::getBestFitLocation(server.locations, path); // relative path
     
-    if (temp_msg_body == "")
-        temp_msg_body.append("<html><head><title>").append(error).append(" ").append(description).append("</title></head><body><center><h1>")\
-        .append(error).append(" ").append(description).append("</h1></center></body></html>");
-	
-    data = "HTTP/1.1 " + error + " " + description + "\r\n";
+    if (location == NULL)
+        return (parse_error_pages("403", "Forbidden", server));
     
-    data.append("Content-Type: text/html\r\n").append("Content-Length: ").append(std::to_string(temp_msg_body.length())).append("\r\n").append("\r\n");
-    data.append(temp_msg_body);
-    data.append("\r\n");
+    // if ((*location).get_return() != "") 
+			// this->handle_return((*location).get_return());
+
+    // Check if the resource is a static file
+    if (isStaticContent(location)) {
+        if (request.getMethod() == "GET")
+            return (handleStaticContent(request, location, server));
+        else
+            return (parse_error_pages("405", "Method not allowed", server));
+    }
+    else {
+        // TODO - Dynamic requests
+        // Proceed with handling dynamic content with CGI
+        if (request.getMethod() == "GET")
+            return (handle_GET_request(request, location, server));
+        else if (request.getMethod() == "POST")
+            return (handle_POST_request(request, location, server));
+        else if (request.getMethod() == "DELETE")
+            return (handle_DELETE_request(request, location, server));
+    }
 }

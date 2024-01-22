@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:16:57 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/19 17:19:51 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/22 09:54:39 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,14 @@
 #include <iostream>
 #include <map>
 #include <algorithm>
+#include "Path.hpp"
 
 class Request {
 public:
     Request(const std::string& rawReqString);
 
     std::string getMethod() const;
-    std::string getPath() const;
+    Path        getPath() const;
     std::string getVersion() const;
     std::string getHost() const;
     std::string getPort() const;
@@ -34,7 +35,8 @@ public:
 
 private:
     std::string _method;
-    std::string _path;
+    // std::string _path;
+    Path _path;
     std::string _httpVersion;
     std::string _host;
     std::string _port;

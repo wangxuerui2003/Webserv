@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/20 12:56:10 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/22 10:38:32 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ enum pathType {
 	URI,
 	ERROR_PATH
 };
+
+struct Location;
 
 class Path {
 	public:
