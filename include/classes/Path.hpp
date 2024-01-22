@@ -23,7 +23,6 @@
 #include <sys/types.h>
 
 #include "utils.hpp"
-#include "Parser.hpp"
 
 enum pathType {
 	REG_FILE,
@@ -81,5 +80,7 @@ class Path {
 		std::string _path;
 		enum pathType _type;
 };
+
+#include "Parser.hpp"
 
 #endif

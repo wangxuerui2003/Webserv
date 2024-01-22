@@ -19,15 +19,16 @@
 #include <map>
 #include <fstream>
 #include <sstream>
+
 #include "Path.hpp"
 
 struct Location {
 	Location();
 
-	std::vector<std::string> path;
-	std::vector<std::string> root;
-	// Path uri;
-	// Path root;
+	// std::vector<std::string> path;
+	// std::vector<std::string> root;
+	Path uri;
+	Path root;
 	Path cgi_pass;
 	// std::vector<std::string> allowedHttpMethods;
 	// bool directory_listing;
@@ -36,18 +37,18 @@ struct Location {
 struct Server {
 	Server();
 
-	std::vector<std::string> listen;
-	std::vector<std::string> root;
-	std::vector<std::string> index;
-	std::vector<std::string> server_name;
-	std::vector<std::string> error_page;
-	// std::string port;
-	// std::string host;
-	// std::string server_name;
-	// Path root;
+	// std::vector<std::string> listen;
+	// std::vector<std::string> root;
 	// std::vector<std::string> index;
-	// std::map<int, Path> error_pages;
-	// size_t max_client_body_size;
+	// std::vector<std::string> server_name;
+	// std::vector<std::string> error_page;
+	std::string port;
+	std::string host;
+	std::vector<std::string> server_name;
+	Path root;
+	std::vector<std::string> index;
+	std::map<int, Path> error_pages;
+	size_t max_client_body_size;
 
 	std::vector<Location> locations;
 };

@@ -58,11 +58,12 @@ void Parser::parse(std::string configFilePath) {
                     std::vector<std::string> locationLines;
                     while (i < configLines.size()) {
                         locationLines.push_back(configLines[i]);
-                        std::cout << configLines[i] << std::endl;
+                        // std::cout << configLines[i] << std::endl;
                         if (configLines[i].find("}") != std::string::npos) {
                             Location _location;
-                            _location.path = getKeywordValues("location", locationLines);
-                            _location.root = getKeywordValues("root", locationLines);
+                            _location.uri = Path(getKeywordValues("location", locationLines)[0], URI);
+                            std::vector<std::string> roots = getKeywordValues("root", locationLines);
+                            _location.root = Path(getKeywordValues("root", !roots.empty() ? locationLines : serverLines)[0]);
                             _locations.push_back(_location);
                             i++;
                             break;
@@ -72,11 +73,14 @@ void Parser::parse(std::string configFilePath) {
                 }
                 if (configLines[i].find("}") != std::string::npos) {
                     Server _server;
-                    _server.listen = getKeywordValues("listen", serverLines);
-                    _server.root = getKeywordValues("root", serverLines);
+                    std::string listen = getKeywordValues("listen", serverLines)[0];
+                    std::istringstream iss(listen);
+                    std::getline(iss, _server.host, ':');
+                    std::getline(iss, _server.port);
+                    _server.root = Path(getKeywordValues("root", serverLines)[0]);
                     _server.index = getKeywordValues("index", serverLines);
                     _server.server_name = getKeywordValues("server_name", serverLines);
-                    _server.error_page = getKeywordValues("error_page", serverLines);
+                    // _server.error_page = getKeywordValues("error_page", serverLines); // [404, 404.html, 501, 501.html]
                     _server.locations = _locations;
                     _servers.push_back(_server);
                     i++;

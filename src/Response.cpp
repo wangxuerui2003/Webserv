@@ -34,7 +34,6 @@ std::string Response::parse_custom_error_pages(std::string error, std::map<int, 
 
 std::string Response::parse_error_pages(std::string error, std::string description, Server &server) {
 	std::string temp_msg_body = parse_custom_error_pages(error, server.error_pages);
-    std::string temp_msg_body;
     std::string data;
     
     if (temp_msg_body == "")
@@ -98,6 +97,8 @@ bool Response::isStaticContent(Location *location) {
 }
 
 // IF static content, then just return string using readFile
+// TODO: implement default index
+// TODO: implement directory listing
 std::string Response::handleStaticContent(const Request& request, Location *location, Server &server) { // add argument location (so that I can use prepend root)
     // Handle static content based on the requested path.
     std::cout << "Handling static content..." << std::endl;
@@ -107,7 +108,7 @@ std::string Response::handleStaticContent(const Request& request, Location *loca
         Path abs_path = Path::mapURLToFS(request_uri, location->uri, location->root);
         std::cout << "ABSOLUTE FILE PATH FORM LOCATION IS: " << abs_path.getPath() << std::endl;
         return (readFile(abs_path.getPath(), server));
-    } catch (Path::InvalidOperationException &err) {
+    } catch (Path::InvalidPathException &err) {
         return (parse_error_pages("501", err.what(), server));
     }
     // std::string resource_path = get_resource_path(request, *location);
@@ -117,23 +118,31 @@ std::string Response::handleStaticContent(const Request& request, Location *loca
 }
 
 std::string Response::handle_GET_request(Request &request, Location *location, Server &server) {
-    return ;
+    (void)request;
+    (void)location;
+    (void)server;
+    return std::string();
 }
 
 std::string Response::handle_POST_request(Request &request, Location *location, Server &server) {
     if (location->cgi_pass.getPath() == "")
         return (parse_error_pages("405", "Method not allowed ", server));
-    else if (request.getHeader("Content-Length") != "" && server.max_client_body_size != NULL && // CHECK: max_client_body_size when not defined?
+    else if (request.getHeader("Content-Length") != "" && server.max_client_body_size != 0 && // CHECK: max_client_body_size when not defined?
     std::stoull(request.getHeader("Content-Length")) > server.max_client_body_size)
         return (parse_error_pages("413", "Payload Too Large", server));
     else {
         // CgiHandler cgi;
         // cgi.handle_cgi(request, *this, server, *location);
     }
+
+    return std::string();
 }
 
 std::string Response::handle_DELETE_request(Request &request, Location *location, Server &server) {
-    return ;
+    (void)request;
+    (void)location;
+    (void)server;
+    return std::string();
 }
 
 Server &Response::find_server(Request& request, std::map<int, Server>& servers) {
@@ -143,7 +152,7 @@ Server &Response::find_server(Request& request, std::map<int, Server>& servers) 
         // Matching port found
         const Server& currentServer = it->second;
 
-        if (request.getHost() == currentServer.server_name) { // e.g. example.com == example.com?
+        if (std::find(currentServer.server_name.begin(), currentServer.server_name.end(), request.getHost()) != currentServer.server_name.end()) { // e.g. example.com == example.com?
             // Matching server found
             return const_cast<Server&>(currentServer);
         }
@@ -191,4 +200,6 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
         else if (request.getMethod() == "DELETE")
             return (handle_DELETE_request(request, location, server));
     }
+
+    return std::string();
 }
