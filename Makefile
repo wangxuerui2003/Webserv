@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+         #
+#    By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/12 11:48:29 by wxuerui           #+#    #+#              #
-#    Updated: 2024/01/13 18:11:11 by wxuerui          ###   ########.fr        #
+#    Updated: 2024/01/19 16:44:35 by zwong            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,6 +34,8 @@ SRC_FILES	=	main \
 				Parser \
 				Path \
 				ConnectionHandler \
+				Request	\
+				Response \
 				utils
 
 SRC			=	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(SRC_FILES)))

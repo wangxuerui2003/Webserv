@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 17:55:47 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/15 17:29:31 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/22 09:48:26 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,11 @@ struct Location {
 
 	std::vector<std::string> path;
 	std::vector<std::string> root;
-	// std::string url;
+	// Path uri;
 	// Path root;
+	Path cgi_pass;
 	// std::vector<std::string> allowedHttpMethods;
 	// bool directory_listing;
-	// std::vector<std::string> index;
 };
 
 struct Server {

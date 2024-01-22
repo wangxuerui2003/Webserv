@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:07:17 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/13 16:09:52 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/15 20:42:12 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 namespace wsutils {
 	void errorExit(const char *msg);
+	void warningOutput(const char *msg);
 }
 
 #endif

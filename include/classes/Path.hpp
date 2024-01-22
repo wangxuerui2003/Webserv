@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/13 17:48:14 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/22 10:38:32 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,32 @@
 #define PATH_HPP
 
 #include <string>
+#include <vector>
+#include <iostream>
 #include <exception>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <sys/types.h>
+
+#include "utils.hpp"
+#include "Parser.hpp"
 
 enum pathType {
 	REG_FILE,
 	DIRECTORY,
-	URL,
+	SYM_LINK,
+	URI,
 	ERROR_PATH
 };
+
+struct Location;
 
 class Path {
 	public:
 		Path();
-		Path(std::string path, enum pathType type);
+		Path(std::string path);  // Construct with auto detect path type
+		Path(std::string path, enum pathType expectedType);  // Construct with expected Type
 		Path(const Path& copy);
 		Path& operator=(const Path& copy);
 		~Path();
@@ -34,10 +47,34 @@ class Path {
 		const std::string& getPath(void) const;
 		const enum pathType& getType(void) const;
 
-		int isParentDirOf(std::string otherPath);
+		static bool isAccessible(const char *path);
+
+		static bool isValidChild(Path& parent, Path& child);
+
+		static Path mapURLToFS(Path& reqestUri, Path& uriPrefix, Path& root);
+
+		static Location *getBestFitLocation(std::vector<Location>& locations, Path& requestUri);
+
+		static enum pathType getFileType(const char *path);
+
+		Path concat(Path& other);
+		Path concat(std::string otherPath, enum pathType type);
+
+		Path prepend(Path& other);
+		Path prepend(std::string otherPath, enum pathType type);
+
+		bool isReadable(void) const;
+		bool isWritable(void) const;
+		bool isExecutable(void) const;
 
 		class InvalidPathException : public std::exception {
-			const char *what() const throw();
+			public:
+				const char *what() const throw();
+		};
+
+		class InvalidOperationException : public std::exception {
+			public:
+				const char *what() const throw();
 		};
 
 	private:
