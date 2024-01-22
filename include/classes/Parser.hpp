@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 17:55:47 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/22 09:45:40 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/22 09:48:26 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ struct Location {
 	
 	Path uri;
 	Path root;
+	Path cgi_pass;
 	// std::vector<std::string> allowedHttpMethods;
 	// bool directory_listing;
 };

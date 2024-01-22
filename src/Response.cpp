@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/19 18:19:01 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/22 09:48:54 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
 // }
 
 bool Response::isStaticContent(Location &location) {
-	return (location.cgi_pass == "");
+	return (location.cgi_pass.getPath() == "");
 }
 
 // EXAMPLE OF CGI_PASS
@@ -136,7 +136,7 @@ bool Response::isStaticContent(Location &location) {
 std::string Response::handle_POST_request(Request &request, Server &server) {
     Location *location = get_location(request, server);
 
-    if (location->cgi_pass == "")
+    if (location->cgi_pass.getPath() == "")
         return (parse_error_pages("405", "Method not allowed ", server));
     else if (request.getHeader("Content-Length") != "" && server.max_client_body_size != NULL && // CHECK: max_client_body_size when not defined?
     std::stoull(request.getHeader("Content-Length")) > server.max_client_body_size)
@@ -163,7 +163,7 @@ Location *Response::get_location(Request& request, Server& server) {
 
     for (size_t index = 0; index < server.locations.size(); ++index) {
         const Location& location = server.locations[index];
-        const std::string& location_root = location.root;
+        const std::string& location_root = location.root.getPath();
 
         if (req_path.find(location_root) == 1) {
             // Found a matching location
