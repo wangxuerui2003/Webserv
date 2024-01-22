@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/19 17:25:07 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/22 09:46:34 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,8 @@ void ConnectionHandler::serverListen(void) {
 		}
 
 		// Check for connection sockets events
-		for (std::map<int, std::string>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ) {
+		std::vector<int> socketsToErase;
+		for (std::map<int, std::string>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
 			int connectionSocket = it->first;
 			if (FD_ISSET(connectionSocket, &tempFds)) {
 				char buffer[1024];
@@ -87,8 +88,7 @@ void ConnectionHandler::serverListen(void) {
 					// Client closed the connection
 					FD_CLR(connectionSocket, &_readFds);
 					close(connectionSocket);
-					it = _activeConnections.erase(it);
-					std::cout << "Number of active connections: " << _activeConnections.size() << std::endl;
+					socketsToErase.push_back(connectionSocket);
 				} else {
 					_activeConnections[connectionSocket] += buffer;
 					// Use a while loop to prevent unhandled HTTP request that was sent in one chunk of data under 1024 bytes
@@ -108,13 +108,15 @@ void ConnectionHandler::serverListen(void) {
 						_activeConnections[connectionSocket] = _activeConnections[connectionSocket].substr(terminator + 4);
 						terminator = _activeConnections[connectionSocket].find(HTTP_REQUEST_TERMINATOR);
 					}
-					
-					++it;
 				}
-			} else {
-				++it;
 			}
-		}		
+		}
+
+		for (std::vector<int>::iterator it = socketsToErase.begin(); it != socketsToErase.end(); ++it) {
+			_activeConnections.erase(*it);
+		}
+		socketsToErase.clear();
+		std::cout << "Number of active connections left: " << _activeConnections.size() << std::endl;
 	}
 }
 
