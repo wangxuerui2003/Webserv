@@ -28,6 +28,7 @@ struct Server {
 	std::vector<std::string> index;
 	std::vector<std::string> server_name;
 	std::vector<std::string> error_page;
+    // std::map<int, Path> error_pages;
 	// size_t max_client_body_size;
 
 	std::vector<Location> locations;

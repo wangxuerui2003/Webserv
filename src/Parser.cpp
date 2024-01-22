@@ -31,28 +31,96 @@ const std::vector<Server>& Parser::getServers(void) const {
 }
 
 void Parser::parse(std::string configFilePath) {
-	Path configFile(configFilePath, REG_FILE);
-	// TODO: Parse the config file into the Server objects
+	// Path configFile(configFilePath, REG_FILE);
 
-	/***********************************/
-	/************DUMMY CONF*************/
-	/***********************************/
+    std::ifstream configFile(configFilePath);
+	if (!configFile.is_open()) {
+        std::cerr << "Error opening config file." << std::endl;
+        return ;
+    }
 
-	Server dummy;
-	dummy.root = Path("./www", DIRECTORY);
-	dummy.host = "127.0.0.1";
-	dummy.port = "8080";
-	dummy.index.push_back("index.html");
-	dummy.error_pages[404] = Path("./www/404.html", REG_FILE);
+    std::vector<std::string> configLines;
+	std::string line;
+	while (std::getline(configFile, line))
+        configLines.push_back(line);
+    configFile.close();
 
-	Location location;
-	location.url = "/";
-	location.root = dummy.root;
-	location.index = dummy.index;
+    // std::vector<Server> _servers;
 
-	dummy.locations.push_back(location);
+    // check for server blocks and location blocks
+    for (size_t i = 0; i < configLines.size(); i++) {
+        if (configLines[i].find("server {") != std::string::npos) {
+            std::vector<std::string> serverLines;
+            std::vector<Location> _locations;
+            while (++i < configLines.size()) {
+                serverLines.push_back(configLines[i]);
+                if (configLines[i].find("location") != std::string::npos) {
+                    std::vector<std::string> locationLines;
+                    while (i < configLines.size()) {
+                        locationLines.push_back(configLines[i]);
+                        std::cout << configLines[i] << std::endl;
+                        if (configLines[i].find("}") != std::string::npos) {
+                            Location _location;
+                            _location.path = getKeywordValues("location", locationLines);
+                            _location.root = getKeywordValues("root", locationLines);
+                            _locations.push_back(_location);
+                            i++;
+                            break;
+                        }
+                        i++;
+                    }
+                }
+                if (configLines[i].find("}") != std::string::npos) {
+                    Server _server;
+                    _server.listen = getKeywordValues("listen", serverLines);
+                    _server.root = getKeywordValues("root", serverLines);
+                    _server.index = getKeywordValues("index", serverLines);
+                    _server.server_name = getKeywordValues("server_name", serverLines);
+                    _server.error_page = getKeywordValues("error_page", serverLines);
+                    _server.locations = _locations;
+                    _servers.push_back(_server);
+                    i++;
+                    break ;
+                }
+            }
+        }
+    }
 
-	_servers.push_back(dummy);
+	// Server dummy;
+	// dummy.root = Path("./www", DIRECTORY);
+	// dummy.host = "127.0.0.1";
+	// dummy.port = "8080";
+	// dummy.index.push_back("index.html");
+	// dummy.error_pages[404] = Path("./www/404.html", REG_FILE);
+
+	// Location location;
+	// location.url = "/";
+	// location.root = dummy.root;
+	// location.index = dummy.index;
+
+	// dummy.locations.push_back(location);
+
+	// _servers.push_back(dummy);
+}
+
+std::vector<std::string> Parser::getKeywordValues(std::string keyword, std::vector<std::string> serverLines) {
+    std::vector<std::string> values;
+    for (size_t i = 0; i < serverLines.size(); ++i) {
+        std::string value;
+        if (serverLines[i].find(keyword) != std::string::npos) {
+            std::istringstream iss(serverLines[i]);
+            iss >> value;
+            if (value == keyword)
+                while (!iss.eof()) {
+                    iss >> value;
+                    if (iss.eof() && (value.back() == ';' || value.back() == '{'))
+                        values.push_back(value.substr(0, value.size() - 1));
+                    else
+                        values.push_back(value);
+                }
+        }
+    }
+    return values;
 }
 
 Server::Server() {}
