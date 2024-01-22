@@ -48,7 +48,7 @@ std::vector<std::string> getKeywordValues(std::string keyword, std::vector<std::
             if (value == keyword)
                 while (!iss.eof()) {
                     iss >> value;
-                    if (iss.eof() && value.back() == ';')
+                    if (iss.eof() && (value.back() == ';' || value.back() == '{'))
                         values.push_back(value.substr(0, value.size() - 1));
                     else
                         values.push_back(value);
@@ -74,40 +74,47 @@ int main(void)
         configLines.push_back(line);
     configFile.close();
 
-
     std::vector<Server> servers;
-    Server _server;
-    Location _location;
 
     // check for server blocks
     for (size_t i = 0; i < configLines.size(); i++) {
         // START OF SERVER BLOCK
         if (configLines[i].find("server {") != std::string::npos) {
-            std::cout << i << " start of server: " << configLines[i] << std::endl;
+            // std::cout << i << " start of server: " << configLines[i] << std::endl;
             std::vector<std::string> serverLines;
+            std::vector<Location> _locations;
             // START OF LOCATION BLOCK
             while (++i < configLines.size()) {
                 serverLines.push_back(configLines[i]);
                 if (configLines[i].find("location") != std::string::npos) {
-                    std::cout << i << " start of location: " << configLines[i] << std::endl;
+                    // std::cout << i << " start of location: " << configLines[i] << std::endl;
+                    std::vector<std::string> locationLines;
                     // END OF LOCATION BLOCK
-                    while (++i < configLines.size()) {
+                    while (i < configLines.size()) {
+                        locationLines.push_back(configLines[i]);
+                        std::cout << configLines[i] << std::endl;
                         if (configLines[i].find("}") != std::string::npos) {
-                            std::cout << i << " end of location: " << configLines[i] << std::endl;
+                            // std::cout << i << " end of location: " << configLines[i] << std::endl;
+                            Location _location;
+                            _location.path = getKeywordValues("location", locationLines);
+                            _location.root = getKeywordValues("root", locationLines);
+                            _locations.push_back(_location);
                             i++;
                             break;
                         }
+                        i++;
                     }
                 }
                 // END OF SERVER BLOCK
                 if (configLines[i].find("}") != std::string::npos) {
-                    std::cout << i << " end of server: " << configLines[i] << std::endl;
+                    // std::cout << i << " end of server: " << configLines[i] << std::endl;
                     Server _server;
                     _server.listen = getKeywordValues("listen", serverLines);
                     _server.root = getKeywordValues("root", serverLines);
                     _server.index = getKeywordValues("index", serverLines);
                     _server.server_name = getKeywordValues("server_name", serverLines);
                     _server.error_page = getKeywordValues("error_page", serverLines);
+                    _server.locations = _locations;
                     servers.push_back(_server);
                     i++;
                     break ;
@@ -115,17 +122,6 @@ int main(void)
             }
         }
     }
-
-    // for (size_t i = 0; i < serverLines.size(); i++)
-    //     std::cout << serverLines[i] << std::endl;
-
-    // Add values to struct and add to servers vector.
-    // Server _server;
-    // _server.listen = getKeywordValues("listen", configLines);
-    // _server.root = getKeywordValues("root", configLines);
-    // _server.index = getKeywordValues("index", configLines);
-    // _server.server_name = getKeywordValues("server_name", configLines);
-    // servers.push_back(_server);
 
     for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
         int i;
@@ -145,6 +141,18 @@ int main(void)
             std::cout << *it2 << " ";
         std::cout << "| error_page: ";
         for (std::vector<std::string>::iterator it2 = it->error_page.begin(); it2 != it->error_page.end(); ++it2)
+            std::cout << *it2 << " ";
+        std::cout << "| locations[0].path: ";
+        for (std::vector<std::string>::iterator it2 = it->locations[0].path.begin(); it2 != it->locations[0].path.end(); ++it2)
+            std::cout << *it2 << " ";
+        std::cout << "| locations[0].root: ";
+        for (std::vector<std::string>::iterator it2 = it->locations[0].root.begin(); it2 != it->locations[0].root.end(); ++it2)
+            std::cout << *it2 << " ";
+        std::cout << "| locations[1].path: ";
+        for (std::vector<std::string>::iterator it2 = it->locations[1].path.begin(); it2 != it->locations[1].path.end(); ++it2)
+            std::cout << *it2 << " ";
+        std::cout << "| locations[1].root: ";
+        for (std::vector<std::string>::iterator it2 = it->locations[1].root.begin(); it2 != it->locations[1].root.end(); ++it2)
             std::cout << *it2 << " ";
         std::cout << std::endl;
     }
