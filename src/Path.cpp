@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/23 21:19:59 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/23 21:46:17 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ Path::Path() : _path(""), _type(ERROR_PATH) {
 Path::Path(std::string path) : _path(path) {
 	enum pathType type = getFileType(_path.c_str());
 	if (type == ERROR_PATH) {
-		throw InvalidPathException();
+		throw InvalidPathException(path + " is an invalid filesystem path");
 	}
 
 	_type = type;
@@ -29,18 +29,18 @@ Path::Path(std::string path) : _path(path) {
 // throw exception if the path is invalid or type is not the same as input
 Path::Path(std::string path, enum pathType expectedType) : _path(path), _type(expectedType) {
 	if (_type == ERROR_PATH) {
-		throw InvalidOperationException();
+		throw InvalidOperationException(path + " is an invalid filesystem path");
 	}
 
 	enum pathType realPathType = getFileType(_path.c_str());
 
 	// Change path type to it's real type if expected type is wrong
 	if (_type != URI && realPathType != _type) {
-		throw InvalidOperationException();
+		throw InvalidOperationException("Expected file type of " + path + " does not match the real file type");
 	}
 
 	if (_type != URI && isAccessible(_path.c_str()) == false) {
-		throw InvalidPathException();
+		throw InvalidPathException(path + " is not accessible");
 	}
 }
 
@@ -72,8 +72,16 @@ const enum pathType& Path::getType(void) const {
  * - REG_FILE/DIRECTORY/SYM_LINK cannot access the path
  * 
 */
+Path::InvalidPathException::InvalidPathException(std::string errorMsg) : _errorMsg(errorMsg) {
+	
+}
+
+Path::InvalidPathException::~InvalidPathException() throw() {
+	
+}
+
 const char *Path::InvalidPathException::what() const throw() {
-	return "Invalid Path";
+	return _errorMsg.c_str();
 }
 
 /**
@@ -83,8 +91,16 @@ const char *Path::InvalidPathException::what() const throw() {
  * - Call concat but the _type is not a DIRECTORY
  * - Call prepend but other.getType() is not a DIRECTORY
 */
+Path::InvalidOperationException::InvalidOperationException(std::string errorMsg) : _errorMsg(errorMsg) {
+	
+}
+
+Path::InvalidOperationException::~InvalidOperationException() throw() {
+	
+}
+
 const char *Path::InvalidOperationException::what() const throw() {
-	return "Invalid Operation";
+	return _errorMsg.c_str();
 }
 
 /**
@@ -146,7 +162,7 @@ Path Path::concat(Path& other) {
 */
 Path Path::concat(std::string otherPath, enum pathType type) {
 	if (_type != DIRECTORY) {
-		throw InvalidOperationException();
+		throw InvalidOperationException(_path + " is not a directory");
 	}
 	
 	std::string delimiter = "/";
@@ -165,7 +181,7 @@ Path Path::concat(std::string otherPath, enum pathType type) {
 */
 Path Path::prepend(Path& other) {
 	if (other.getType() != DIRECTORY) {
-		throw InvalidOperationException();
+		throw InvalidOperationException(other.getPath() + " is not a directory");
 	}
 	
 	const std::string& otherPath = other.getPath();
@@ -219,7 +235,7 @@ Path Path::mapURLToFS(Path& requestUri, Path& uriPrefix, Path& root) {
 	const std::string& uriPrefixRef = uriPrefix.getPath();
 
 	if (uriRef.substr(0, uriPrefixRef.length()) != uriPrefixRef) {
-		throw InvalidOperationException();
+		throw InvalidOperationException("URI \"" + uriRef + "\" does not belong to uriPrefix \"" + uriPrefixRef + '"');
 	}
 
 	size_t postfixStart = uriPrefixRef.length();
@@ -299,11 +315,11 @@ std::string Path::read(void) const {
 	return content;
 }
 
-void Path::write(std::string content) const {
-	std::ofstream outputFile(_path, std::ios::app);
+void Path::write(std::string filePath, std::string content) {
+	std::ofstream outputFile(filePath, std::ios::out | std::ios::trunc);
 
     if (!outputFile.is_open()) {
-        return;
+        throw Path::InvalidPathException("File " + filePath + " cannot be opened");
     }
     
     outputFile << content;

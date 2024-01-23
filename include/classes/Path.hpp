@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/23 21:11:12 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/23 21:45:23 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,15 +66,23 @@ class Path {
 		bool isExecutable(void) const;
 
 		std::string read(void) const;
-		void write(std::string content) const;
+		static void write(std::string filePath, std::string content);
 
 		class InvalidPathException : public std::exception {
+			private:
+				std::string _errorMsg;
 			public:
+				InvalidPathException(std::string errorMsg);
+				~InvalidPathException() throw();
 				const char *what() const throw();
 		};
 
 		class InvalidOperationException : public std::exception {
+			private:
+				std::string _errorMsg;
 			public:
+				InvalidOperationException(std::string errorMsg);
+				~InvalidOperationException() throw();
 				const char *what() const throw();
 		};
 
