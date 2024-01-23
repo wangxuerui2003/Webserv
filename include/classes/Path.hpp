@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/22 10:38:32 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/23 20:46:08 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,6 @@ class Path {
 		const enum pathType& getType(void) const;
 
 		static bool isAccessible(const char *path);
-
-		static bool isValidChild(Path& parent, Path& child);
 
 		static Path mapURLToFS(Path& reqestUri, Path& uriPrefix, Path& root);
 

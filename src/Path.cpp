@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/20 12:59:49 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/23 20:46:45 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ Path::Path(std::string path, enum pathType expectedType) : _path(path), _type(ex
 
 	// Change path type to it's real type if expected type is wrong
 	if (_type != URI && realPathType != _type) {
-		// _type = realPathType;
 		throw InvalidOperationException();
 	}
 
@@ -189,25 +188,6 @@ Path Path::prepend(Path& other) {
 Path Path::prepend(std::string otherPath, enum pathType type) {
 	Path other(otherPath, type);
 	return prepend(other);
-}
-
-/**
- * @param parent: the parent directory
- * @param child: the child path in relative path to the parent
- * 
- * @brief Check if the child path is a valid relative path to the parent directory.
-*/
-bool Path::isValidChild(Path& parent, Path& child) {
-	try {
-		parent.concat(child);
-		return true;
-	} catch (InvalidPathException& e) {
-		return false;
-	} catch (std::exception& e) {
-		wsutils::warningOutput(e.what());
-	}
-
-	return false;
 }
 
 /**
