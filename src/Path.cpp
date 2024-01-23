@@ -138,21 +138,7 @@ bool Path::isExecutable(void) const {
  * @brief Concatenate another path to the current path object and return a new path object.
 */
 Path Path::concat(Path& other) {
-	if (_type != DIRECTORY) {
-		throw InvalidOperationException();
-	}
-	
-	const std::string& otherPath = other.getPath();
-
-	std::string delimiter = "/";
-	if (_path[_path.length() - 1] == '/') {
-		delimiter = "";
-	}
-
-	if (otherPath[0] == '/') {
-		return Path(_path + delimiter + otherPath.substr(1));
-	}
-	return Path(_path + delimiter + otherPath);
+	return concat(other.getPath(), other.getType());
 }
 
 /**
@@ -160,8 +146,19 @@ Path Path::concat(Path& other) {
  * and return a new path object.
 */
 Path Path::concat(std::string otherPath, enum pathType type) {
-	Path other(otherPath, type);
-	return concat(other);
+	if (_type != DIRECTORY) {
+		throw InvalidOperationException();
+	}
+	
+	std::string delimiter = "/";
+	if (_path[_path.length() - 1] == '/') {
+		delimiter = "";
+	}
+
+	if (otherPath[0] == '/') {
+		return Path(_path + delimiter + otherPath.substr(1), type);
+	}
+	return Path(_path + delimiter + otherPath, type);
 }
 
 /**

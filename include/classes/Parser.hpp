@@ -19,6 +19,7 @@
 #include <map>
 #include <fstream>
 #include <sstream>
+#include <utility>
 
 #include "Path.hpp"
 
@@ -32,25 +33,22 @@ struct Location {
 	Path cgi_pass;
 	std::vector<std::string> index;
 	bool autoindex;
-	// std::vector<std::string> allowedHttpMethods;
-	// bool directory_listing;
+	size_t max_client_body_size;
+	Path upload_store;
+	bool accept_upload;
+	std::vector<std::string> allowedHttpMethods;
 };
 
 struct Server {
 	Server();
 
-	// std::vector<std::string> listen;
-	// std::vector<std::string> root;
-	// std::vector<std::string> index;
-	// std::vector<std::string> server_name;
-	// std::vector<std::string> error_page;
-	std::string port;
-	std::string host;
+	// std::string port;
+	// std::string host;
+	std::vector<std::pair<std::string, std::string> > hosts;
 	std::vector<std::string> server_name;
 	Path root;
 	std::vector<std::string> index;
-	std::map<int, Path> error_pages;
-	size_t max_client_body_size;
+	std::map<std::string, Path> error_pages;
 
 	std::vector<Location> locations;
 };

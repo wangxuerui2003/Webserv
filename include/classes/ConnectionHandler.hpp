@@ -33,7 +33,7 @@ class ConnectionHandler {
 		ConnectionHandler(const std::vector<Server>& servers);
 		~ConnectionHandler();
 
-		int createListenSocket(const Server& config) const;
+		int createListenSocket(std::string host, std::string port) const;
 		void createNewConnection(int listenSocket);
 
 		void serverListen(void);

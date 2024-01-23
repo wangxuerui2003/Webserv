@@ -74,6 +74,28 @@ void Parser::parse(std::string configFilePath) {
                             // Autoindex
                             std::vector<std::string> autoindex = getKeywordValues("autoindex", locationLines);
                             _location.autoindex = autoindex.empty() ? false : getKeywordValues("autoindex", locationLines)[0] == "on" ? true : false;
+
+                            // client_max_body_size
+                            std::vector<std::string> mcbsStrs = getKeywordValues("client_max_body_size", locationLines);
+                            _location.max_client_body_size = mcbsStrs.empty() ? 0 : wsutils::convertSizeStringToBytes(mcbsStrs[0]);
+
+                            // upload_store
+                            std::vector<std::string> uploadStoreStrs = getKeywordValues("upload_store", locationLines);
+                            if (uploadStoreStrs.empty() == false) {
+                                _location.upload_store = _location.root.concat(uploadStoreStrs[0], DIRECTORY);
+                                _location.accept_upload = true;
+                            } else {
+                                _location.accept_upload = false;
+                            }
+
+                            // limit_except (allowed HTTP methods)
+                            _location.allowedHttpMethods = getKeywordValues("limit_except", locationLines);
+                            if (_location.allowedHttpMethods.empty()) {
+                                _location.allowedHttpMethods.push_back("GET");
+                                _location.allowedHttpMethods.push_back("POST");
+                                _location.allowedHttpMethods.push_back("DELETE");
+                            }
+
                             _locations.push_back(_location);
                             i++;
                             break;
@@ -83,14 +105,34 @@ void Parser::parse(std::string configFilePath) {
                 }
                 if (configLines[i].find("}") != std::string::npos) {
                     Server _server;
-                    std::string listen = getKeywordValues("listen", serverLines)[0];
-                    std::istringstream iss(listen);
-                    std::getline(iss, _server.host, ':');
-                    std::getline(iss, _server.port);
+                    std::vector<std::string> listens = getKeywordValues("listen", serverLines);
+                    for (std::vector<std::string>::iterator listen = listens.begin(); listen != listens.end(); ++listen) {
+                        std::string host, port;
+                        // listen can be host:port / port
+                        if (listen->find(':') == std::string::npos) {
+                            port = *listen;
+                            host = "0.0.0.0";
+                        } else {
+                            std::istringstream iss(*listen);
+                            std::getline(iss, host, ':');
+                            std::getline(iss, port);
+                        }
+                        _server.hosts.push_back(std::make_pair(host, port));
+                    }
                     _server.root = Path(getKeywordValues("root", serverLines)[0]);
                     _server.index = getKeywordValues("index", serverLines);
                     _server.server_name = getKeywordValues("server_name", serverLines);
-                    // _server.error_page = getKeywordValues("error_page", serverLines); // [404, 404.html, 501, 501.html]
+
+                    // [404, 404.html, 501, 501.html]
+                    std::vector<std::string> errorPages = getKeywordValues("error_page", serverLines);
+                    if (errorPages.size() % 2 != 0) {
+                        wsutils::errorExit("Error Pages should be key-value pairs!");
+                    }
+                    // [404, 404.html] => 404 => root/404.html
+                    for (std::vector<std::string>::iterator it = errorPages.begin(); it != errorPages.end(); it += 2) {
+                        Path errorPagePath = _server.root.concat(*(it + 1), URI);
+                        _server.error_pages[*it] = errorPagePath;
+                    }
                     _server.locations = _locations;
                     _servers.push_back(_server);
                     i++;

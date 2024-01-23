@@ -12,14 +12,14 @@
 
 #include "Response.hpp"
 
-std::string Response::parse_custom_error_pages(std::string error, std::map<int, Path> &error_pages) {
-	std::map<int, Path>::iterator head = error_pages.begin();
-	std::map<int, Path>::iterator end = error_pages.end();
+std::string Response::parse_custom_error_pages(std::string error, std::map<std::string, Path> &error_pages) {
+	std::map<std::string, Path>::iterator head = error_pages.begin();
+	std::map<std::string, Path>::iterator end = error_pages.end();
 	std::string buffer;
 	std::string temp_msg_body;
 
 	for (; head != end; head++) {
-		if (head->first == std::stoi(error)) {
+		if (head->first == error) {
 			std::string path = "." + head->second.getPath();
 			std::fstream fs(path, std::fstream::in);
 			if (fs.is_open()) {
@@ -157,8 +157,8 @@ std::string Response::handle_GET_request(Request &request, Location *location, S
 std::string Response::handle_POST_request(Request &request, Location *location, Server &server) {
     if (location->cgi_pass.getPath() == "")
         return (parse_error_pages("405", "Method not allowed ", server));
-    else if (request.getHeader("Content-Length") != "" && server.max_client_body_size != 0 && // CHECK: max_client_body_size when not defined?
-    std::stoull(request.getHeader("Content-Length")) > server.max_client_body_size)
+    else if (request.getHeader("Content-Length") != "" && location->max_client_body_size != 0 && // CHECK: max_client_body_size when not defined?
+    std::stoull(request.getHeader("Content-Length")) > location->max_client_body_size)
         return (parse_error_pages("413", "Payload Too Large", server));
     else {
         // CgiHandler cgi;

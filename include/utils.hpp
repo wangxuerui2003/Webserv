@@ -16,6 +16,7 @@
 namespace wsutils {
 	void errorExit(const char *msg);
 	void warningOutput(const char *msg);
+	size_t convertSizeStringToBytes(const std::string& sizeString);
 }
 
 #endif

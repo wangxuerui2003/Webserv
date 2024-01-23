@@ -19,9 +19,11 @@
 */
 ConnectionHandler::ConnectionHandler(const std::vector<Server>& servers) {
 	int listenSocket;
-	for (std::vector<Server>::const_iterator it = servers.begin(); it != servers.end(); ++it) {
-		listenSocket = createListenSocket(*it);
-		_servers[listenSocket] = *it;
+	for (std::vector<Server>::const_iterator serverConfig = servers.begin(); serverConfig != servers.end(); ++serverConfig) {
+		for (size_t i = 0; i < serverConfig->hosts.size(); ++i) {
+			listenSocket = createListenSocket(serverConfig->hosts[i].first, serverConfig->hosts[i].second);
+			_servers[listenSocket] = *serverConfig;
+		}
 	}
 
 	_maxFd = listenSocket;
@@ -143,13 +145,13 @@ void ConnectionHandler::createNewConnection(int listenSocket) {
 	std::cout << "Accepted connection from " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }
 
-int ConnectionHandler::createListenSocket(const Server& config) const {
+int ConnectionHandler::createListenSocket(std::string host, std::string port) const {
 	struct addrinfo hints, *addressInfo;
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;  // Use IPv4
 	hints.ai_socktype = SOCK_STREAM;  // Use TCP
 
-	int status = getaddrinfo(config.host.c_str(), config.port.c_str(), &hints, &addressInfo);
+	int status = getaddrinfo(host.c_str(), port.c_str(), &hints, &addressInfo);
 	if (status != 0) {
 		wsutils::errorExit(strerror(errno));
 	}

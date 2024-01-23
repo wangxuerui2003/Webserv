@@ -39,7 +39,7 @@ class Response {
         static std::string readFile(const std::string& filename, Server &server);
         static Server &find_server(Request& request, std::map<int, Server>& servers);
         static std::string parse_error_pages(std::string error, std::string description, Server &server);
-        static std::string parse_custom_error_pages(std::string error, std::map<int, Path> &error_pages);
+        static std::string parse_custom_error_pages(std::string error, std::map<std::string, Path> &error_pages);
         
         static std::string handle_GET_request(Request &request, Location *location, Server &server);
         static std::string handle_POST_request(Request &request, Location *location, Server &server);
