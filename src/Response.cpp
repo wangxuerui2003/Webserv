@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/23 12:46:26 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/23 17:34:02 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ std::string Response::parse_custom_error_pages(std::string error, std::map<std::
 			}
 		}
 	}
-	return temp_msg_body;
+	return (temp_msg_body);
 }
 
 std::string Response::parse_error_pages(std::string error, std::string description, Server &server) {
@@ -117,22 +117,18 @@ bool Response::isStaticContent(Location *location) {
 // IF static content, then just return string using readFile
 // TODO: implement default index
 // TODO: implement directory listing
-std::string Response::handleStaticContent(const Request& request, Location *location, Server &server) { // add argument location (so that I can use prepend root)
+std::string Response::handleStaticContent(Path &absPath, Location *location, Server &server) { // add argument location (so that I can use prepend root)
     // Handle static content based on the requested path.
     std::cout << "Handling static content..." << std::endl;
 
-    try {
-        Path request_uri = request.getPath();
-        Path abs_path = Path::mapURLToFS(request_uri, location->uri, location->root);
-        std::cout << "ABSOLUTE FILE PATH FORM LOCATION IS: " << abs_path.getPath() << std::endl;
-        
+    try {        
         // Check if it's directory. Cannot use Path.type because mapURLtoFS defaults to URI type
         // TODO: Ask XueRui identify DIRECTORY type when mapURLtoFS
-        if (abs_path.getPath()[abs_path.getPath().length() - 1] == '/') {
-            abs_path = find_default_index(abs_path, location);
+        if (absPath.getPath()[absPath.getPath().length() - 1] == '/') {
+            absPath = find_default_index(absPath, location);
 
             // If still cannot find default index, then list directory
-            if (abs_path.getType() == DIRECTORY) {
+            if (absPath.getType() == DIRECTORY) {
                 if (location->autoindex == true) {
                     // TODO: list directories
                     std::cout << "AUTOINDEX IS: " << (location->autoindex ? "ON" : "OFF") << std::endl;
@@ -141,7 +137,7 @@ std::string Response::handleStaticContent(const Request& request, Location *loca
                 }
             }
         }
-        return (readFile(abs_path.getPath(), server));
+        return (readFile(absPath.getPath(), server));
     } catch (Path::InvalidPathException &err) {
         return (parse_error_pages("501", err.what(), server));
     }
@@ -151,7 +147,9 @@ std::string Response::handle_GET_request(Request &request, Location *location, S
     (void)request;
     (void)location;
     (void)server;
-    return std::string();
+    // CgiHandler cgi;
+    // cgi.handle_cgi(request, *this, server, *location);
+    return (std::string("WORK IN PROGRESS"));
 }
 
 std::string Response::handle_POST_request(Request &request, Location *location, Server &server) {
@@ -163,41 +161,73 @@ std::string Response::handle_POST_request(Request &request, Location *location, 
     else {
         // CgiHandler cgi;
         // cgi.handle_cgi(request, *this, server, *location);
+        return (std::string("WORK IN PROGRESS"));
     }
-
-    return std::string();
 }
 
-std::string Response::handle_DELETE_request(Request &request, Location *location, Server &server) {
-    (void)request;
-    (void)location;
-    (void)server;
-    return std::string();
+std::string Response::deleteResource(Path &absPath, Server &server) {
+    if (remove(absPath.getPath().c_str()) == -1) {
+		if (errno == ENOENT) 
+			return (parse_error_pages("404", "Not Found", server));
+		else
+			return (parse_error_pages("500", "Internal Server Error", server));
+	}
+	else {
+        // hard coded success page
+        std::string data;
+		std::string response_content = "<html>\n<head><title>200 OK</title></head>\n<body>\n<center><h1>200 OK</h1></center>\n</body>\n</html>";
+		data += "HTTP/1.1 200 OK\r\n";
+		data += "Content-Type: text/html\r\n";
+		data += "Content-Length: " + std::to_string(response_content.length()) + "\r\n";
+		data += "\r\n";
+		data += response_content;
+		data += "\r\n";
+        return (data);
+	}
 }
 
-Server &Response::find_server(Request& request, std::map<int, Server>& servers) {
-    std::map<int, Server>::iterator it = servers.find(std::stoi(request.getPort())); // confirm what map<int> represents, should be port number
+std::string Response::handle_DELETE_request(Path &absPath, Location *location, Server &server) {
+    std::vector<std::string>::iterator head = location->allowedHttpMethods.begin();
+    std::vector<std::string>::iterator end = location->allowedHttpMethods.end();
+    if (std::find(head, end, "DELETE") == end) // if couldn't find DELETE, reached the end
+        return (parse_error_pages("405", "Method not allowed", server));
+    else
+        return (deleteResource(absPath, server));
+}
 
-    if (it != servers.end()) {
-        // Matching port found
-        const Server& currentServer = it->second;
+// TODO: Check with XueRui on config checks host and ports
+Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
+    for (std::map<int, Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
+        Server& currentServer = it->second;
 
-        if (std::find(currentServer.server_name.begin(), currentServer.server_name.end(), request.getHost()) != currentServer.server_name.end()) { // e.g. example.com == example.com?
-            // Matching server found
-            return const_cast<Server&>(currentServer);
+        // Check hosts
+        for (size_t j = 0; j < currentServer.hosts.size(); ++j) {
+            std::pair<std::string, std::string> &hostPair = currentServer.hosts[j];
+            if (request.getHost() == hostPair.first && request.getPort() == hostPair.second) {
+                return (const_cast<Server&>(currentServer));
+            }
+        }
+
+        // Check server names (no check ports)
+        for (size_t k = 0; k < currentServer.server_name.size(); ++k) {
+            const std::string& serverName = currentServer.server_name[k];
+            if (request.getHost() == serverName) {
+                return (const_cast<Server&>(currentServer));
+            }
         }
     }
-    // If no exact match is found, return the server with the same index as the first server checked
-    return (servers.begin()->second);
+
+    // If no exact match is found, return the first server
+    return const_cast<Server&>(servers.begin()->second);
 }
 
 // START HERE - MAIN RESPONSE FUNCTION
 std::string Response::generateResponse(Request &request, std::map<int, Server> &servers) {
 
     // Find the correct server based the host and port e.g. 192.168.0.1:8080
-    Server server = find_server(request, servers);
+    Server server = findServer(request, servers);
     std::string method = request.getMethod();
-    Path path = request.getPath();
+    Path request_uri = request.getPath();
 
     if (method != "GET" && method != "POST" && method != "DELETE")
         return (parse_error_pages("501", "Method not implemented", server));
@@ -205,7 +235,7 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     // PROCESSING RESPONSE
     // FIND the correct location block
     // e.g. _path = HTTP/1.1 /images/1.png GET
-    Location *location = Path::getBestFitLocation(server.locations, path); // relative path
+    Location *location = Path::getBestFitLocation(server.locations, request_uri); // relative path
     
     if (location == NULL)
         return (parse_error_pages("403", "Forbidden", server));
@@ -213,10 +243,14 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     // if ((*location).get_return() != "") 
 			// this->handle_return((*location).get_return());
 
+    // Get absolute resource path
+    Path absPath = Path::mapURLToFS(request_uri, location->uri, location->root);
+    std::cout << "ABSOLUTE FILE PATH FORM LOCATION IS: " << absPath.getPath() << std::endl;
+
     // Check if the resource is a static file
     if (isStaticContent(location)) {
         if (request.getMethod() == "GET")
-            return (handleStaticContent(request, location, server));
+            return (handleStaticContent(absPath, location, server));
         else
             return (parse_error_pages("405", "Method not allowed", server));
     }
@@ -228,7 +262,7 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
         else if (request.getMethod() == "POST")
             return (handle_POST_request(request, location, server));
         else if (request.getMethod() == "DELETE")
-            return (handle_DELETE_request(request, location, server));
+            return (handle_DELETE_request(absPath, location, server));
     }
 
     return std::string();
