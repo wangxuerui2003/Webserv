@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/22 10:37:40 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/23 12:46:26 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,24 @@ std::string Response::readFile(const std::string& filename, Server &server) {
     return (parse_error_pages("404", "File not found.", server));
 }
 
+Path Response::find_default_index(Path &abs_path, Location *location) {
+    abs_path = Path(abs_path.getPath(), DIRECTORY);
+    // Check for location default indexes
+    if (location->index.size() != 0) {
+        std::vector<std::string>::iterator it = location->index.begin();
+        std::vector<std::string>::iterator ite = location->index.end();
+        for (; it != ite; it++) {
+            Path index(*it, URI);
+            Path temp_index = abs_path.concat(index.getPath(), URI);
+            if (Path::isAccessible(temp_index.getPath().c_str())) {
+                // If index is found, then break and readFile() below
+                return (temp_index);
+            }
+        }
+    }
+    return (abs_path);
+}
+
 bool Response::isStaticContent(Location *location) {
 	return (location->cgi_pass.getPath() == "");
 }
@@ -107,14 +125,26 @@ std::string Response::handleStaticContent(const Request& request, Location *loca
         Path request_uri = request.getPath();
         Path abs_path = Path::mapURLToFS(request_uri, location->uri, location->root);
         std::cout << "ABSOLUTE FILE PATH FORM LOCATION IS: " << abs_path.getPath() << std::endl;
+        
+        // Check if it's directory. Cannot use Path.type because mapURLtoFS defaults to URI type
+        // TODO: Ask XueRui identify DIRECTORY type when mapURLtoFS
+        if (abs_path.getPath()[abs_path.getPath().length() - 1] == '/') {
+            abs_path = find_default_index(abs_path, location);
+
+            // If still cannot find default index, then list directory
+            if (abs_path.getType() == DIRECTORY) {
+                if (location->autoindex == true) {
+                    // TODO: list directories
+                    std::cout << "AUTOINDEX IS: " << (location->autoindex ? "ON" : "OFF") << std::endl;
+                } else {
+                    return (parse_error_pages("403", "Forbidden", server));
+                }
+            }
+        }
         return (readFile(abs_path.getPath(), server));
     } catch (Path::InvalidPathException &err) {
         return (parse_error_pages("501", err.what(), server));
     }
-    // std::string resource_path = get_resource_path(request, *location);
-    // parse_resource()
-    // if (this->data = "")
-    // return (error);
 }
 
 std::string Response::handle_GET_request(Request &request, Location *location, Server &server) {
@@ -164,7 +194,7 @@ Server &Response::find_server(Request& request, std::map<int, Server>& servers) 
 // START HERE - MAIN RESPONSE FUNCTION
 std::string Response::generateResponse(Request &request, std::map<int, Server> &servers) {
 
-    // Find the correct server based the host and port 192.168.0.1:8080
+    // Find the correct server based the host and port e.g. 192.168.0.1:8080
     Server server = find_server(request, servers);
     std::string method = request.getMethod();
     Path path = request.getPath();

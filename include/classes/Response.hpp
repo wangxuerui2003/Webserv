@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:27:18 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/22 10:39:13 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/23 12:44:51 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ class Response {
 
         static std::string getContentType(const std::string& filePath);
         static bool isStaticContent(Location *location);
+        static Path find_default_index(Path &abs_path, Location *location);
         static std::string handleStaticContent(const Request& request, Location *location, Server &server);
         static std::string readFile(const std::string& filename, Server &server);
         static Server &find_server(Request& request, std::map<int, Server>& servers);

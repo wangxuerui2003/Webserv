@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/22 10:40:04 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/23 12:17:08 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,8 +62,18 @@ void Parser::parse(std::string configFilePath) {
                         if (configLines[i].find("}") != std::string::npos) {
                             Location _location;
                             _location.uri = Path(getKeywordValues("location", locationLines)[0], URI);
+                            
+                            // If location doesn't have root, get from server block
                             std::vector<std::string> roots = getKeywordValues("root", locationLines);
                             _location.root = Path(getKeywordValues("root", !roots.empty() ? locationLines : serverLines)[0]);
+                            
+                            // If location doesn't have index vector, get from server block
+                            std::vector<std::string> index = getKeywordValues("index", locationLines);
+                            _location.index = getKeywordValues("index", !index.empty() ? locationLines : serverLines);
+
+                            // Autoindex
+                            std::vector<std::string> autoindex = getKeywordValues("autoindex", locationLines);
+                            _location.autoindex = autoindex.empty() ? false : getKeywordValues("autoindex", locationLines)[0] == "on" ? true : false;
                             _locations.push_back(_location);
                             i++;
                             break;
