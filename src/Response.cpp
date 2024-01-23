@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/23 17:34:02 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/23 17:49:06 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,26 +121,22 @@ std::string Response::handleStaticContent(Path &absPath, Location *location, Ser
     // Handle static content based on the requested path.
     std::cout << "Handling static content..." << std::endl;
 
-    try {        
-        // Check if it's directory. Cannot use Path.type because mapURLtoFS defaults to URI type
-        // TODO: Ask XueRui identify DIRECTORY type when mapURLtoFS
-        if (absPath.getPath()[absPath.getPath().length() - 1] == '/') {
-            absPath = find_default_index(absPath, location);
+    // Check if it's directory. Cannot use Path.type because mapURLtoFS defaults to URI type
+    // TODO: Ask XueRui identify DIRECTORY type when mapURLtoFS
+    if (absPath.getPath()[absPath.getPath().length() - 1] == '/') {
+        absPath = find_default_index(absPath, location);
 
-            // If still cannot find default index, then list directory
-            if (absPath.getType() == DIRECTORY) {
-                if (location->autoindex == true) {
-                    // TODO: list directories
-                    std::cout << "AUTOINDEX IS: " << (location->autoindex ? "ON" : "OFF") << std::endl;
-                } else {
-                    return (parse_error_pages("403", "Forbidden", server));
-                }
+        // If still cannot find default index, then list directory
+        if (absPath.getType() == DIRECTORY) {
+            if (location->autoindex == true) {
+                // TODO: list directories
+                std::cout << "AUTOINDEX IS: " << (location->autoindex ? "ON" : "OFF") << std::endl;
+            } else {
+                return (parse_error_pages("403", "Forbidden", server));
             }
         }
-        return (readFile(absPath.getPath(), server));
-    } catch (Path::InvalidPathException &err) {
-        return (parse_error_pages("501", err.what(), server));
     }
+    return (readFile(absPath.getPath(), server));
 }
 
 std::string Response::handle_GET_request(Request &request, Location *location, Server &server) {
@@ -244,8 +240,13 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
 			// this->handle_return((*location).get_return());
 
     // Get absolute resource path
-    Path absPath = Path::mapURLToFS(request_uri, location->uri, location->root);
-    std::cout << "ABSOLUTE FILE PATH FORM LOCATION IS: " << absPath.getPath() << std::endl;
+    Path absPath;
+    try {
+        absPath = Path::mapURLToFS(request_uri, location->uri, location->root);
+        std::cout << "ABSOLUTE FILE PATH FORM LOCATION IS: " << absPath.getPath() << std::endl;
+    } catch (Path::InvalidOperationException &err) {
+        return (parse_error_pages("501", err.what(), server));
+    }
 
     // Check if the resource is a static file
     if (isStaticContent(location)) {
