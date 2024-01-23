@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/23 20:46:08 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/23 21:11:12 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <exception>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -63,6 +64,9 @@ class Path {
 		bool isReadable(void) const;
 		bool isWritable(void) const;
 		bool isExecutable(void) const;
+
+		std::string read(void) const;
+		void write(std::string content) const;
 
 		class InvalidPathException : public std::exception {
 			public:

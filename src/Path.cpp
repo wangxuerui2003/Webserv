@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/23 20:46:45 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/23 21:19:59 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,4 +278,35 @@ Location *Path::getBestFitLocation(std::vector<Location>& locations, Path& reque
 	}
 
 	return bestFit;
+}
+
+std::string Path::read(void) const {
+	std::ifstream infile(_path);
+
+	if (!infile.is_open()) {
+		return "";
+	}
+
+	std::string content;
+	std::string buffer;
+
+	while (std::getline(infile, buffer, '\0')) {
+		content += buffer;
+	}
+
+	infile.close();
+
+	return content;
+}
+
+void Path::write(std::string content) const {
+	std::ofstream outputFile(_path, std::ios::app);
+
+    if (!outputFile.is_open()) {
+        return;
+    }
+    
+    outputFile << content;
+
+    outputFile.close();
 }
