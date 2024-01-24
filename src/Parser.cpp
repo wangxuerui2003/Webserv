@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/24 15:29:24 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/24 19:33:40 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,11 +66,10 @@ void Parser::parse(std::string configFilePath) {
                             // If location doesn't have root, get from server block
                             std::vector<std::string> roots = getKeywordValues("root", locationLines);
                             if (roots.empty()) {
-                                _location.root = Path(getKeywordValues("root", serverLines)[0]).concat(_location.uri);
+                                _location.root = Path(getKeywordValues("root", serverLines)[0]).concat(_location.uri.getPath(), DIRECTORY);
                             } else {
                                 _location.root = Path(getKeywordValues("root", locationLines)[0]);
                             }
-                            wsutils::log(_location.root.getPath(), "./logs");
                             
                             // If location doesn't have index vector, get from server block
                             std::vector<std::string> index = getKeywordValues("index", locationLines);
@@ -124,7 +123,7 @@ void Parser::parse(std::string configFilePath) {
                         }
                         _server.hosts.push_back(std::make_pair(host, port));
                     }
-                    _server.root = Path(getKeywordValues("root", serverLines)[0]);
+                    _server.root = Path(getKeywordValues("root", serverLines)[0], DIRECTORY);
                     _server.index = getKeywordValues("index", serverLines);
                     _server.server_name = getKeywordValues("server_name", serverLines);
 

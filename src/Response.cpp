@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/24 15:04:10 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/24 19:33:58 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ std::string Response::readFile(Path &absPath, Server &server) {
     std::string response;
     if (Path::isAccessible(absPath.getPath().c_str())) {
         std::string content = absPath.read();
-        wsutils::log(content, "./logs");
+        // wsutils::log(content, "./logs");
         response += "HTTP/1.1 200 OK\r\n";
         response += "Content-Type: " + getContentType(absPath.getPath()) + "\r\n";
         response += ("Content-Length: " + std::to_string(content.length()) + "\r\n");
@@ -188,16 +188,10 @@ Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
     for (std::map<int, Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
         Server& currentServer = it->second;
 
-        wsutils::log("REQUEST HOST / PORT: \"" + request.getHost() + "\"" + " " + "\"" + request.getPort() + "\"", "./logs");
-
         // Check hosts
         for (size_t j = 0; j < currentServer.hosts.size(); ++j) {
             std::pair<std::string, std::string> &hostPair = currentServer.hosts[j];
-            wsutils::log("FINDING HOST / PORT: \"" + hostPair.first + "\"" + " " + "\"" + hostPair.second + "\"", "./logs");
-            std::cout << j << ". host: " << (request.getHost() == hostPair.first) << std::endl;
-            std::cout << j << ". port: " << (request.getPort().length() == hostPair.second.length()) << std::endl;
             if (request.getHost() == hostPair.first && request.getPort() == hostPair.second) {
-                wsutils::log("Found host and port: " + hostPair.first + hostPair.second, "./logs");
                 return (const_cast<Server&>(currentServer));
             }
         }
@@ -230,8 +224,10 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     std::string method = request.getMethod();
     Path request_uri = request.getPath();
 
-    if (method != "GET" && method != "POST" && method != "DELETE")
+    if (method != "GET" && method != "POST" && method != "DELETE") {
+        wsutils::log(method, "./logs");
         return (parse_error_pages("501", "Method not implemented", server));
+    }
 
     // PROCESSING RESPONSE
     // FIND the correct location block
@@ -248,7 +244,7 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     Path absPath;
     try {
         absPath = Path::mapURLToFS(request_uri, location->uri, location->root);
-        std::cout << "ABSOLUTE FILE PATH FORM LOCATION IS: " << absPath.getPath() << std::endl;
+        wsutils::log("ABSOLUTE FILE PATH FORM LOCATION IS: " + absPath.getPath(), "./logs");
     } catch (Path::InvalidOperationException &err) {
         return (parse_error_pages("501", err.what(), server));
     }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/24 15:14:54 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/24 19:16:30 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,6 @@ void Request::parseHeaders(const std::string& headerPart) {
         if (line.back() == '\r') {
             line.pop_back();
         }
-        wsutils::log(line + "$", "./logs");
         size_t colonPos = line.find(':');
 
         if (colonPos != std::string::npos) {
