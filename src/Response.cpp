@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/24 12:24:42 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/24 13:01:54 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,9 +113,9 @@ bool Response::isStaticContent(Location *location) {
 	return (location->cgi_pass.getPath() == "");
 }
 
+
+
 // IF static content, then just return string using readFile
-// TODO: implement default index
-// TODO: implement directory listing
 std::string Response::handleStaticContent(Path &absPath, Location *location, Server &server) { // add argument location (so that I can use prepend root)
     // Handle static content based on the requested path.
     std::cout << "Handling static content..." << std::endl;
@@ -128,8 +128,7 @@ std::string Response::handleStaticContent(Path &absPath, Location *location, Ser
         // If still cannot find default index, then list directory
         if (absPath.getType() == DIRECTORY) {
             if (location->autoindex == true) {
-                // TODO: list directories
-                std::cout << "AUTOINDEX IS: " << (location->autoindex ? "ON" : "OFF") << std::endl;
+                return (absPath.generateDirectoryListing());
             } else {
                 return (parse_error_pages("403", "Forbidden", server));
             }

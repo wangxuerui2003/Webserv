@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/24 12:22:32 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/24 13:01:20 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -321,4 +321,32 @@ void Path::write(std::string filePath, std::string content) {
     outputFile << content;
 
     outputFile.close();
+}
+
+std::string Path::generateDirectoryListing(void) const {
+	if (_type != DIRECTORY)
+		throw InvalidOperationException("File " + _path + " is not a directory");
+    std::string html = "<html>\n<head><title>Index of " + _path + "</title></head>\n<body>\n<h1>Index of " + _path + "</h1>\n<ul>\n";
+
+    DIR* dir = opendir(_path.c_str());
+    if (dir != nullptr) {
+        struct dirent* entry;
+        while ((entry = readdir(dir)) != nullptr) {
+            const std::string entryName = entry->d_name;
+            html += "<li><a href=\"" + entryName + "\">" + entryName + "</a></li>\n";
+        }
+        closedir(dir);
+    }
+
+    html += "</ul>\n</body>\n</html>\n";
+
+	std::string response;
+
+	response += "HTTP/1.1 200 OK\r\n";
+	response += "Content-Type: text/html\r\n";
+	response += ("Content-Length: " + std::to_string(html.length()) + "\r\n");
+	response += "\r\n";
+	response += html;
+	// std::cout << "FINAL STR: " << response << std::endl;
+	return (response);
 }

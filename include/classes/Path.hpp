@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/23 21:45:23 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/24 12:41:18 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/types.h>
+#include <dirent.h>
 
 #include "utils.hpp"
 
@@ -67,6 +68,8 @@ class Path {
 
 		std::string read(void) const;
 		static void write(std::string filePath, std::string content);
+
+		std::string generateDirectoryListing(void) const;
 
 		class InvalidPathException : public std::exception {
 			private:
