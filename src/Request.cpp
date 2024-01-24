@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/22 09:54:26 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/24 15:14:54 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,11 +83,15 @@ void Request::parseHeaders(const std::string& headerPart) {
     std::string line;
 
     while (std::getline(headerStream, line)) {
+        if (line.back() == '\r') {
+            line.pop_back();
+        }
+        wsutils::log(line + "$", "./logs");
         size_t colonPos = line.find(':');
 
         if (colonPos != std::string::npos) {
             std::string headerName = line.substr(0, colonPos);
-            std::string headerValue = line.substr(colonPos + 1);
+            std::string headerValue = line.substr(colonPos + 2);
 
             // Extract Host and Port variable
             if (headerName == "Host") {

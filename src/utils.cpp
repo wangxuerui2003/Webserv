@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:02:56 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/23 21:06:58 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/24 14:48:14 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,9 @@ size_t wsutils::convertSizeStringToBytes(const std::string& sizeString) {
 }
 
 void wsutils::log(std::string msg, std::ostream& os) {
-    os << "----------LOG BEGIN----------\n";
+    // os << "----------LOG BEGIN----------\n";
     os << YELLOW << msg << RESET;
-    os << "\n----------LOG END----------" << std::endl;
+    // os << "\n----------LOG END----------" << std::endl;
 }
 
 void wsutils::log(std::string msg, std::string filename) {
@@ -56,9 +56,9 @@ void wsutils::log(std::string msg, std::string filename) {
         throw std::ios_base::failure("Fail to open file");
     }
     
-    outputFile << "----------LOG BEGIN----------\n";
-    outputFile << msg;
-    outputFile << "\n----------LOG END----------" << std::endl;
+    // outputFile << "----------LOG BEGIN----------\n";
+    outputFile << msg << std::endl;
+    // outputFile << "\n----------LOG END----------" << std::endl;
 
     outputFile.close();
 }

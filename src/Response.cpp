@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/24 13:40:56 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/24 15:04:10 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,10 +188,16 @@ Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
     for (std::map<int, Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
         Server& currentServer = it->second;
 
+        wsutils::log("REQUEST HOST / PORT: \"" + request.getHost() + "\"" + " " + "\"" + request.getPort() + "\"", "./logs");
+
         // Check hosts
         for (size_t j = 0; j < currentServer.hosts.size(); ++j) {
             std::pair<std::string, std::string> &hostPair = currentServer.hosts[j];
+            wsutils::log("FINDING HOST / PORT: \"" + hostPair.first + "\"" + " " + "\"" + hostPair.second + "\"", "./logs");
+            std::cout << j << ". host: " << (request.getHost() == hostPair.first) << std::endl;
+            std::cout << j << ". port: " << (request.getPort().length() == hostPair.second.length()) << std::endl;
             if (request.getHost() == hostPair.first && request.getPort() == hostPair.second) {
+                wsutils::log("Found host and port: " + hostPair.first + hostPair.second, "./logs");
                 return (const_cast<Server&>(currentServer));
             }
         }
@@ -206,14 +212,21 @@ Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
     }
 
     // If no exact match is found, return the first server
-    return const_cast<Server&>(servers.begin()->second);
+    wsutils::log("Invalid server host: " + request.getHost(), "./logs");
+    throw InvalidServerException();
+    // return const_cast<Server&>(servers.begin()->second);
 }
 
 // START HERE - MAIN RESPONSE FUNCTION
 std::string Response::generateResponse(Request &request, std::map<int, Server> &servers) {
 
     // Find the correct server based the host and port e.g. 192.168.0.1:8080
-    Server server = findServer(request, servers);
+    Server server;
+    try {
+        server = findServer(request, servers);
+    } catch (InvalidServerException &err) {
+        return (parse_error_pages("502", "Bad gateway", server));
+    }
     std::string method = request.getMethod();
     Path request_uri = request.getPath();
 
@@ -260,3 +273,8 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
 
     return std::string();
 }
+
+const char *Response::InvalidServerException::InvalidServerException::what() const throw() {
+    return ("Invalid server");
+}
+	
