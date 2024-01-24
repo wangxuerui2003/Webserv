@@ -1,18 +1,33 @@
-import socket
+import requests
+import unittest
+import subprocess
 
-# Define the target host and port
-host = "localhost"
-port = 8080
+class MyWebServerTestCase(unittest.TestCase):
+    def setUp(self):
+        # Start your web server or setup a testing environment
+        self.server_process = subprocess.Popen(['./webserv'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-# Create a socket object
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def tearDown(self):
+        # Stop your web server or clean up resources
+        self.server_process.terminate()
+        self.server_process.wait()
 
-# Connect to the server
-client_socket.connect((host, port))
+    def test_get_request(self):
+        # Make a GET request to your server
+        response = requests.get('http://localhost:8080')
 
-# Send data to the server
-message = "hello"
-client_socket.send(message.encode())
+        # Check the response status code and content
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Welcome to Webserv!', response.text)
 
-# Close the socket
-client_socket.close()
+    # def test_post_request(self):
+    #     # Make a POST request to your server with data
+    #     data = {'key': 'value'}
+    #     response = requests.post('http://localhost:8080', data=data)
+
+    #     # Check the response status code and content
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertIn('Created', response.text)
+
+if __name__ == '__main__':
+    unittest.main()
