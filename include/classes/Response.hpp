@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:27:18 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/23 17:31:01 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/24 12:00:43 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ class Response {
         static bool isStaticContent(Location *location);
         static Path find_default_index(Path &abs_path, Location *location);
         static std::string handleStaticContent(Path &absPath, Location *location, Server &server);
-        static std::string readFile(const std::string& filename, Server &server);
+        static std::string readFile(Path &absPath, Server &server);
         static Server &findServer(Request &request, std::map<int, Server> &servers);
         static std::string parse_error_pages(std::string error, std::string description, Server &server);
         static std::string parse_custom_error_pages(std::string error, std::map<std::string, Path> &error_pages);

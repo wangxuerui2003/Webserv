@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/23 17:49:06 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/24 12:24:42 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,17 +75,16 @@ std::string Response::getContentType(const std::string& filePath) {
     return ("text/plain");
 }
 
-std::string Response::readFile(const std::string& filename, Server &server) {
+std::string Response::readFile(Path &absPath, Server &server) {
     std::string response;
-    std::ifstream file(filename);
-    if (file) {
-        std::stringstream buffer;
-        buffer << file.rdbuf();
+    if (Path::isAccessible(absPath.getPath().c_str())) {
+        std::string content = absPath.read();
+        wsutils::log(content, "./logs");
         response += "HTTP/1.1 200 OK\r\n";
-        response += "Content-Type: " + getContentType(filename) + "\r\n";
-        response += ("Content-Length: " + std::to_string(buffer.str().length()) + "\r\n");
+        response += "Content-Type: " + getContentType(absPath.getPath()) + "\r\n";
+        response += ("Content-Length: " + std::to_string(content.length()) + "\r\n");
         response += "\r\n";
-        response += buffer.str();
+        response += content;
         // std::cout << "FINAL STR: " << response << std::endl;
         return (response);
     }
@@ -136,7 +135,7 @@ std::string Response::handleStaticContent(Path &absPath, Location *location, Ser
             }
         }
     }
-    return (readFile(absPath.getPath(), server));
+    return (readFile(absPath, server));
 }
 
 std::string Response::handle_GET_request(Request &request, Location *location, Server &server) {
