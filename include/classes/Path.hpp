@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/22 10:38:32 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/23 21:45:23 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <exception>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -48,8 +49,6 @@ class Path {
 
 		static bool isAccessible(const char *path);
 
-		static bool isValidChild(Path& parent, Path& child);
-
 		static Path mapURLToFS(Path& reqestUri, Path& uriPrefix, Path& root);
 
 		static Location *getBestFitLocation(std::vector<Location>& locations, Path& requestUri);
@@ -66,13 +65,24 @@ class Path {
 		bool isWritable(void) const;
 		bool isExecutable(void) const;
 
+		std::string read(void) const;
+		static void write(std::string filePath, std::string content);
+
 		class InvalidPathException : public std::exception {
+			private:
+				std::string _errorMsg;
 			public:
+				InvalidPathException(std::string errorMsg);
+				~InvalidPathException() throw();
 				const char *what() const throw();
 		};
 
 		class InvalidOperationException : public std::exception {
+			private:
+				std::string _errorMsg;
 			public:
+				InvalidOperationException(std::string errorMsg);
+				~InvalidOperationException() throw();
 				const char *what() const throw();
 		};
 

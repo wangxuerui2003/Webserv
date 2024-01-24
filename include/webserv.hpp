@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:01:20 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/20 12:27:24 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/23 20:44:52 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 #include <cstdlib>
 
 #define USAGE "Usage: ./webserv <config_file>"
-#define DEFAULT_CONFIG "./conf/test.conf"
+#define DEFAULT_CONFIG "./conf/example.conf"
 #define HTTP_REQUEST_TERMINATOR "\r\n\r\n"
 
 #ifdef __linux__

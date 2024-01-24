@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:02:56 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/15 20:41:58 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/23 21:06:58 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,4 +41,24 @@ size_t wsutils::convertSizeStringToBytes(const std::string& sizeString) {
     }
 
     return sizeValue * multiplier;
+}
+
+void wsutils::log(std::string msg, std::ostream& os) {
+    os << "----------LOG BEGIN----------\n";
+    os << YELLOW << msg << RESET;
+    os << "\n----------LOG END----------" << std::endl;
+}
+
+void wsutils::log(std::string msg, std::string filename) {
+    std::ofstream outputFile(filename, std::ios::app);
+
+    if (!outputFile.is_open()) {
+        throw std::ios_base::failure("Fail to open file");
+    }
+    
+    outputFile << "----------LOG BEGIN----------\n";
+    outputFile << msg;
+    outputFile << "\n----------LOG END----------" << std::endl;
+
+    outputFile.close();
 }

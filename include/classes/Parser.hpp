@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 17:55:47 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/23 12:02:28 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/23 20:45:42 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,6 @@
 struct Location {
 	Location();
 
-	// std::vector<std::string> path;
-	// std::vector<std::string> root;
 	Path uri;
 	Path root;
 	Path cgi_pass;
@@ -42,8 +40,6 @@ struct Location {
 struct Server {
 	Server();
 
-	// std::string port;
-	// std::string host;
 	std::vector<std::pair<std::string, std::string> > hosts;
 	std::vector<std::string> server_name;
 	Path root;

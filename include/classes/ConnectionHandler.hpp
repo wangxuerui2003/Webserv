@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/19 16:59:58 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/23 20:45:16 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,11 +37,6 @@ class ConnectionHandler {
 		void createNewConnection(int listenSocket);
 
 		void serverListen(void);
-
-		// TODO: Add the connection handling function,
-		// 		which is called when the listen function has a new connection or event from existing connection
-
-		// TODO: 
 
 	private:
 		// connectionSocket => Read buffer (waiting for full http request end with \r\n\r\n)

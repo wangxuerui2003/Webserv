@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:47:59 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/15 17:30:07 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/23 21:46:41 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,9 @@ int main(int ac, char **av) {
 			parser->parse(DEFAULT_CONFIG);
 		}
 	} catch (Path::InvalidPathException& e) {
-		wsutils::errorExit("Invalid config file path");
+		wsutils::errorExit(e.what());
+	} catch (Path::InvalidOperationException& e) {
+		wsutils::errorExit(e.what());
 	}
 
 	const std::vector<Server>& servers = parser->getServers();

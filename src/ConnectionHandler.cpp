@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/22 09:46:34 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/23 20:47:50 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,6 @@ void ConnectionHandler::serverListen(void) {
 					// Use a while loop to prevent unhandled HTTP request that was sent in one chunk of data under 1024 bytes
 					size_t terminator = _activeConnections[connectionSocket].find(HTTP_REQUEST_TERMINATOR);
 					while (terminator != std::string::npos) {
-						// TODO: Pass the full HTTP request string to wong's ResponseHandler
 					    Request request(_activeConnections[connectionSocket].substr(0, terminator + 4));
 						std::string response = Response::generateResponse(request, this->_servers);
 
@@ -105,7 +104,6 @@ void ConnectionHandler::serverListen(void) {
 						// Print response from ResponseHandler which includes Content-Type and Content-Length
 						std::cout << "RESPONSE:\n" << response << std::endl;
 						send(connectionSocket, response.c_str(), response.length(), 0);
-						// send(connectionSocket, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello, World!", 79, 0);
 
 						_activeConnections[connectionSocket] = _activeConnections[connectionSocket].substr(terminator + 4);
 						terminator = _activeConnections[connectionSocket].find(HTTP_REQUEST_TERMINATOR);
