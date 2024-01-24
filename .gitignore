@@ -12,3 +12,5 @@ webserv
 
 # testing config file
 test.conf
+
+log*
