@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/24 13:01:54 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/24 13:40:56 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,7 @@ std::string Response::parse_custom_error_pages(std::string error, std::map<std::
 
 	for (; head != end; head++) {
 		if (head->first == error) {
-			std::string path = "." + head->second.getPath();
-			std::fstream fs(path, std::fstream::in);
-			if (fs.is_open()) {
-				while(std::getline(fs, buffer, '\n'))
-					temp_msg_body += buffer;
-				fs.close();
-			}
+            temp_msg_body = head->second.read();
 		}
 	}
 	return (temp_msg_body);
