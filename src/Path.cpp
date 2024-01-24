@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/23 21:46:17 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/24 12:22:32 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -303,16 +303,12 @@ std::string Path::read(void) const {
 		return "";
 	}
 
-	std::string content;
-	std::string buffer;
-
-	while (std::getline(infile, buffer, '\0')) {
-		content += buffer;
-	}
+	std::stringstream buffer;
+	buffer << infile.rdbuf();
 
 	infile.close();
 
-	return content;
+	return buffer.str();
 }
 
 void Path::write(std::string filePath, std::string content) {
