@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/24 19:33:40 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/29 17:51:03 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,13 @@ void Parser::parse(std::string configFilePath) {
                         if (configLines[i].find("}") != std::string::npos) {
                             Location _location;
                             _location.uri = Path(getKeywordValues("location", locationLines)[0], URI);
+                            // std::vector<std::string>::iterator cgi_it = std::find(locationLines.begin(), locationLines.end(), "cgi_pass");
+
+
+                            std::vector<std::string> cgi_pass = getKeywordValues("cgi_pass", locationLines);
+                            if (!cgi_pass.empty()) {
+                                _location.cgi_pass = Path(getKeywordValues("cgi_pass", locationLines)[0], DIRECTORY);
+                            }
                             
                             // If location doesn't have root, get from server block
                             std::vector<std::string> roots = getKeywordValues("root", locationLines);
@@ -70,6 +77,7 @@ void Parser::parse(std::string configFilePath) {
                             } else {
                                 _location.root = Path(getKeywordValues("root", locationLines)[0]);
                             }
+                            wsutils::log("ROOT is: " + _location.root.getPath(), "./logs");
                             
                             // If location doesn't have index vector, get from server block
                             std::vector<std::string> index = getKeywordValues("index", locationLines);

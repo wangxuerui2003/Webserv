@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:27:18 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/24 14:28:28 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/29 14:16:47 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <sstream>
 #include "Request.hpp"
 #include "Parser.hpp"
+#include "CgiHandler.hpp"
 
 struct Location;
 struct Server;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/24 19:16:30 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/29 17:50:19 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,10 @@ std::string Request::getHeader(const std::string& headerName) const {
         }
     }
     return (""); // When header not found
+}
+
+std::map<std::string, std::string> &Request::getHeaderMap() {
+    return (_headers);
 }
 
 std::string Request::getBody() const {
@@ -101,7 +105,6 @@ void Request::parseHeaders(const std::string& headerPart) {
                 } else {
                     this->_host = headerValue;
                 }
-                continue ;
             }
             
             // Trim leading and trailing whitespaces from headerValue

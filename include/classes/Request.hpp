@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:16:57 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/22 09:54:39 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/29 17:49:02 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ public:
     std::string getHost() const;
     std::string getPort() const;
     std::string getHeader(const std::string& headerName) const;
+    std::map<std::string, std::string> &getHeaderMap();
     std::string getBody() const;
 
 private:
