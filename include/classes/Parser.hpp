@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 17:55:47 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 17:04:30 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 18:33:50 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ struct Location {
 
 	Path uri;
 	Path root;
+	bool isCustomRoot;
 	std::vector<std::string> index;
 	bool autoindex;
 	size_t max_client_body_size;

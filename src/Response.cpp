@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/30 18:26:45 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 18:41:32 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,14 +243,11 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     if (std::find(location->allowedHttpMethods.begin(), location->allowedHttpMethods.end(), method) == location->allowedHttpMethods.end()) {
         return (parse_error_pages("405", "Method not allowed", server));
     }
-    
-    // if ((*location).get_return() != "") 
-			// this->handle_return((*location).get_return());
 
     // Get absolute resource path
     Path absPath;
     try {
-        absPath = Path::mapURLToFS(request_uri, location->uri, location->root);
+        absPath = Path::mapURLToFS(request_uri, location->uri, location->root, location->isCustomRoot);
         wsutils::log("ABSOLUTE FILE PATH FORM LOCATION IS: " + absPath.getPath(), "./logs");
     } catch (Path::InvalidOperationException &err) {
         return (parse_error_pages("501", err.what(), server));

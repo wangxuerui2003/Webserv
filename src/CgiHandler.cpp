@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 18:09:25 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 18:37:20 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
     // CGI handling logic implementation
     // TODO: Parse CGI path
     // std::string cgiPath = "." + location.cgi_pass.getPath(); // make sure the path has "./"
-	std::string cgiPath = Path::mapURLToFS(request.getPath(), location.uri, location.root).getPath();
+	std::string cgiPath = Path::mapURLToFS(request.getPath(), location.uri, location.root, location.isCustomRoot).getPath();
 	// char *argv[2] = {(char *)cgiPath.c_str(), NULL};
 
 	// wsutils::log(request.getBody(), std::cerr);

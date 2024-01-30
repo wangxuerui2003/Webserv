@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 17:20:05 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 18:43:46 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,9 +66,11 @@ void Parser::parse(std::string configFilePath) {
                             // If location doesn't have root, get from server block
                             std::vector<std::string> roots = getKeywordValues("root", locationLines);
                             if (roots.empty()) {
-                                _location.root = Path(getKeywordValues("root", serverLines)[0]).concat(_location.uri.getPath(), DIRECTORY);
+                                _location.root = Path(getKeywordValues("root", serverLines)[0]);
+                                _location.isCustomRoot = false;
                             } else {
                                 _location.root = Path(getKeywordValues("root", locationLines)[0]);
+                                _location.isCustomRoot = true;
                             }
                             wsutils::log("ROOT is: " + _location.root.getPath(), "./logs");
                             
@@ -87,7 +89,7 @@ void Parser::parse(std::string configFilePath) {
                             // upload_store
                             std::vector<std::string> uploadStoreStrs = getKeywordValues("upload_store", locationLines);
                             if (uploadStoreStrs.empty() == false) {
-                                _location.upload_store = _location.root.concat(uploadStoreStrs[0], DIRECTORY);
+                                _location.upload_store = uploadStoreStrs[0];
                                 _location.accept_upload = true;
                             } else {
                                 _location.accept_upload = false;
@@ -187,4 +189,6 @@ std::vector<std::string> Parser::getKeywordValues(std::string keyword, std::vect
 
 Server::Server() {}
 
-Location::Location() {}
+Location::Location() {
+    isCustomRoot = false;
+}

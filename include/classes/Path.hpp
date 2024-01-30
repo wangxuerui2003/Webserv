@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 17:06:22 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 18:36:59 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ class Path {
 
 		static bool isAccessible(const char *path);
 
-		static Path mapURLToFS(Path& reqestUri, Path& uriPrefix, Path& root);
+		static Path mapURLToFS(Path& reqestUri, Path& uriPrefix, Path& root, bool isCustomRoot);
 
 		static Location *getBestFitLocation(std::vector<Location>& locations, Path& requestUri);
 

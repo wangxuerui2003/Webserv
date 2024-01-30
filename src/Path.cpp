@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 18:24:58 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 18:39:19 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -230,9 +230,13 @@ Path Path::prepend(std::string otherPath, enum pathType type) {
  * 
  * @return Path - the mapped filesystem path
 */
-Path Path::mapURLToFS(Path& requestUri, Path& uriPrefix, Path& root) {
+Path Path::mapURLToFS(Path& requestUri, Path& uriPrefix, Path& root, bool isCustomRoot) {
 	const std::string& uriRef = requestUri.getPath();
 	const std::string& uriPrefixRef = uriPrefix.getPath();
+
+	if (isCustomRoot == false) {
+		return root.concat(uriRef, URI);
+	}
 
 	if (uriRef.substr(0, uriPrefixRef.length()) != uriPrefixRef) {
 		throw InvalidOperationException("URI \"" + uriRef + "\" does not belong to uriPrefix \"" + uriPrefixRef + '"');
