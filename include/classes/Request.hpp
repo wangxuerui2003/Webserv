@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:16:57 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/29 17:49:02 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/30 17:41:38 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,23 +26,26 @@ public:
     Request(const std::string& rawReqString);
 
     std::string getMethod() const;
-    Path        getPath() const;
+    Path&       getPath();
     std::string getVersion() const;
     std::string getHost() const;
     std::string getPort() const;
     std::string getHeader(const std::string& headerName) const;
     std::map<std::string, std::string> &getHeaderMap();
     std::string getBody() const;
+    const std::string& getQueryParams(void) const;
+
+    void setBody(std::string body);
 
 private:
     std::string _method;
-    // std::string _path;
     Path _path;
     std::string _httpVersion;
     std::string _host;
     std::string _port;
     std::map<std::string, std::string> _headers;
     std::string _body;
+    std::string _queryParams;
 
     void parseRequest(const std::string& rawReqString);
     void parseHeaders(const std::string& headerPart);

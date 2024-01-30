@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/30 10:27:19 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/30 17:19:22 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,8 @@ Path Response::find_default_index(Path &abs_path, Location *location) {
 }
 
 bool Response::isStaticContent(Location *location) {
-	return (location->cgi_pass.getPath() == "");
+    (void)location;
+	return (false);
 }
 
 
@@ -132,18 +133,13 @@ std::string Response::handleStaticContent(Path &absPath, Location *location, Ser
 }
 
 std::string Response::handle_GET_request(Request &request, Location *location, Server &server) {
-    (void)request;
-    (void)location;
-    (void)server;
     wsutils::log("HANDLING GET REQUEST", "./logs");
     CgiHandler cgi;
-    cgi.handleCgi(request, server, *location);
     return (cgi.handleCgi(request, server, *location));
 }
 
 std::string Response::handle_POST_request(Request &request, Location *location, Server &server) {
-    if (location->cgi_pass.getPath() == "") {
-        wsutils::log("Couldn't find CGI PASS!", "./logs");
+    if (find(server.cgi_extensions.begin(), server.cgi_extensions.end(), request.getPath().getFileExtension()) == server.cgi_extensions.end()) {
         return (parse_error_pages("405", "Method not allowed ", server));
     }
     else if (request.getHeader("Content-Length") != "" && location->max_client_body_size != 0 && // CHECK: max_client_body_size when not defined?
@@ -257,8 +253,9 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     }
 
     // Check if the resource is a static file
-    if (isStaticContent(location)) {
-        wsutils::log("IS STATIC CONTENT, NO CGI_PASS", "./logs");
+    wsutils::log(request.getPath().getFileExtension(), "./logs");
+    if (find(server.cgi_extensions.begin(), server.cgi_extensions.end(), request.getPath().getFileExtension()) == server.cgi_extensions.end()) {
+        wsutils::log("Static Content", "./logs");
         if (request.getMethod() == "GET")
             return (handleStaticContent(absPath, location, server));
         else

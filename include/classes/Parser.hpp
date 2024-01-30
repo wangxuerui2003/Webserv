@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 17:55:47 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/23 20:45:42 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 17:04:30 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ struct Location {
 
 	Path uri;
 	Path root;
-	Path cgi_pass;
 	std::vector<std::string> index;
 	bool autoindex;
 	size_t max_client_body_size;
@@ -45,6 +44,7 @@ struct Server {
 	Path root;
 	std::vector<std::string> index;
 	std::map<std::string, Path> error_pages;
+	std::vector<std::string> cgi_extensions;
 
 	std::vector<Location> locations;
 };

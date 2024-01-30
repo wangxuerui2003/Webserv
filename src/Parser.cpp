@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 10:11:09 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/30 17:20:05 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,13 +62,6 @@ void Parser::parse(std::string configFilePath) {
                         if (configLines[i].find("}") != std::string::npos) {
                             Location _location;
                             _location.uri = Path(getKeywordValues("location", locationLines)[0], URI);
-
-                            std::vector<std::string> cgi_pass = getKeywordValues("cgi_pass", locationLines);
-                            if (!cgi_pass.empty()) {
-                                _location.cgi_pass = Path(getKeywordValues("cgi_pass", locationLines)[0], URI);
-                            } else {
-                                _location.cgi_pass = Path("", URI); // no CGI pass
-                            }
                             
                             // If location doesn't have root, get from server block
                             std::vector<std::string> roots = getKeywordValues("root", locationLines);
@@ -134,6 +127,7 @@ void Parser::parse(std::string configFilePath) {
                     _server.root = Path(getKeywordValues("root", serverLines)[0], DIRECTORY);
                     _server.index = getKeywordValues("index", serverLines);
                     _server.server_name = getKeywordValues("server_name", serverLines);
+                    _server.cgi_extensions = getKeywordValues("cgi_extension", serverLines);
 
                     // [404, 404.html, 501, 501.html]
                     std::vector<std::string> errorPages = getKeywordValues("error_page", serverLines);

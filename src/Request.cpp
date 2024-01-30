@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/30 11:41:37 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/30 17:41:25 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ std::string Request::getMethod() const {
     return (_method);
 }
 
-Path Request::getPath() const {
+Path& Request::getPath() {
     return (_path);
 }
 
@@ -56,6 +56,15 @@ std::string Request::getBody() const {
     return (_body);
 }
 
+const std::string& Request::getQueryParams(void) const {
+    return _queryParams;
+}
+
+void Request::setBody(std::string body) {
+    _body = body;
+}
+
+
 // example of raw string is:
 // GET /foo/bar HTTP/1.1
 // Host: example.org
@@ -69,23 +78,19 @@ void Request::parseRequest(const std::string& rawReqString) {
     std::string temp_path;
     requestStream >> _method >> temp_path >> _httpVersion; // extraction operator splits by whitespaces
 
+    size_t queryParamSeparator = temp_path.find('?');
+    if (queryParamSeparator != std::string::npos) {
+        _queryParams = temp_path.substr(queryParamSeparator + 1);
+        temp_path = temp_path.substr(0, queryParamSeparator);
+    }
+
     _path = Path(temp_path, URI);
 
     // Read headers until an empty line is encountered
     std::string line;
-    std::getline(requestStream, line);  // Skips the method, path, version -> go to headers
-    while (std::getline(requestStream, line) && !line.empty()) {
+    std::getline(requestStream, line, '\n');  // Skips the method, path, version -> go to headers
+    while (std::getline(requestStream, line, '\n') && line != "\r") {
         parseHeaders(line);
-    }
-
-    // Read the request body if present
-    if (_headers.find("Content-Length") != _headers.end()) {
-        int contentLength = std::stoi(_headers["Content-Length"]);
-        char buffer[contentLength + 1];
-        requestStream.read(buffer, contentLength);
-        buffer[contentLength] = '\0';
-        _body = buffer;
-        wsutils::log(_body, "./logs");
     }
 }
 

@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/23 20:45:16 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 14:27:09 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,17 @@
 #include <netdb.h>
 #include <unistd.h>
 
+
+struct ConnectionBuffer {
+	ConnectionBuffer();
+	~ConnectionBuffer();
+
+	std::string requestString;
+	Request *request;
+	bool hasUnhandledHeader;
+};
+
+
 class ConnectionHandler {
 	public:
 		ConnectionHandler(const std::vector<Server>& servers);
@@ -40,7 +51,7 @@ class ConnectionHandler {
 
 	private:
 		// connectionSocket => Read buffer (waiting for full http request end with \r\n\r\n)
-		std::map<int, std::string> _activeConnections;
+		std::map<int, ConnectionBuffer> _activeConnections;
 
 		// listenSocket => Server config struct
 		std::map<int, Server> _servers;

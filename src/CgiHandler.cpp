@@ -8,12 +8,13 @@ CgiHandler::~CgiHandler() {}
 std::string CgiHandler::handleCgi(Request &request, Server &server, Location &location) {
     // CGI handling logic implementation
     // TODO: Parse CGI path
-    std::string cgiPath = "." + location.cgi_pass.getPath(); // make sure the path has "./"
-    // std::string cgiDir = "./cgi/";
-	std::string cgiDir = cgiPath.substr(0, cgiPath.find_first_of("/", 2) + 1);
-    wsutils::log("Setting CGI path is: " + cgiPath, "./logs");
-    wsutils::log("Setting CGI directory is: " + cgiDir, "./logs");
-	char *argv[3] = {(char *)cgiPath.c_str(), (char *)cgiDir.c_str(), NULL};
+    // std::string cgiPath = "." + location.cgi_pass.getPath(); // make sure the path has "./"
+	std::string cgiPath = Path::mapURLToFS(request.getPath(), location.uri, location.root).getPath();
+	// char *argv[2] = {(char *)cgiPath.c_str(), NULL};
+
+	// wsutils::log(request.getBody(), std::cerr);
+
+	char **argv = NULL;
     
     int pid1;
 	int pid2;
@@ -126,12 +127,14 @@ char **CgiHandler::setEnv(Request &request) {
 
     std::map<std::string, std::string>::iterator it = request.getHeaderMap().begin();
 	std::map<std::string, std::string>::iterator ite = request.getHeaderMap().end();
-	char **envp = (char **)malloc((request.getHeaderMap().size() + 3) * sizeof(char *));
+	char **envp = (char **)malloc((request.getHeaderMap().size() + 4) * sizeof(char *));
 	
 	int i = 0;
 	envp[i] = strdup((std::string("REQUEST_METHOD=") + request.getMethod()).c_str());
 	i++;
 	envp[i] = strdup((std::string("ROUTE=") + request.getPath().getPath()).c_str());
+	i++;
+	envp[i] = strdup((std::string("QUERY_STRING=") + request.getQueryParams()).c_str());
 	i++;
 	for (; it != ite; it++) {
 		std::string field = it->first;
