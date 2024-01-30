@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/24 19:33:43 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 17:07:58 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -347,6 +347,10 @@ std::string Path::generateDirectoryListing(void) const {
 	response += ("Content-Length: " + std::to_string(html.length()) + "\r\n");
 	response += "\r\n";
 	response += html;
-	// std::cout << "FINAL STR: " << response << std::endl;
 	return (response);
+}
+
+std::string Path::getFileExtension(void) const {
+	size_t extentionIndex = _path.find_last_of('.');
+	return _path.substr(extentionIndex);
 }

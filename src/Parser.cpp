@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/24 19:33:40 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 17:20:05 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ void Parser::parse(std::string configFilePath) {
                             } else {
                                 _location.root = Path(getKeywordValues("root", locationLines)[0]);
                             }
+                            wsutils::log("ROOT is: " + _location.root.getPath(), "./logs");
                             
                             // If location doesn't have index vector, get from server block
                             std::vector<std::string> index = getKeywordValues("index", locationLines);
@@ -126,6 +127,7 @@ void Parser::parse(std::string configFilePath) {
                     _server.root = Path(getKeywordValues("root", serverLines)[0], DIRECTORY);
                     _server.index = getKeywordValues("index", serverLines);
                     _server.server_name = getKeywordValues("server_name", serverLines);
+                    _server.cgi_extensions = getKeywordValues("cgi_extension", serverLines);
 
                     // [404, 404.html, 501, 501.html]
                     std::vector<std::string> errorPages = getKeywordValues("error_page", serverLines);

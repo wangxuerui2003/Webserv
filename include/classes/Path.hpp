@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/24 12:41:18 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/30 17:06:22 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,8 @@ class Path {
 		static void write(std::string filePath, std::string content);
 
 		std::string generateDirectoryListing(void) const;
+
+		std::string getFileExtension(void) const;
 
 		class InvalidPathException : public std::exception {
 			private:

@@ -6,12 +6,23 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/23 20:47:50 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 16:23:54 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConnectionHandler.hpp"
 #include "webserv.hpp"
+
+
+ConnectionBuffer::ConnectionBuffer() {
+	requestString = "";
+	request = NULL;
+	hasUnhandledHeader = false;
+}
+
+ConnectionBuffer::~ConnectionBuffer() {
+	delete request;
+}
 
 /**
  * Generate listening sockets for each Server object
@@ -34,7 +45,7 @@ ConnectionHandler::~ConnectionHandler() {
 		close(it->first);
 	}
 
-	for (std::map<int, std::string>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
+	for (std::map<int, ConnectionBuffer>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
 		close(it->first);
 	}
 }
@@ -77,7 +88,7 @@ void ConnectionHandler::serverListen(void) {
 
 		// Check for connection sockets events
 		std::vector<int> socketsToErase;
-		for (std::map<int, std::string>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
+		for (std::map<int, ConnectionBuffer>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
 			int connectionSocket = it->first;
 			if (FD_ISSET(connectionSocket, &tempFds)) {
 				char buffer[1024];
@@ -92,21 +103,41 @@ void ConnectionHandler::serverListen(void) {
 					close(connectionSocket);
 					socketsToErase.push_back(connectionSocket);
 				} else {
-					_activeConnections[connectionSocket] += buffer;
-					// Use a while loop to prevent unhandled HTTP request that was sent in one chunk of data under 1024 bytes
-					size_t terminator = _activeConnections[connectionSocket].find(HTTP_REQUEST_TERMINATOR);
-					while (terminator != std::string::npos) {
-					    Request request(_activeConnections[connectionSocket].substr(0, terminator + 4));
-						std::string response = Response::generateResponse(request, this->_servers);
+					ConnectionBuffer& conn = _activeConnections[connectionSocket];
+					conn.requestString.append(buffer, bytesRead);
+					if (conn.hasUnhandledHeader == false) {
+						size_t terminator = conn.requestString.find(HTTP_REQUEST_TERMINATOR);
+						if (terminator != std::string::npos) {
+							conn.request = new Request(conn.requestString.substr(0, terminator + 4));
+							
+							std::cout << conn.requestString.substr(0, terminator + 4) << std::endl;
 
-						std::cout << _activeConnections[connectionSocket].substr(0, terminator + 4) << std::endl;
-						
-						// Print response from ResponseHandler which includes Content-Type and Content-Length
-						std::cout << "RESPONSE:\n" << response << std::endl;
-						send(connectionSocket, response.c_str(), response.length(), 0);
+							conn.requestString = conn.requestString.substr(terminator + 4);
+							// terminator = conn.requestString.find(HTTP_REQUEST_TERMINATOR);
 
-						_activeConnections[connectionSocket] = _activeConnections[connectionSocket].substr(terminator + 4);
-						terminator = _activeConnections[connectionSocket].find(HTTP_REQUEST_TERMINATOR);
+							std::map<std::string, std::string>& headers = conn.request->getHeaderMap();
+							if (headers.find("Content-Length") != headers.end()) {
+								conn.hasUnhandledHeader = true;
+							} else {
+								std::string response = Response::generateResponse(*(conn.request), this->_servers);
+								delete conn.request;
+								conn.request = NULL;
+								send(connectionSocket, response.c_str(), response.length(), 0);
+							}
+						}
+					}
+					
+					if (conn.hasUnhandledHeader == true) {
+						size_t contentLength = std::stoi(conn.request->getHeader("Content-Length"));
+						if (conn.requestString.length() >= contentLength) {
+							conn.request->setBody(conn.requestString.substr(0, contentLength));
+							conn.requestString = conn.requestString.substr(contentLength);
+							std::string response = Response::generateResponse(*(conn.request), this->_servers);
+							delete conn.request;
+							conn.request = NULL;
+							conn.hasUnhandledHeader = false;
+							send(connectionSocket, response.c_str(), response.length(), 0);
+						}
 					}
 				}
 			}
@@ -116,7 +147,7 @@ void ConnectionHandler::serverListen(void) {
 			_activeConnections.erase(*it);
 		}
 		socketsToErase.clear();
-		std::cout << "Number of active connections left: " << _activeConnections.size() << std::endl;
+		// std::cout << "Number of active connections left: " << _activeConnections.size() << std::endl;
 	}
 }
 
@@ -138,7 +169,7 @@ void ConnectionHandler::createNewConnection(int listenSocket) {
 		_maxFd = connectionSocket;
 	}
 
-	_activeConnections[connectionSocket] = "";
+	_activeConnections[connectionSocket] = ConnectionBuffer();
 
 	std::cout << "Accepted connection from " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }

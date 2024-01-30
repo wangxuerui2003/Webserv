@@ -6,7 +6,7 @@
 #    By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/12 11:48:29 by wxuerui           #+#    #+#              #
-#    Updated: 2024/01/19 16:44:35 by zwong            ###   ########.fr        #
+#    Updated: 2024/01/29 13:47:08 by zwong            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,7 +36,8 @@ SRC_FILES	=	main \
 				ConnectionHandler \
 				Request	\
 				Response \
-				utils
+				utils \
+				CgiHandler
 
 SRC			=	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(SRC_FILES)))
 OBJ			=	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_FILES)))

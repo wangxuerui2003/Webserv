@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/24 19:33:58 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 17:19:22 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,8 @@ Path Response::find_default_index(Path &abs_path, Location *location) {
 }
 
 bool Response::isStaticContent(Location *location) {
-	return (location->cgi_pass.getPath() == "");
+    (void)location;
+	return (false);
 }
 
 
@@ -112,7 +113,7 @@ bool Response::isStaticContent(Location *location) {
 // IF static content, then just return string using readFile
 std::string Response::handleStaticContent(Path &absPath, Location *location, Server &server) { // add argument location (so that I can use prepend root)
     // Handle static content based on the requested path.
-    std::cout << "Handling static content..." << std::endl;
+    wsutils::log("HANDLING STATIC REQUEST: " + absPath.getPath(), "./logs");
 
     // Check if it's directory. Cannot use Path.type because mapURLtoFS defaults to URI type
     // TODO: Ask XueRui identify DIRECTORY type when mapURLtoFS
@@ -132,24 +133,22 @@ std::string Response::handleStaticContent(Path &absPath, Location *location, Ser
 }
 
 std::string Response::handle_GET_request(Request &request, Location *location, Server &server) {
-    (void)request;
-    (void)location;
-    (void)server;
-    // CgiHandler cgi;
-    // cgi.handle_cgi(request, *this, server, *location);
-    return (std::string("WORK IN PROGRESS"));
+    wsutils::log("HANDLING GET REQUEST", "./logs");
+    CgiHandler cgi;
+    return (cgi.handleCgi(request, server, *location));
 }
 
 std::string Response::handle_POST_request(Request &request, Location *location, Server &server) {
-    if (location->cgi_pass.getPath() == "")
+    if (find(server.cgi_extensions.begin(), server.cgi_extensions.end(), request.getPath().getFileExtension()) == server.cgi_extensions.end()) {
         return (parse_error_pages("405", "Method not allowed ", server));
+    }
     else if (request.getHeader("Content-Length") != "" && location->max_client_body_size != 0 && // CHECK: max_client_body_size when not defined?
     std::stoull(request.getHeader("Content-Length")) > location->max_client_body_size)
         return (parse_error_pages("413", "Payload Too Large", server));
     else {
-        // CgiHandler cgi;
-        // cgi.handle_cgi(request, *this, server, *location);
-        return (std::string("WORK IN PROGRESS"));
+        wsutils::log("POST: HANDLING CGI!", "./logs");
+        CgiHandler cgi;
+        return (cgi.handleCgi(request, server, *location));
     }
 }
 
@@ -205,7 +204,7 @@ Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
         }
     }
 
-    // If no exact match is found, return the first server
+    // If no exact match is found
     wsutils::log("Invalid server host: " + request.getHost(), "./logs");
     throw InvalidServerException();
     // return const_cast<Server&>(servers.begin()->second);
@@ -215,12 +214,16 @@ Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
 std::string Response::generateResponse(Request &request, std::map<int, Server> &servers) {
 
     // Find the correct server based the host and port e.g. 192.168.0.1:8080
+    wsutils::log("REQUEST BODY: \n" + request.getBody(), "./logs");
     Server server;
+    
     try {
         server = findServer(request, servers);
     } catch (InvalidServerException &err) {
+        wsutils::log("BAD GATEWAY", "./logs");
         return (parse_error_pages("502", "Bad gateway", server));
     }
+    
     std::string method = request.getMethod();
     Path request_uri = request.getPath();
 
@@ -250,7 +253,9 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     }
 
     // Check if the resource is a static file
-    if (isStaticContent(location)) {
+    wsutils::log(request.getPath().getFileExtension(), "./logs");
+    if (find(server.cgi_extensions.begin(), server.cgi_extensions.end(), request.getPath().getFileExtension()) == server.cgi_extensions.end()) {
+        wsutils::log("Static Content", "./logs");
         if (request.getMethod() == "GET")
             return (handleStaticContent(absPath, location, server));
         else
@@ -259,6 +264,8 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     else {
         // TODO - Dynamic requests
         // Proceed with handling dynamic content with CGI
+        if (!Path::isAccessible(absPath.getPath().c_str()))
+			return (parse_error_pages("404", "Not Found", server));
         if (request.getMethod() == "GET")
             return (handle_GET_request(request, location, server));
         else if (request.getMethod() == "POST")
