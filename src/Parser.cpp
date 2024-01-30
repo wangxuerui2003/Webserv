@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/29 17:51:03 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/30 10:11:09 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,12 @@ void Parser::parse(std::string configFilePath) {
                         if (configLines[i].find("}") != std::string::npos) {
                             Location _location;
                             _location.uri = Path(getKeywordValues("location", locationLines)[0], URI);
-                            // std::vector<std::string>::iterator cgi_it = std::find(locationLines.begin(), locationLines.end(), "cgi_pass");
-
 
                             std::vector<std::string> cgi_pass = getKeywordValues("cgi_pass", locationLines);
                             if (!cgi_pass.empty()) {
-                                _location.cgi_pass = Path(getKeywordValues("cgi_pass", locationLines)[0], DIRECTORY);
+                                _location.cgi_pass = Path(getKeywordValues("cgi_pass", locationLines)[0], URI);
+                            } else {
+                                _location.cgi_pass = Path("", URI); // no CGI pass
                             }
                             
                             // If location doesn't have root, get from server block

@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/29 17:03:23 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/30 10:27:19 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,6 @@ std::string Response::handle_GET_request(Request &request, Location *location, S
 }
 
 std::string Response::handle_POST_request(Request &request, Location *location, Server &server) {
-    wsutils::log("HANDLING POST REQUEST", "./logs");
     if (location->cgi_pass.getPath() == "") {
         wsutils::log("Couldn't find CGI PASS!", "./logs");
         return (parse_error_pages("405", "Method not allowed ", server));
@@ -151,7 +150,7 @@ std::string Response::handle_POST_request(Request &request, Location *location, 
     std::stoull(request.getHeader("Content-Length")) > location->max_client_body_size)
         return (parse_error_pages("413", "Payload Too Large", server));
     else {
-        wsutils::log("POST CGI!", "./logs");
+        wsutils::log("POST: HANDLING CGI!", "./logs");
         CgiHandler cgi;
         return (cgi.handleCgi(request, server, *location));
     }
@@ -191,7 +190,6 @@ std::string Response::handle_DELETE_request(Path &absPath, Location *location, S
 Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
     for (std::map<int, Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
         Server& currentServer = it->second;
-        wsutils::log("Host port: " + request.getHost() + " " + request.getPort(), "./logs");
 
         // Check hosts
         for (size_t j = 0; j < currentServer.hosts.size(); ++j) {
@@ -210,7 +208,7 @@ Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
         }
     }
 
-    // If no exact match is found, return the first server
+    // If no exact match is found
     wsutils::log("Invalid server host: " + request.getHost(), "./logs");
     throw InvalidServerException();
     // return const_cast<Server&>(servers.begin()->second);
@@ -220,14 +218,16 @@ Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
 std::string Response::generateResponse(Request &request, std::map<int, Server> &servers) {
 
     // Find the correct server based the host and port e.g. 192.168.0.1:8080
-    wsutils::log("FROM REQUEST: \n" + request.getHost() + "\n" + request.getBody(), "./logs");
+    wsutils::log("REQUEST BODY: \n" + request.getBody(), "./logs");
     Server server;
+    
     try {
         server = findServer(request, servers);
     } catch (InvalidServerException &err) {
         wsutils::log("BAD GATEWAY", "./logs");
         return (parse_error_pages("502", "Bad gateway", server));
     }
+    
     std::string method = request.getMethod();
     Path request_uri = request.getPath();
 
@@ -267,6 +267,8 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     else {
         // TODO - Dynamic requests
         // Proceed with handling dynamic content with CGI
+        if (!Path::isAccessible(absPath.getPath().c_str()))
+			return (parse_error_pages("404", "Not Found", server));
         if (request.getMethod() == "GET")
             return (handle_GET_request(request, location, server));
         else if (request.getMethod() == "POST")

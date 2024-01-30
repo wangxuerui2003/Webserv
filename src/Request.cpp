@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/29 17:50:19 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/30 11:41:37 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,14 @@ void Request::parseRequest(const std::string& rawReqString) {
     }
 
     // Read the request body if present
-    std::getline(requestStream, _body);
+    if (_headers.find("Content-Length") != _headers.end()) {
+        int contentLength = std::stoi(_headers["Content-Length"]);
+        char buffer[contentLength + 1];
+        requestStream.read(buffer, contentLength);
+        buffer[contentLength] = '\0';
+        _body = buffer;
+        wsutils::log(_body, "./logs");
+    }
 }
 
 void Request::parseHeaders(const std::string& headerPart) {

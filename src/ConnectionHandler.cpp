@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/23 20:47:50 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 10:18:34 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,12 +97,19 @@ void ConnectionHandler::serverListen(void) {
 					size_t terminator = _activeConnections[connectionSocket].find(HTTP_REQUEST_TERMINATOR);
 					while (terminator != std::string::npos) {
 					    Request request(_activeConnections[connectionSocket].substr(0, terminator + 4));
+						// std::__1::map<std::__1::string, std::__1::string>::iterator it = request.getHeaderMap().begin();
+						// std::__1::map<std::__1::string, std::__1::string>::iterator ite = request.getHeaderMap().end();
+						
+						// wsutils::log("REQUEST HEADER MAP: ", "./logs");
+						// while (it != ite) {
+						// 	wsutils::log(it->first + " | " + it->second, "./logs");
+						// 	it++;
+						// }
+						
 						std::string response = Response::generateResponse(request, this->_servers);
-
 						std::cout << _activeConnections[connectionSocket].substr(0, terminator + 4) << std::endl;
 						
-						// Print response from ResponseHandler which includes Content-Type and Content-Length
-						std::cout << "RESPONSE:\n" << response << std::endl;
+						// std::cout << "RESPONSE:\n" << response << std::endl;
 						send(connectionSocket, response.c_str(), response.length(), 0);
 
 						_activeConnections[connectionSocket] = _activeConnections[connectionSocket].substr(terminator + 4);
