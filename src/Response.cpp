@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/30 17:19:22 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/30 18:26:45 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,9 +103,8 @@ Path Response::find_default_index(Path &abs_path, Location *location) {
     return (abs_path);
 }
 
-bool Response::isStaticContent(Location *location) {
-    (void)location;
-	return (false);
+bool Response::isStaticContent(Request& request, Server& server) {
+    return find(server.cgi_extensions.begin(), server.cgi_extensions.end(), request.getPath().getFileExtension()) == server.cgi_extensions.end();
 }
 
 
@@ -227,6 +226,7 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     std::string method = request.getMethod();
     Path request_uri = request.getPath();
 
+
     if (method != "GET" && method != "POST" && method != "DELETE") {
         wsutils::log(method, "./logs");
         return (parse_error_pages("501", "Method not implemented", server));
@@ -239,6 +239,10 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     
     if (location == NULL)
         return (parse_error_pages("403", "Forbidden", server));
+
+    if (std::find(location->allowedHttpMethods.begin(), location->allowedHttpMethods.end(), method) == location->allowedHttpMethods.end()) {
+        return (parse_error_pages("405", "Method not allowed", server));
+    }
     
     // if ((*location).get_return() != "") 
 			// this->handle_return((*location).get_return());
@@ -253,8 +257,7 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     }
 
     // Check if the resource is a static file
-    wsutils::log(request.getPath().getFileExtension(), "./logs");
-    if (find(server.cgi_extensions.begin(), server.cgi_extensions.end(), request.getPath().getFileExtension()) == server.cgi_extensions.end()) {
+    if (isStaticContent(request, server)) {
         wsutils::log("Static Content", "./logs");
         if (request.getMethod() == "GET")
             return (handleStaticContent(absPath, location, server));

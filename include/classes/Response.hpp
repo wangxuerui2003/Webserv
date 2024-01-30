@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:27:18 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/29 14:16:47 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/30 18:19:40 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ class Response {
         static std::string generateResponse(Request &request, std::map<int, Server> &server);
 
         static std::string getContentType(const std::string& filePath);
-        static bool isStaticContent(Location *location);
+        static bool isStaticContent(Request& request, Server& server);
         static Path find_default_index(Path &abs_path, Location *location);
         static std::string handleStaticContent(Path &absPath, Location *location, Server &server);
         static std::string readFile(Path &absPath, Server &server);
