@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 11:36:28 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 11:59:11 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ CgiHandler::~CgiHandler() {}
 
 // Method to handle CGI execution
 std::string CgiHandler::handleCgi(Request &request, Server &server, Location &location) {
+	// Getting the absolute path of (e.g. ./www/upload/upload.py) - considering the best fit location block
 	std::string cgiPath = Path::mapURLToFS(request.getPath(), location.uri, location.root, location.isCustomRoot).getPath();
 
     int pipefd_input[2];
@@ -71,10 +72,11 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
             int status;
             waitpid(pid, &status, 0);
             if (WIFEXITED(status) && WEXITSTATUS(status) == 3) {
-				// Assume full HTTP error from parseCgiOutput above
+				// ERROR: Assume full HTTP error from parseCgiOutput above
 				wsutils::log("CGI Error", "./logs");
 				ret = cgiBody;
             } else if (cgiBody.substr(0,8) != "HTTP/1.1") {
+				// SUCCESS: Without full HTTP header
 				std::string output;
 				output += std::string("HTTP/1.1") + " 200 OK\r\n";
 				output += "Content-Type: text/html\r\n";
@@ -84,6 +86,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
 				ret = output;
 			}
 			else
+				// SUCCESS: With full HTTP header
 				ret = cgiBody;
         }
     }
@@ -113,8 +116,11 @@ char **CgiHandler::setEnv(Request &request) {
             field.replace(pos, 1, "_");
             pos = field.find_first_of("-");
         }
+		// Transform the env keys to upper case (fields)
         std::transform(field.begin(), field.end(), field.begin(), ::toupper);
+		// Adds the values to each UPPERCASE FIELD
         envp[i] = strdup((field + "=" + it->second).c_str());
+		// Optional setenv() in the current process (just for safe guard)
         setenv(field.c_str(), it->second.c_str(), 1);
         i++;
     }

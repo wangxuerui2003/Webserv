@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/31 09:05:16 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 12:21:41 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,8 +64,6 @@ std::string Response::getContentType(const std::string& filePath) {
             return it->second;
         }
     }
-
-    // Default to plain text if the MIME type is not found
     return ("text/plain");
 }
 
@@ -73,13 +71,11 @@ std::string Response::readFile(Path &absPath, Server &server) {
     std::string response;
     if (Path::isAccessible(absPath.getPath().c_str())) {
         std::string content = absPath.read();
-        // wsutils::log(content, "./logs");
         response += "HTTP/1.1 200 OK\r\n";
         response += "Content-Type: " + getContentType(absPath.getPath()) + "\r\n";
         response += ("Content-Length: " + wsutils::toString(content.length()) + "\r\n");
         response += "\r\n";
         response += content;
-        // std::cout << "FINAL STR: " << response << std::endl;
         return (response);
     }
     return (parse_error_pages("404", "File not found.", server));
@@ -87,7 +83,7 @@ std::string Response::readFile(Path &absPath, Server &server) {
 
 Path Response::find_default_index(Path &abs_path, Location *location) {
     abs_path = Path(abs_path.getPath(), DIRECTORY);
-    // Check for location default indexes
+    // Check for location default indexes specified in the location config block
     if (location->index.size() != 0) {
         std::vector<std::string>::iterator it = location->index.begin();
         std::vector<std::string>::iterator ite = location->index.end();
@@ -95,7 +91,7 @@ Path Response::find_default_index(Path &abs_path, Location *location) {
             Path index(*it, URI);
             Path temp_index = abs_path.concat(index.getPath(), URI);
             if (Path::isAccessible(temp_index.getPath().c_str())) {
-                // If index is found, then break and readFile() below
+                // If index is found, then break and readFile() in the main function
                 return (temp_index);
             }
         }
@@ -107,15 +103,11 @@ bool Response::isStaticContent(Request& request, Server& server) {
     return find(server.cgi_extensions.begin(), server.cgi_extensions.end(), request.getPath().getFileExtension()) == server.cgi_extensions.end();
 }
 
-
-
-// IF static content, then just return string using readFile
+// Handle static content based on the requested absoulte path
 std::string Response::handleStaticContent(Path &absPath, Location *location, Server &server) { // add argument location (so that I can use prepend root)
-    // Handle static content based on the requested path.
     wsutils::log("HANDLING STATIC REQUEST: " + absPath.getPath(), "./logs");
 
-    // Check if it's directory. Cannot use Path.type because mapURLtoFS defaults to URI type
-    // TODO: Ask XueRui identify DIRECTORY type when mapURLtoFS
+    // TODO: http://zwong.42.fr:8080/public/uploads/ | http://zwong.42.fr:8080/public/uploads (no slash won't work)
     if (absPath.getPath()[absPath.getPath().length() - 1] == '/') {
         absPath = find_default_index(absPath, location);
 
@@ -132,7 +124,7 @@ std::string Response::handleStaticContent(Path &absPath, Location *location, Ser
 }
 
 std::string Response::handle_GET_request(Request &request, Location *location, Server &server) {
-    wsutils::log("HANDLING GET REQUEST", "./logs");
+    wsutils::log("GET: HANDLING CGI!", "./logs");
     CgiHandler cgi;
     return (cgi.handleCgi(request, server, *location));
 }
@@ -159,7 +151,7 @@ std::string Response::deleteResource(Path &absPath, Server &server) {
 			return (parse_error_pages("500", "Internal Server Error", server));
 	}
 	else {
-        // hard coded success page
+        // Return HTTP response
         std::string data;
 		std::string response_content = "<html>\n<head><title>200 OK</title></head>\n<body>\n<center><h1>200 OK</h1></center>\n</body>\n</html>";
 		data += "HTTP/1.1 200 OK\r\n";
@@ -173,15 +165,10 @@ std::string Response::deleteResource(Path &absPath, Server &server) {
 }
 
 std::string Response::handle_DELETE_request(Path &absPath, Location *location, Server &server) {
-    std::vector<std::string>::iterator head = location->allowedHttpMethods.begin();
-    std::vector<std::string>::iterator end = location->allowedHttpMethods.end();
-    if (std::find(head, end, "DELETE") == end) // if couldn't find DELETE, reached the end
-        return (parse_error_pages("405", "Method not allowed", server));
-    else
-        return (deleteResource(absPath, server));
+    (void)location;
+    return (deleteResource(absPath, server));
 }
 
-// TODO: Check with XueRui on config checks host and ports
 Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
     for (std::map<int, Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
         Server& currentServer = it->second;
@@ -193,7 +180,7 @@ Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
                 return (const_cast<Server&>(currentServer));
             }
         }
-
+        
         // Check server names (no check ports)
         for (size_t k = 0; k < currentServer.server_name.size(); ++k) {
             const std::string& serverName = currentServer.server_name[k];
@@ -206,64 +193,59 @@ Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
     // If no exact match is found
     wsutils::log("Invalid server host: " + request.getHost(), "./logs");
     throw InvalidServerException();
-    // return const_cast<Server&>(servers.begin()->second);
 }
 
 // START HERE - MAIN RESPONSE FUNCTION
 std::string Response::generateResponse(Request &request, std::map<int, Server> &servers) {
 
-    // Find the correct server based the host and port e.g. 192.168.0.1:8080
-    wsutils::log("REQUEST BODY: \n" + request.getBody(), "./logs");
     Server server;
-    
-    try {
-        server = findServer(request, servers);
-    } catch (InvalidServerException &err) {
-        wsutils::log("BAD GATEWAY", "./logs");
-        return (parse_error_pages("502", "Bad gateway", server));
-    }
-    
     std::string method = request.getMethod();
     Path request_uri = request.getPath();
-
-
-    if (method != "GET" && method != "POST" && method != "DELETE") {
-        wsutils::log(method, "./logs");
-        return (parse_error_pages("501", "Method not implemented", server));
+        
+    try {
+        // Find the correct server based the HOST and PORT and SERVER NAME (e.g. 127.0.0.1:8080)
+        server = findServer(request, servers);
+    } catch (InvalidServerException &err) {
+        return (parse_error_pages("502", "Bad Server Gateway", server));
     }
 
-    // PROCESSING RESPONSE
-    // FIND the correct location block
-    // e.g. _path = HTTP/1.1 /images/1.png GET
-    Location *location = Path::getBestFitLocation(server.locations, request_uri); // relative path
+    // Projected is lmited to 3 http methods only (further lmitation is handled later on)
+    if (method != "GET" && method != "POST" && method != "DELETE") {
+        return (parse_error_pages("501", "Method not implemented", server));
+    }
     
+    // Finding the correct location block from the short URI given (crosshecks config file)
+    Location *location = Path::getBestFitLocation(server.locations, request_uri);
+    
+    // If NULL, means no such path found
     if (location == NULL)
         return (parse_error_pages("403", "Forbidden", server));
 
+    // Found matching location block, then chekc the limited METHODS
     if (std::find(location->allowedHttpMethods.begin(), location->allowedHttpMethods.end(), method) == location->allowedHttpMethods.end()) {
         return (parse_error_pages("405", "Method not allowed", server));
     }
 
-    // Get absolute resource path
+    // Once server and location is matched, get absolute resource path
     Path absPath;
     try {
+        // Map URL to filesystem
         absPath = Path::mapURLToFS(request_uri, location->uri, location->root, location->isCustomRoot);
-        wsutils::log("ABSOLUTE FILE PATH FORM LOCATION IS: " + absPath.getPath(), "./logs");
     } catch (Path::InvalidOperationException &err) {
         return (parse_error_pages("501", err.what(), server));
     }
 
-    // Check if the resource is a static file
+    // Check if the resource is a STATIC file by file extentions (e.g. .html, .py, .png)
     if (isStaticContent(request, server)) {
         wsutils::log("Static Content", "./logs");
+        // Only GET method is alloed for static content
         if (request.getMethod() == "GET")
             return (handleStaticContent(absPath, location, server));
         else
             return (parse_error_pages("405", "Method not allowed", server));
     }
     else {
-        // TODO - Dynamic requests
-        // Proceed with handling dynamic content with CGI
+        // Proceed with handling DYNAMIC content (e.g. upload, delete)
         if (!Path::isAccessible(absPath.getPath().c_str()))
 			return (parse_error_pages("404", "Not Found", server));
         if (request.getMethod() == "GET")
@@ -273,11 +255,9 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
         else if (request.getMethod() == "DELETE")
             return (handle_DELETE_request(absPath, location, server));
     }
-
-    return std::string();
+    return (parse_error_pages("400", "Bad Request", server));
 }
 
 const char *Response::InvalidServerException::InvalidServerException::what() const throw() {
     return ("Invalid server");
 }
-	
