@@ -7,11 +7,16 @@ from urllib.parse import unquote
 import cgitb
 cgitb.enable()
 
-# PROBLEM: form is empty, not parsed properly from html form WHY?? hmm..
 request_method = os.environ.get("REQUEST_METHOD").upper()
+content_type = os.environ.get("CONTENT_TYPE", "")
 route = unquote("." + os.environ.get("ROUTE"))
 
 if request_method == "POST":
+	if not content_type.startswith("multipart/form-data"):
+		print("Content-Type: text/plain")
+		print()
+		print("File uploads are only allowed with multipart/form-data.")
+		sys.exit(0)
 	form = cgi.FieldStorage()
 	print(form)
 	if "file" in form and form["file"].filename:
