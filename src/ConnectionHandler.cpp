@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 14:46:47 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 23:08:08 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,7 @@ bool ConnectionHandler::receiveMsgBody(int connectionSocket, bool newEvent) {
 		ssize_t bytesRead = recv(connectionSocket, buffer, bufferSize, 0);
 
 		conn.requestString.append(buffer, bytesRead);
-		delete buffer;
+		delete[] buffer;
 
 		if (bytesRead < 0) {
 			wsutils::warningOutput(strerror(errno));

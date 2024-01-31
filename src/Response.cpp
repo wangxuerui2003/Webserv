@@ -6,7 +6,7 @@
 /*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/31 12:21:41 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/31 23:08:40 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,10 +164,14 @@ std::string Response::deleteResource(Path &absPath, Server &server) {
 	}
 }
 
-std::string Response::handle_DELETE_request(Path &absPath, Location *location, Server &server) {
-    (void)location;
-    return (deleteResource(absPath, server));
-}
+// std::string Response::handle_DELETE_request(Path &absPath, Location *location, Server &server) {
+//     std::vector<std::string>::iterator head = location->allowedHttpMethods.begin();
+//     std::vector<std::string>::iterator end = location->allowedHttpMethods.end();
+//     if (std::find(head, end, "DELETE") == end) // if couldn't find DELETE, reached the end
+//         return (parse_error_pages("405", "Method not allowed", server));
+//     else
+//         return (deleteResource(absPath, server));
+// }
 
 Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
     for (std::map<int, Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
@@ -241,6 +245,8 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
         // Only GET method is alloed for static content
         if (request.getMethod() == "GET")
             return (handleStaticContent(absPath, location, server));
+        else if (request.getMethod() == "DELETE")
+            return (deleteResource(absPath, server));
         else
             return (parse_error_pages("405", "Method not allowed", server));
     }
@@ -252,8 +258,6 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
             return (handle_GET_request(request, location, server));
         else if (request.getMethod() == "POST")
             return (handle_POST_request(request, location, server));
-        else if (request.getMethod() == "DELETE")
-            return (handle_DELETE_request(absPath, location, server));
     }
     return (parse_error_pages("400", "Bad Request", server));
 }
