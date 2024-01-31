@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 18:37:20 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 08:56:11 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
 				close(pipefd_output[1]);
 				close(pipefd_stderror[0]);
 				close(pipefd_stderror[1]);
-                wsutils::log("Request body length is: " + std::to_string(request.getBody().length()), "./logs");
+                wsutils::log("Request body length is: " + wsutils::toString(request.getBody().length()), "./logs");
 				write(STDOUT_FILENO, request.getBody().c_str(), request.getBody().length());
 				exit(0);
 			}
@@ -90,7 +90,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
 					std::string output;
 					output += std::string("HTTP/1.1") + " 200 OK\r\n";
 					output += "Content-Type: text/html\r\n";
-					output += "Content-Length: " + std::to_string(cgiBody.length()) + "\r\n";
+					output += "Content-Length: " + wsutils::toString(cgiBody.length()) + "\r\n";
 					output += "\r\n";
 					output += cgiBody;
                     ret = output;
@@ -103,7 +103,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
 					std::string output;
 					output += std::string("HTTP/1.1") + " 200 OK\r\n";
 					output += "Content-Type: text/html\r\n";
-					output += "Content-Length: " + std::to_string(cgiBody.length()) + "\r\n";
+					output += "Content-Length: " + wsutils::toString(cgiBody.length()) + "\r\n";
 					output += "\r\n";
 					output += cgiBody;
                     ret = output;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 16:23:54 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 09:04:43 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,7 @@ void ConnectionHandler::serverListen(void) {
 					}
 					
 					if (conn.hasUnhandledHeader == true) {
-						size_t contentLength = std::stoi(conn.request->getHeader("Content-Length"));
+						size_t contentLength = wsutils::stringToNumber<size_t>(conn.request->getHeader("Content-Length"));
 						if (conn.requestString.length() >= contentLength) {
 							conn.request->setBody(conn.requestString.substr(0, contentLength));
 							conn.requestString = conn.requestString.substr(contentLength);

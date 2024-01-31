@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 18:39:19 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 09:08:53 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -301,7 +301,7 @@ Location *Path::getBestFitLocation(std::vector<Location>& locations, Path& reque
 }
 
 std::string Path::read(void) const {
-	std::ifstream infile(_path);
+	std::ifstream infile(_path.c_str(), std::ios_base::in);
 
 	if (!infile.is_open()) {
 		return "";
@@ -316,7 +316,7 @@ std::string Path::read(void) const {
 }
 
 void Path::write(std::string filePath, std::string content) {
-	std::ofstream outputFile(filePath, std::ios::out | std::ios::trunc);
+	std::ofstream outputFile(filePath.c_str(), std::ios::out | std::ios::trunc);
 
     if (!outputFile.is_open()) {
         throw Path::InvalidPathException("File " + filePath + " cannot be opened");
@@ -333,9 +333,9 @@ std::string Path::generateDirectoryListing(void) const {
     std::string html = "<html>\n<head><title>Index of " + _path + "</title></head>\n<body>\n<h1>Index of " + _path + "</h1>\n<ul>\n";
 
     DIR* dir = opendir(_path.c_str());
-    if (dir != nullptr) {
+    if (dir != NULL) {
         struct dirent* entry;
-        while ((entry = readdir(dir)) != nullptr) {
+        while ((entry = readdir(dir)) != NULL) {
             const std::string entryName = entry->d_name;
             html += "<li><a href=\"" + entryName + "\">" + entryName + "</a></li>\n";
         }
@@ -348,7 +348,7 @@ std::string Path::generateDirectoryListing(void) const {
 
 	response += "HTTP/1.1 200 OK\r\n";
 	response += "Content-Type: text/html\r\n";
-	response += ("Content-Length: " + std::to_string(html.length()) + "\r\n");
+	response += ("Content-Length: " + wsutils::toString<size_t>(html.length()) + "\r\n");
 	response += "\r\n";
 	response += html;
 	return (response);

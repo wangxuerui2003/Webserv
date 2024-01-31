@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/30 18:41:32 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 09:05:16 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ std::string Response::parse_error_pages(std::string error, std::string descripti
 	
     data = "HTTP/1.1 " + error + " " + description + "\r\n";
     
-    data.append("Content-Type: text/html\r\n").append("Content-Length: ").append(std::to_string(temp_msg_body.length())).append("\r\n").append("\r\n");
+    data.append("Content-Type: text/html\r\n").append("Content-Length: ").append(wsutils::toString(temp_msg_body.length())).append("\r\n").append("\r\n");
     data.append(temp_msg_body);
     data.append("\r\n");
     return (data);
@@ -76,7 +76,7 @@ std::string Response::readFile(Path &absPath, Server &server) {
         // wsutils::log(content, "./logs");
         response += "HTTP/1.1 200 OK\r\n";
         response += "Content-Type: " + getContentType(absPath.getPath()) + "\r\n";
-        response += ("Content-Length: " + std::to_string(content.length()) + "\r\n");
+        response += ("Content-Length: " + wsutils::toString(content.length()) + "\r\n");
         response += "\r\n";
         response += content;
         // std::cout << "FINAL STR: " << response << std::endl;
@@ -142,7 +142,7 @@ std::string Response::handle_POST_request(Request &request, Location *location, 
         return (parse_error_pages("405", "Method not allowed ", server));
     }
     else if (request.getHeader("Content-Length") != "" && location->max_client_body_size != 0 && // CHECK: max_client_body_size when not defined?
-    std::stoull(request.getHeader("Content-Length")) > location->max_client_body_size)
+    wsutils::stringToNumber<unsigned long long>(request.getHeader("Content-Length")) > location->max_client_body_size)
         return (parse_error_pages("413", "Payload Too Large", server));
     else {
         wsutils::log("POST: HANDLING CGI!", "./logs");
@@ -164,7 +164,7 @@ std::string Response::deleteResource(Path &absPath, Server &server) {
 		std::string response_content = "<html>\n<head><title>200 OK</title></head>\n<body>\n<center><h1>200 OK</h1></center>\n</body>\n</html>";
 		data += "HTTP/1.1 200 OK\r\n";
 		data += "Content-Type: text/html\r\n";
-		data += "Content-Length: " + std::to_string(response_content.length()) + "\r\n";
+		data += "Content-Length: " + wsutils::toString(response_content.length()) + "\r\n";
 		data += "\r\n";
 		data += response_content;
 		data += "\r\n";

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 18:43:46 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 08:51:44 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ const std::vector<Server>& Parser::getServers(void) const {
 void Parser::parse(std::string configFilePath) {
 	// Path configFile(configFilePath, REG_FILE);
 
-    std::ifstream configFile(configFilePath);
+    std::ifstream configFile(configFilePath.c_str(), std::ios_base::in);
 	if (!configFile.is_open()) {
         std::cerr << "Error opening config file." << std::endl;
         return ;
@@ -177,7 +177,7 @@ std::vector<std::string> Parser::getKeywordValues(std::string keyword, std::vect
             if (value == keyword)
                 while (!iss.eof()) {
                     iss >> value;
-                    if (iss.eof() && (value.back() == ';' || value.back() == '{'))
+                    if (iss.eof() && (value[value.length() - 1] == ';' || value[value.length() - 1] == '{'))
                         values.push_back(value.substr(0, value.size() - 1));
                     else
                         values.push_back(value);

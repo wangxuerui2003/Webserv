@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/30 17:41:25 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 09:02:24 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,8 +99,8 @@ void Request::parseHeaders(const std::string& headerPart) {
     std::string line;
 
     while (std::getline(headerStream, line)) {
-        if (line.back() == '\r') {
-            line.pop_back();
+        if (line[line.length() - 1] == '\r') {
+            line.erase(line.length() - 1);
         }
         size_t colonPos = line.find(':');
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:02:56 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 12:47:24 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 09:12:15 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void wsutils::log(std::string msg, std::ostream& os) {
 }
 
 void wsutils::log(std::string msg, std::string filename) {
-    std::ofstream outputFile(filename, std::ios::app);
+    std::ofstream outputFile(filename.c_str(), std::ios::app);
 
     if (!outputFile.is_open()) {
         throw std::ios_base::failure("Fail to open file");
@@ -62,3 +62,4 @@ void wsutils::log(std::string msg, std::string filename) {
 
     outputFile.close();
 }
+
