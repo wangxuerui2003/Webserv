@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 09:04:43 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 09:37:32 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ void ConnectionHandler::serverListen(void) {
 		FD_SET(listenSocket, &_readFds);
 	}
 
+	char commonBuffer[1024];
 	// Forever listen for new connection or new data to be read
 	while (true) {
 		tempFds = _readFds;
@@ -91,9 +92,25 @@ void ConnectionHandler::serverListen(void) {
 		for (std::map<int, ConnectionBuffer>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
 			int connectionSocket = it->first;
 			if (FD_ISSET(connectionSocket, &tempFds)) {
-				char buffer[1024];
-				memset(buffer, 0, sizeof(buffer));
-				ssize_t bytesRead = recv(connectionSocket, buffer, sizeof(buffer), 0);
+				ConnectionBuffer& conn = _activeConnections[connectionSocket];
+				char *buffer;
+				size_t bufferSize;
+				bool bufferIsHeap;
+
+				if (conn.hasUnhandledHeader == true) {
+					size_t contentLength = wsutils::stringToNumber<size_t>(conn.request->getHeader("Content-Length"));
+					size_t recvLength = contentLength - conn.requestString.length();
+					buffer = new char[recvLength + 1];
+					bufferSize = recvLength + 1;
+					bufferIsHeap = true;
+				} else {
+					buffer = commonBuffer;
+					bufferSize = COMMON_BUFFER_SIZE;
+					bufferIsHeap = false;
+				}
+				
+				memset(buffer, 0, bufferSize);
+				ssize_t bytesRead = recv(connectionSocket, buffer, bufferSize, 0);
 				
 				if (bytesRead < 0) {
 					wsutils::warningOutput(strerror(errno));
@@ -103,8 +120,11 @@ void ConnectionHandler::serverListen(void) {
 					close(connectionSocket);
 					socketsToErase.push_back(connectionSocket);
 				} else {
-					ConnectionBuffer& conn = _activeConnections[connectionSocket];
 					conn.requestString.append(buffer, bytesRead);
+					if (bufferIsHeap == true) {
+						delete buffer;
+					}
+					
 					if (conn.hasUnhandledHeader == false) {
 						size_t terminator = conn.requestString.find(HTTP_REQUEST_TERMINATOR);
 						if (terminator != std::string::npos) {
@@ -147,7 +167,6 @@ void ConnectionHandler::serverListen(void) {
 			_activeConnections.erase(*it);
 		}
 		socketsToErase.clear();
-		// std::cout << "Number of active connections left: " << _activeConnections.size() << std::endl;
 	}
 }
 
