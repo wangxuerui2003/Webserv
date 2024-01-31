@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 14:27:09 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 14:45:32 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,8 @@ struct ConnectionBuffer {
 
 	std::string requestString;
 	Request *request;
-	bool hasUnhandledHeader;
+	bool waitingForMsgBody;
+	bool isChunkedRequest;
 };
 
 
@@ -46,6 +47,9 @@ class ConnectionHandler {
 
 		int createListenSocket(std::string host, std::string port) const;
 		void createNewConnection(int listenSocket);
+		bool handleConnectionSocketEvent(int connectionSocket, char commonBuffer[COMMON_BUFFER_SIZE]);
+		bool handleChunkedRequest(int connectionSocket, char commonBuffer[COMMON_BUFFER_SIZE], bool newEvent);
+		bool receiveMsgBody(int connectionSocket, bool newEvent);
 
 		void serverListen(void);
 

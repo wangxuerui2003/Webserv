@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 11:32:21 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 14:46:47 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@
 ConnectionBuffer::ConnectionBuffer() {
 	requestString = "";
 	request = NULL;
-	hasUnhandledHeader = false;
+	waitingForMsgBody = false;
+	isChunkedRequest = false;
 }
 
 ConnectionBuffer::~ConnectionBuffer() {
@@ -50,7 +51,170 @@ ConnectionHandler::~ConnectionHandler() {
 	}
 }
 
+std::string unchunkRequest(std::string& req) {
+	std::istringstream input(req);
+    std::ostringstream output;
 
+    std::string line;
+    while (!input.eof()) {
+        std::getline(input, line);
+
+        // Parse the hexadecimal chunk size
+        std::istringstream sizeStream(line);
+        size_t chunkSize = 0;
+        sizeStream >> std::hex >> chunkSize;
+
+        if (chunkSize == 0) {
+            // End of chunks
+            break;
+        }
+
+        // Read the chunk data
+        char buffer[chunkSize + 1];
+        input.read(buffer, chunkSize);
+        buffer[chunkSize] = '\0';
+
+        // Append the chunk data to the output
+        output.write(buffer, chunkSize);
+
+        // Read and discard the CRLF following the chunk
+        input.ignore(2);
+    }
+
+    return output.str();
+}
+
+bool ConnectionHandler::handleChunkedRequest(int connectionSocket, char commonBuffer[COMMON_BUFFER_SIZE], bool newEvent) {
+	ConnectionBuffer& conn = _activeConnections[connectionSocket];
+
+	if (newEvent == true) {
+		memset(commonBuffer, 0, COMMON_BUFFER_SIZE);
+		ssize_t bytesRead = recv(connectionSocket, commonBuffer, COMMON_BUFFER_SIZE, 0);
+
+		if (bytesRead < 0) {
+			wsutils::warningOutput(strerror(errno));
+		} else if (bytesRead == 0) {
+			// Client closed the connection
+			FD_CLR(connectionSocket, &_readFds);
+			close(connectionSocket);
+			return false;
+		}
+
+		conn.requestString.append(commonBuffer, bytesRead);
+	}
+
+	// Receive the body until 0\r\n\r\n, unchunk it, set Content-Length, and setBody()
+	size_t chunkEnd = conn.requestString.find("0\r\n\r\n");
+	if (chunkEnd != std::string::npos) {
+		std::string chunkedRequest = conn.requestString.substr(0, chunkEnd + 5);
+		conn.requestString = conn.requestString.substr(chunkEnd + 5);
+
+		std::string body = unchunkRequest(chunkedRequest);
+
+		conn.request->getHeaderMap()["Content-Length"] = wsutils::toString(body.length());
+		conn.request->setBody(body);
+		std::string response = Response::generateResponse(*(conn.request), this->_servers);
+		delete conn.request;
+		conn.request = NULL;
+		conn.isChunkedRequest = false;
+		send(connectionSocket, response.c_str(), response.length(), 0);
+	}
+
+	return true;
+}
+
+bool ConnectionHandler::receiveMsgBody(int connectionSocket, bool newEvent) {
+	ConnectionBuffer& conn = _activeConnections[connectionSocket];
+	size_t contentLength = wsutils::stringToNumber<size_t>(conn.request->getHeader("Content-Length"));
+	
+	if (newEvent == true) {
+		size_t recvLength = contentLength - conn.requestString.length();
+		size_t bufferSize = recvLength + 1;
+		char *buffer = new char[bufferSize];
+
+		memset(buffer, 0, bufferSize);
+		ssize_t bytesRead = recv(connectionSocket, buffer, bufferSize, 0);
+
+		conn.requestString.append(buffer, bytesRead);
+		delete buffer;
+
+		if (bytesRead < 0) {
+			wsutils::warningOutput(strerror(errno));
+		} else if (bytesRead == 0) {
+			// Client closed the connection
+			FD_CLR(connectionSocket, &_readFds);
+			close(connectionSocket);
+			return false;
+		}
+	}
+
+	// If body is all received
+	if (conn.requestString.length() >= contentLength) {
+		conn.request->setBody(conn.requestString.substr(0, contentLength));
+		conn.requestString = conn.requestString.substr(contentLength);
+		std::string response = Response::generateResponse(*(conn.request), this->_servers);
+		delete conn.request;
+		conn.request = NULL;
+		conn.waitingForMsgBody = false;
+		send(connectionSocket, response.c_str(), response.length(), 0);
+	}
+
+	return true;
+}
+
+
+bool ConnectionHandler::handleConnectionSocketEvent(int connectionSocket, char commonBuffer[COMMON_BUFFER_SIZE]) {
+	ConnectionBuffer& conn = _activeConnections[connectionSocket];
+
+	if (conn.isChunkedRequest == true) {
+		return handleChunkedRequest(connectionSocket, commonBuffer, true);
+	} else if (conn.waitingForMsgBody == true) {
+		return receiveMsgBody(connectionSocket, true);
+	}
+	
+	memset(commonBuffer, 0, COMMON_BUFFER_SIZE);
+	ssize_t bytesRead = recv(connectionSocket, commonBuffer, COMMON_BUFFER_SIZE, 0);
+	
+	if (bytesRead < 0) {
+		wsutils::warningOutput(strerror(errno));
+	} else if (bytesRead == 0) {
+		// Client closed the connection
+		FD_CLR(connectionSocket, &_readFds);
+		close(connectionSocket);
+		return false;
+	} else {
+		conn.requestString.append(commonBuffer, bytesRead);
+		
+		size_t terminator = conn.requestString.find(HTTP_REQUEST_TERMINATOR);
+		if (terminator != std::string::npos) {
+			conn.request = new Request(conn.requestString.substr(0, terminator + 4));
+			
+			std::cout << conn.requestString.substr(0, terminator + 4) << std::endl;
+
+			conn.requestString = conn.requestString.substr(terminator + 4);
+
+			std::map<std::string, std::string>& headers = conn.request->getHeaderMap();
+			if (headers.find("Content-Length") != headers.end()) {
+				conn.waitingForMsgBody = true;
+			} else if ((headers.find("Transfer-Encoding") != headers.end()) && (headers["Transfer-Encoding"] == "chunked")) {
+				conn.isChunkedRequest = true;
+			} else {
+				std::string response = Response::generateResponse(*(conn.request), this->_servers);
+				delete conn.request;
+				conn.request = NULL;
+				send(connectionSocket, response.c_str(), response.length(), 0);
+			}
+		}
+		
+		if (conn.waitingForMsgBody == true) {
+			return receiveMsgBody(connectionSocket, false);
+		} else if (conn.isChunkedRequest == true) {
+			return handleChunkedRequest(connectionSocket, commonBuffer, false);
+		}
+	}
+
+	return true;
+}
 
 
 /**
@@ -71,9 +235,10 @@ void ConnectionHandler::serverListen(void) {
 		FD_SET(listenSocket, &_readFds);
 	}
 
-	char commonBuffer[1024];
+	char commonBuffer[COMMON_BUFFER_SIZE];
 	// Forever listen for new connection or new data to be read
 	while (true) {
+		wsutils::log(wsutils::toString(_activeConnections.size()) + " connections left", std::cerr);
 		tempFds = _readFds;
 
 		// Monitor read event only
@@ -95,72 +260,9 @@ void ConnectionHandler::serverListen(void) {
 		for (std::map<int, ConnectionBuffer>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
 			int connectionSocket = it->first;
 			if (FD_ISSET(connectionSocket, &tempFds)) {
-				ConnectionBuffer& conn = _activeConnections[connectionSocket];
-				char *buffer;
-				size_t bufferSize;
-				bool bufferIsHeap;
-
-				if (conn.hasUnhandledHeader == true) {
-					size_t contentLength = wsutils::stringToNumber<size_t>(conn.request->getHeader("Content-Length"));
-					size_t recvLength = contentLength - conn.requestString.length();
-					buffer = new char[recvLength + 1];
-					bufferSize = recvLength + 1;
-					bufferIsHeap = true;
-				} else {
-					buffer = commonBuffer;
-					bufferSize = COMMON_BUFFER_SIZE;
-					bufferIsHeap = false;
-				}
-				
-				memset(buffer, 0, bufferSize);
-				ssize_t bytesRead = recv(connectionSocket, buffer, bufferSize, 0);
-				
-				if (bytesRead < 0) {
-					wsutils::warningOutput(strerror(errno));
-				} else if (bytesRead == 0) {
-					// Client closed the connection
-					FD_CLR(connectionSocket, &_readFds);
-					close(connectionSocket);
+				if (handleConnectionSocketEvent(connectionSocket, commonBuffer) == false) {
+					// connection has been closed
 					socketsToErase.push_back(connectionSocket);
-				} else {
-					conn.requestString.append(buffer, bytesRead);
-					if (bufferIsHeap == true) {
-						delete buffer;
-					}
-					
-					if (conn.hasUnhandledHeader == false) {
-						size_t terminator = conn.requestString.find(HTTP_REQUEST_TERMINATOR);
-						if (terminator != std::string::npos) {
-							conn.request = new Request(conn.requestString.substr(0, terminator + 4));
-							
-							std::cout << conn.requestString.substr(0, terminator + 4) << std::endl;
-
-							conn.requestString = conn.requestString.substr(terminator + 4);
-
-							std::map<std::string, std::string>& headers = conn.request->getHeaderMap();
-							if (headers.find("Content-Length") != headers.end()) {
-								conn.hasUnhandledHeader = true;
-							} else {
-								std::string response = Response::generateResponse(*(conn.request), this->_servers);
-								delete conn.request;
-								conn.request = NULL;
-								send(connectionSocket, response.c_str(), response.length(), 0);
-							}
-						}
-					}
-					
-					if (conn.hasUnhandledHeader == true) {
-						size_t contentLength = wsutils::stringToNumber<size_t>(conn.request->getHeader("Content-Length"));
-						if (conn.requestString.length() >= contentLength) {
-							conn.request->setBody(conn.requestString.substr(0, contentLength));
-							conn.requestString = conn.requestString.substr(contentLength);
-							std::string response = Response::generateResponse(*(conn.request), this->_servers);
-							delete conn.request;
-							conn.request = NULL;
-							conn.hasUnhandledHeader = false;
-							send(connectionSocket, response.c_str(), response.length(), 0);
-						}
-					}
 				}
 			}
 		}
@@ -192,7 +294,7 @@ void ConnectionHandler::createNewConnection(int listenSocket) {
 
 	_activeConnections[connectionSocket] = ConnectionBuffer();
 
-	std::cout << "Accepted connection from " << inet_ntoa(clientAddr.sin_addr) << std::endl;
+	// std::cout << "Accepted connection from " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }
 
 int ConnectionHandler::createListenSocket(std::string host, std::string port) const {

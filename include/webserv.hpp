@@ -6,12 +6,14 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:01:20 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 09:24:23 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 11:49:09 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
+
+#define COMMON_BUFFER_SIZE 1024
 
 #include "Parser.hpp"
 #include "Path.hpp"
@@ -26,7 +28,6 @@
 #define DEFAULT_CONFIG "./conf/example.conf"
 #define HTTP_REQUEST_TERMINATOR "\r\n\r\n"
 
-#define COMMON_BUFFER_SIZE 1024
 
 #ifdef __linux__
 	#include <errno.h>

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 11:59:11 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/31 12:27:55 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,13 +129,13 @@ char **CgiHandler::setEnv(Request &request) {
 }
 
 std::string	CgiHandler::parseCgiOutput(int pipefd_output, int pipefd_error) {
-	char buffer[1024];
+	char buffer[COMMON_BUFFER_SIZE];
 	std::string output;
 	int rec_byte;
 
-	while ((rec_byte = read(pipefd_output, buffer, 1024)) != 0)
+	while ((rec_byte = read(pipefd_output, buffer, COMMON_BUFFER_SIZE)) != 0)
 		output.append(buffer, rec_byte);
-	while ((rec_byte = read(pipefd_error, buffer, 1024)) != 0)
+	while ((rec_byte = read(pipefd_error, buffer, COMMON_BUFFER_SIZE)) != 0)
 		output.append(buffer,rec_byte);
 	return (output);
 }

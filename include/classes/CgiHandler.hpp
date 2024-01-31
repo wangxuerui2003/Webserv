@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:30 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 12:21:27 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/31 12:27:44 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Parser.hpp"
+#include <webserv.hpp>
 
 class CgiHandler {
 public:
