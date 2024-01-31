@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 11:26:50 by zwong            ###   ########.fr       */
+/*   Updated: 2024/01/31 11:36:28 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,11 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
     int pipefd_output[2];
     int pipefd_stderror[2];
     std::string ret;
+
+    char *argv[] = {
+        const_cast<char *>(cgiPath.c_str()),
+        NULL
+    };
 
     if (pipe(pipefd_input) == -1 || pipe(pipefd_output) == -1 || pipe(pipefd_stderror) == -1) {
         ret = Response::parse_error_pages("500", "Internal Server Error", server);
@@ -43,7 +48,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
 
             // Execute CGI script
             char **envp = setEnv(request);
-            if (execve(cgiPath.c_str(), NULL, envp) == -1) {
+            if (execve(cgiPath.c_str(), argv, envp) == -1) {
 				ret = Response::parse_error_pages("500", "Internal Server Error", server);
 				write(STDOUT_FILENO, ret.c_str(), ret.length());
                 exit(3);
