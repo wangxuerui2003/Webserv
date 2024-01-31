@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 09:37:32 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/01/31 11:32:21 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,9 @@ ConnectionHandler::~ConnectionHandler() {
 		close(it->first);
 	}
 }
+
+
+
 
 /**
  * Use select to listen on multiple listen sockets and connection sockets
@@ -133,7 +136,6 @@ void ConnectionHandler::serverListen(void) {
 							std::cout << conn.requestString.substr(0, terminator + 4) << std::endl;
 
 							conn.requestString = conn.requestString.substr(terminator + 4);
-							// terminator = conn.requestString.find(HTTP_REQUEST_TERMINATOR);
 
 							std::map<std::string, std::string>& headers = conn.request->getHeaderMap();
 							if (headers.find("Content-Length") != headers.end()) {
@@ -201,7 +203,7 @@ int ConnectionHandler::createListenSocket(std::string host, std::string port) co
 
 	int status = getaddrinfo(host.c_str(), port.c_str(), &hints, &addressInfo);
 	if (status != 0) {
-		wsutils::errorExit(strerror(errno));
+		wsutils::errorExit(gai_strerror(status));
 	}
 
 	// create the listening socket
