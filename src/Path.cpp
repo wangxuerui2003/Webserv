@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 12:20:28 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 16:50:22 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ std::string Path::urlDecode(std::string &str) {
             ++i;
         }
     }
-	wsutils::log("decoded string is: " + decoded.str(), "./logs");
+	// wsutils::log("decoded string is: " + decoded.str(), "./logs");
     return (decoded.str());
 }
 
@@ -63,14 +63,17 @@ Path::Path(std::string path, enum pathType expectedType) : _path(urlDecode(path)
 
 	enum pathType realPathType = getFileType(_path.c_str());
 
-	// Change path type to it's real type if expected type is wrong
-	if (_type != URI && realPathType != _type) {
-		throw InvalidOperationException("Expected file type of " + path + " does not match the real file type");
+	if (_type != URI && _type != IGNORE) {
+		// Change path type to it's real type if expected type is wrong
+		if (realPathType != _type) {
+			throw InvalidOperationException("Expected file type of " + path + " does not match the real file type");
+		}
+
+		if (isAccessible(_path.c_str()) == false) {
+			throw InvalidPathException(path + " is not accessible");
+		}
 	}
 
-	if (_type != URI && isAccessible(_path.c_str()) == false) {
-		throw InvalidPathException(path + " is not accessible");
-	}
 }
 
 Path::Path(const Path& copy) {

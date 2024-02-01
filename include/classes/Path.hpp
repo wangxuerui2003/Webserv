@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 12:20:38 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 16:48:52 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ enum pathType {
 	DIRECTORY,
 	SYM_LINK,
 	URI,
+	IGNORE,
 	ERROR_PATH
 };
 
