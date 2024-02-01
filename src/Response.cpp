@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/01 11:04:52 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 11:21:29 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,11 +46,28 @@ std::string Response::getContentType(const std::string& filePath) {
     // Map file extensions to MIME types
     std::map<std::string, std::string> mimeTypes;
     mimeTypes["html"] = "text/html";
+    mimeTypes["htm"] = "text/html";
     mimeTypes["css"] = "text/css";
     mimeTypes["js"] = "application/javascript";
     mimeTypes["ico"] = "image/x-icon";
     mimeTypes["png"] = "image/png";
     mimeTypes["gif"] = "image/gif";
+    mimeTypes["jpg"] = "image/jpeg";
+    mimeTypes["jpeg"] = "image/jpeg";
+    mimeTypes["bmp"] = "image/bmp";
+    mimeTypes["svg"] = "image/svg+xml";
+    mimeTypes["pdf"] = "application/pdf";
+    mimeTypes["txt"] = "text/plain";
+    mimeTypes["xml"] = "application/xml";
+    mimeTypes["json"] = "application/json";
+    mimeTypes["zip"] = "application/zip";
+    mimeTypes["tar"] = "application/x-tar";
+    mimeTypes["gz"] = "application/gzip";
+    mimeTypes["mp3"] = "audio/mpeg";
+    mimeTypes["wav"] = "audio/wav";
+    mimeTypes["mp4"] = "video/mp4";
+    mimeTypes["avi"] = "video/x-msvideo";
+    
     // Add more mappings as needed
 
     // Get the file extension
