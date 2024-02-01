@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 19:48:29 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 21:51:56 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,6 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
             waitpid(pid, &status, 0);
             if (WIFEXITED(status) && WEXITSTATUS(status) == 3) {
 				// ERROR: Assume full HTTP error from parseCgiOutput above
-				wsutils::log("CGI Error", "./logs");
 				ret = cgiBody;
             } else if (cgiBody.substr(0,8) != "HTTP/1.1") {
 				// SUCCESS: Without full HTTP header

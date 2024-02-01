@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 19:45:37 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 21:51:59 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ void Parser::parse(std::string configFilePath) {
                                 _location.root = Path(getKeywordValues("root", locationLines)[0]);
                                 _location.isCustomRoot = true;
                             }
-                            wsutils::log("ROOT is: " + _location.root.getPath(), "./logs");
+                            ("ROOT is: " + _location.root.getPath(), "./logs");
                             
                             // If location doesn't have index vector, get from server block
                             std::vector<std::string> index = getKeywordValues("index", locationLines);

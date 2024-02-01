@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/01 20:11:08 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 21:52:23 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,9 +133,6 @@ bool Response::isStaticContent(Path& uri, Server& server) {
 
 // Handle static content based on the requested absoulte path
 std::string Response::handleStaticContent(Request& request, Path &absPath, Location *location, Server &server) {
-    wsutils::log("HANDLING STATIC REQUEST: " + absPath.getPath(), "./logs");
-
-    // TODO: http://zwong.42.fr:8080/public/uploads/ | http://zwong.42.fr:8080/public/uploads (no slash won't work)
     if (absPath.getType() == DIRECTORY) {
         
         Path index = find_default_index(absPath, location);
@@ -155,7 +152,6 @@ std::string Response::handleStaticContent(Request& request, Path &absPath, Locat
 }
 
 std::string Response::handle_GET_request(Request &request, Location *location, Server &server) {
-    wsutils::log("GET: HANDLING CGI!", "./logs");
     CgiHandler cgi;
     return (cgi.handleCgi(request, server, *location));
 }
@@ -168,7 +164,6 @@ std::string Response::handle_POST_request(Request &request, Location *location, 
     wsutils::stringToNumber<unsigned long long>(request.getHeader("Content-Length")) > location->max_client_body_size)
         return (parse_error_pages("413", "Payload Too Large", server));
     else {
-        wsutils::log("POST: HANDLING CGI!", "./logs");
         CgiHandler cgi;
         return (cgi.handleCgi(request, server, *location));
     }
@@ -225,8 +220,6 @@ Server &Response::findServer(Request &request, std::map<int, Server*> &servers) 
         }
     }
 
-    // If no exact match is found
-    wsutils::log("Invalid server host: " + request.getHost(), "./logs");
     throw InvalidServerException();
 }
 
@@ -307,7 +300,6 @@ std::string Response::generateResponse(Request &request, Server &server) {
 
     // Check if the resource is a STATIC file by file extentions (e.g. .html, .py, .png)
     if (isStaticContent(absPath, server)) {
-        wsutils::log("Static Content", "./logs");
         // Only GET method is alloed for static content
         if (request.getMethod() == "GET")
             return (handleStaticContent(request, absPath, location, server));
