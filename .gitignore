@@ -14,3 +14,7 @@ webserv
 test.conf
 
 log*
+
+# test files
+large_file.txt
+be-deleted.txt
