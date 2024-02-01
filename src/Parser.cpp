@@ -133,7 +133,10 @@ void Parser::parse(std::string configFilePath) {
                         }
                         _server.hosts.push_back(std::make_pair(host, port));
                     }
-                    _server.root = Path(getKeywordValues("root", serverLines)[0], DIRECTORY);
+                    if (!getKeywordValues("root", serverLines).empty())
+                        _server.root = Path(getKeywordValues("root", serverLines)[0], DIRECTORY);
+                    else
+                        _server.root = Path("./www");
                     _server.index = getKeywordValues("index", serverLines);
                     _server.server_name = getKeywordValues("server_name", serverLines);
                     _server.cgi_extensions = getKeywordValues("cgi_extension", serverLines);
