@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/01 11:21:29 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 11:35:45 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,8 +116,8 @@ Path Response::find_default_index(Path &abs_path, Location *location) {
     return (abs_path);
 }
 
-bool Response::isStaticContent(Request& request, Server& server) {
-    return find(server.cgi_extensions.begin(), server.cgi_extensions.end(), request.getPath().getFileExtension()) == server.cgi_extensions.end();
+bool Response::isStaticContent(Path& uri, Server& server) {
+    return find(server.cgi_extensions.begin(), server.cgi_extensions.end(), uri.getFileExtension()) == server.cgi_extensions.end();
 }
 
 // Handle static content based on the requested absoulte path
@@ -258,8 +258,9 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
         return (parse_error_pages("404", err.what(), server));
     }
 
+    // wsutils::log(absPath.getPath(), std::cerr);
     // Check if the resource is a STATIC file by file extentions (e.g. .html, .py, .png)
-    if (isStaticContent(request, server)) {
+    if (isStaticContent(absPath, server)) {
         wsutils::log("Static Content", "./logs");
         // Only GET method is alloed for static content
         if (request.getMethod() == "GET")

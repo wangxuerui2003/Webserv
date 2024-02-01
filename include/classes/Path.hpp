@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 10:53:37 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 11:40:24 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ class Path {
 		std::string getFileExtension(void) const;
 
 		Path getDirectory(void) const;
+		std::string getFilename(void) const;
 
 		class InvalidPathException : public std::exception {
 			private:

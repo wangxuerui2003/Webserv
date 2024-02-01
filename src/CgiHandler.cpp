@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 10:40:50 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 11:42:42 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,6 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
     int pipefd_output[2];
     int pipefd_stderror[2];
     std::string ret;
-
-    char *argv[] = {
-        const_cast<char *>(cgiPathStr.c_str()),
-        NULL
-    };
 
     if (pipe(pipefd_input) == -1 || pipe(pipefd_output) == -1 || pipe(pipefd_stderror) == -1) {
         ret = Response::parse_error_pages("500", "Internal Server Error", server);
@@ -61,10 +56,17 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
             } catch (...) {
                 wsutils::log("Fail to chdir", std::cerr);
             }
+
+            std::string cgiFilename = cgiPath.getFilename();
+
+            char *argv[] = {
+                const_cast<char *>(cgiFilename.c_str()),
+                NULL
+            };
             
             // Execute CGI script
             char **envp = setEnv(request);
-            if (execve(cgiPathStr.c_str(), argv, envp) == -1) {
+            if (execve(cgiFilename.c_str(), argv, envp) == -1) {
 				ret = Response::parse_error_pages("500", "Internal Server Error", server);
 				write(STDOUT_FILENO, ret.c_str(), ret.length());
                 exit(3);

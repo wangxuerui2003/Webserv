@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 11:04:33 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 11:41:15 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -400,3 +400,13 @@ Path Path::getDirectory(void) const {
 
 	return Path(_path.substr(0, dirDelimiter), DIRECTORY);
 }
+
+std::string Path::getFilename(void) const {
+	size_t dirDelimiter = _path.find_last_of('/');
+	if (dirDelimiter == std::string::npos) {
+		return _path;
+	}
+
+	return _path.substr(dirDelimiter + 1);
+}
+
