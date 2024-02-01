@@ -29,6 +29,7 @@ int main(int ac, char **av) {
 	} catch (Path::InvalidOperationException& e) {
 		wsutils::errorExit(e.what());
 	}
+	parser.print_values(parser.getServers());
 
 	const std::vector<Server>& servers = parser.getServers();
 

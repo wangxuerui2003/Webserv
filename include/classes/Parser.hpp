@@ -65,6 +65,9 @@ class Parser {
 
 		void parse(std::string configFilePath);
 
+		void print_server(const Server &server);
+		void print_location(const Location &location);
+		void print_values(std::vector<Server> _servers);
 	private:
 		Parser();
 

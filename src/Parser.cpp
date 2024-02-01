@@ -178,6 +178,60 @@ std::vector<std::string> Parser::getKeywordValues(std::string keyword, std::vect
     return values;
 }
 
+void Parser::print_server(const Server &server) {
+    std::cout << GREEN;
+    for (std::vector<std::pair<std::string, std::string> >::const_iterator it = server.hosts.begin(); it != server.hosts.end(); ++it)
+        std::cout << "IP Address: " << it->first << " | " << "Port: " << it->second << std::endl;
+
+    for (std::vector<std::string>::const_iterator it = server.server_name.begin(); it != server.server_name.end(); ++it)
+        std::cout << "Server Name: " << *it << " " << std::endl;
+
+    for (std::vector<std::string>::const_iterator it = server.index.begin(); it != server.index.end(); ++it)
+        std::cout << "Index: " << *it << " " << std::endl;
+
+    if (!server.root.getPath().empty())
+        std::cout << "Root: " << server.root.getPath() << std::endl;
+
+    for (std::map<std::string, Path>::const_iterator it = server.error_pages.begin(); it != server.error_pages.end(); ++it)
+        std::cout << "Error Number: " << it->first << " | " << "Path: " << it->second.getPath() << std::endl;
+    std::cout << RESET;
+}
+
+void Parser::print_location(const Location &location) {
+    std::cout << BLUE;
+    if (!location.uri.getPath().empty())
+        std::cout << "URI: " << location.uri.getPath() << std::endl;
+    if (!location.root.getPath().empty())
+        std::cout << "Root: " << location.root.getPath() << std::endl;
+    // if (!location.cgi_pass.getPath().empty())
+    //     std::cout << "CGI Pass: " << location.cgi_pass.getPath() << std::endl;
+    for (std::vector<std::string>::const_iterator it = location.index.begin(); it != location.index.end(); ++it)
+        std::cout << "Index: " << *it << " " << std::endl;
+    std::cout << "Auto Index: " << std::boolalpha << location.autoindex << std::endl;
+    std::cout << "Max Client Body Size: " << location.max_client_body_size << std::endl;
+    if (!location.upload_store.getPath().empty())
+        std::cout << "Upload Store: " << location.upload_store.getPath() << std::endl;
+    std::cout << "Accept Upload: " << std::boolalpha << location.accept_upload << std::endl;
+    for (std::vector<std::string>::const_iterator it = location.allowedHttpMethods.begin(); it != location.allowedHttpMethods.end(); ++it)
+        std::cout << "allowedHttpMethods: " << *it << " " << std::endl;
+    std::cout << RESET;
+}
+
+void Parser::print_values(std::vector<Server> _servers) {
+    int server_index = 0;
+    for (std::vector<Server>::iterator server = _servers.begin(); server != _servers.end(); server++) {
+        server_index++;
+        std::cout << BOLD << GREEN << "\nServer " << server_index << RESET << std::endl;
+        print_server(*server);
+        int location_index = 0;
+        for (std::vector<Location>::iterator location = server->locations.begin(); location != server->locations.end(); location++) {
+            location_index++;
+            std::cout << BOLD << BLUE << "\nLocation " << location_index << RESET << std::endl;
+            print_location(*location);
+        }
+    }
+}
+
 Server::Server() {}
 
 Location::Location() {
