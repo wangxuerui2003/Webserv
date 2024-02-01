@@ -113,6 +113,10 @@ def test_multiple_servers():
             print(Fore.RED + f"Request timed out")
         except Exception as e:
             print(Fore.RED + f"Request failed: {e}")
+        if response.status_code == 200:
+            print(Fore.GREEN + f"[SUCCESS]")
+        else:
+            print(Fore.RED + "[FAILURE]")
 
 
 # Test multiple servers with different hostnames
@@ -121,6 +125,10 @@ def test_multiple_hostnames():
     for hostname in HOST_NAMES:
         response = requests.get('http://' + hostname + ":8080")
         print(Fore.MAGENTA + f"Response from {hostname}: {response.status_code}")
+        if response.status_code == 200:
+            print(Fore.GREEN + f"[SUCCESS]")
+        else:
+            print(Fore.RED + "[FAILURE]")
 
 # Testing parameter form AND long running sleep
 def test_python_script():
