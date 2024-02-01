@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 10:48:25 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 14:23:02 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ ConnectionHandler::ConnectionHandler(const std::vector<Server>& servers) {
 	for (std::vector<Server>::const_iterator serverConfig = servers.begin(); serverConfig != servers.end(); ++serverConfig) {
 		for (size_t i = 0; i < serverConfig->hosts.size(); ++i) {
 			listenSocket = createListenSocket(serverConfig->hosts[i].first, serverConfig->hosts[i].second);
-			_servers[listenSocket] = *serverConfig;
+			_servers[listenSocket] = const_cast<Server *>(&(*serverConfig));
 		}
 	}
 
@@ -42,7 +42,7 @@ ConnectionHandler::ConnectionHandler(const std::vector<Server>& servers) {
 }
 
 ConnectionHandler::~ConnectionHandler() {
-	for (std::map<int, Server>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+	for (std::map<int, Server*>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
 		close(it->first);
 	}
 
@@ -113,7 +113,7 @@ bool ConnectionHandler::handleChunkedRequest(int connectionSocket, char commonBu
 
 		conn.request->getHeaderMap()["Content-Length"] = wsutils::toString(body.length());
 		conn.request->setBody(body);
-		std::string response = Response::generateResponse(*(conn.request), this->_servers);
+		std::string response = Response::generateResponse(*(conn.request), *conn.server);
 		delete conn.request;
 		conn.request = NULL;
 		conn.isChunkedRequest = false;
@@ -152,7 +152,7 @@ bool ConnectionHandler::receiveMsgBody(int connectionSocket, bool newEvent) {
 	if (conn.requestString.length() >= contentLength) {
 		conn.request->setBody(conn.requestString.substr(0, contentLength));
 		conn.requestString = conn.requestString.substr(contentLength);
-		std::string response = Response::generateResponse(*(conn.request), this->_servers);
+		std::string response = Response::generateResponse(*(conn.request), *conn.server);
 		delete conn.request;
 		conn.request = NULL;
 		conn.waitingForMsgBody = false;
@@ -199,7 +199,7 @@ bool ConnectionHandler::handleConnectionSocketEvent(int connectionSocket, char c
 			} else if ((headers.find("Transfer-Encoding") != headers.end()) && (headers["Transfer-Encoding"] == "chunked")) {
 				conn.isChunkedRequest = true;
 			} else {
-				std::string response = Response::generateResponse(*(conn.request), this->_servers);
+				std::string response = Response::generateResponse(*(conn.request), *conn.server);
 				delete conn.request;
 				conn.request = NULL;
 				send(connectionSocket, response.c_str(), response.length(), 0);
@@ -230,7 +230,7 @@ void ConnectionHandler::serverListen(void) {
 	fd_set tempFds;
 
 	// Let the kernel to monitor all listening sockets events
-	for (std::map<int, Server>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+	for (std::map<int, Server*>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
 		int listenSocket = it->first;
 		FD_SET(listenSocket, &_readFds);
 	}
@@ -247,7 +247,7 @@ void ConnectionHandler::serverListen(void) {
 		}
 
 		// Check for listen sockets events
-		for (std::map<int, Server>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+		for (std::map<int, Server*>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
 			int listenSocket = it->first;
 			if (FD_ISSET(listenSocket, &tempFds)) {
 				createNewConnection(listenSocket);
@@ -292,6 +292,7 @@ void ConnectionHandler::createNewConnection(int listenSocket) {
 	}
 
 	_activeConnections[connectionSocket] = ConnectionBuffer();
+	_activeConnections[connectionSocket].server = _servers[listenSocket];
 
 	// std::cout << "Accepted connection from " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }

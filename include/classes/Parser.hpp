@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 17:55:47 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 18:33:50 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 14:25:45 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,10 @@ struct Location {
 	Path upload_store;
 	bool accept_upload;
 	std::vector<std::string> allowedHttpMethods;
+
+	bool isHttpRedirection;
+	std::string redirectionStatusCode;
+	std::string redirectURL;
 };
 
 struct Server {
@@ -53,7 +57,7 @@ struct Server {
 // Singleton Parser class
 class Parser {
 	public:
-		static Parser *getInstance(void);
+		static Parser& getInstance(void);
 
 		const std::vector<Server>& getServers(void) const;
 	
@@ -67,8 +71,6 @@ class Parser {
 		// Disable copying
 		Parser(const Parser& copy);
 		Parser& operator=(const Parser& copy);
-
-		static Parser *_instance;  // the only instance in the global scope
 
 		std::vector<Server> _servers;
 };

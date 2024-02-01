@@ -6,24 +6,18 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 08:51:44 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 14:28:57 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
 
-// Initialize the instance pointer
-Parser *Parser::_instance = NULL;
-
 Parser::Parser() {
 }
 
-Parser *Parser::getInstance() {
-	if (_instance == NULL) {
-		_instance = new Parser();
-	}
-
-	return _instance;
+Parser& Parser::getInstance() {
+    static Parser instance;
+	return instance;
 }
 
 const std::vector<Server>& Parser::getServers(void) const {
@@ -61,8 +55,23 @@ void Parser::parse(std::string configFilePath) {
                         // std::cout << configLines[i] << std::endl;
                         if (configLines[i].find("}") != std::string::npos) {
                             Location _location;
+
                             _location.uri = Path(getKeywordValues("location", locationLines)[0], URI);
                             
+                            // detect HTTP redirection
+                            std::vector<std::string> httpRedirection = getKeywordValues("return", locationLines);
+                            if (httpRedirection.empty() == false) {
+                                if (httpRedirection.size() != 2) {
+                                    wsutils::errorExit("Http Redirection format should be: return <status code> <url>");
+                                }
+                                _location.isHttpRedirection = true;
+                                _location.redirectionStatusCode = httpRedirection[0];
+                                _location.redirectURL = httpRedirection[1];
+                                _locations.push_back(_location);
+                                i++;
+                                break;  // ignore everything else in the block when it's a http redirection
+                            }
+
                             // If location doesn't have root, get from server block
                             std::vector<std::string> roots = getKeywordValues("root", locationLines);
                             if (roots.empty()) {
@@ -96,11 +105,9 @@ void Parser::parse(std::string configFilePath) {
                             }
 
                             // limit_except (allowed HTTP methods)
-                            _location.allowedHttpMethods = getKeywordValues("limit_except", locationLines);
-                            if (_location.allowedHttpMethods.empty()) {
-                                _location.allowedHttpMethods.push_back("GET");
-                                _location.allowedHttpMethods.push_back("POST");
-                                _location.allowedHttpMethods.push_back("DELETE");
+                            std::vector<std::string> allowedHttpMethods = getKeywordValues("limit_except", locationLines);
+                            if (allowedHttpMethods.empty() == false) {
+                                _location.allowedHttpMethods = allowedHttpMethods;
                             }
 
                             _locations.push_back(_location);
@@ -149,22 +156,6 @@ void Parser::parse(std::string configFilePath) {
             }
         }
     }
-
-	// Server dummy;
-	// dummy.root = Path("./www", DIRECTORY);
-	// dummy.host = "127.0.0.1";
-	// dummy.port = "8080";
-	// dummy.index.push_back("index.html");
-	// dummy.error_pages[404] = Path("./www/404.html", REG_FILE);
-
-	// Location location;
-	// location.url = "/";
-	// location.root = dummy.root;
-	// location.index = dummy.index;
-
-	// dummy.locations.push_back(location);
-
-	// _servers.push_back(dummy);
 }
 
 std::vector<std::string> Parser::getKeywordValues(std::string keyword, std::vector<std::string> serverLines) {
@@ -191,4 +182,10 @@ Server::Server() {}
 
 Location::Location() {
     isCustomRoot = false;
+    isHttpRedirection = false;
+    autoindex = false;
+    accept_upload = false;
+    allowedHttpMethods.push_back("GET");
+    allowedHttpMethods.push_back("POST");
+    allowedHttpMethods.push_back("DELETE");
 }

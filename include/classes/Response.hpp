@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:27:18 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/01 11:28:28 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 14:12:13 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,14 +31,14 @@ class Response {
 		Response& operator=(const Response& copy);
         ~Response();
 
-        static std::string generateResponse(Request &request, std::map<int, Server> &server);
+        static std::string generateResponse(Request &request, Server &server);
 
         static std::string getContentType(const std::string& filePath);
         static bool isStaticContent(Path& uri, Server& server);
         static Path find_default_index(Path &abs_path, Location *location);
         static std::string handleStaticContent(Path &absPath, Location *location, Server &server);
         static std::string readFile(Path &absPath, Server &server);
-        static Server &findServer(Request &request, std::map<int, Server> &servers);
+        static Server &findServer(Request &request, std::map<int, Server*> &servers);
         static std::string parse_error_pages(std::string error, std::string description, Server &server);
         static std::string parse_custom_error_pages(std::string error, std::map<std::string, Path> &error_pages);
         

@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/01 12:10:36 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 14:20:19 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,11 +127,11 @@ bool Response::isStaticContent(Path& uri, Server& server) {
 // Handle static content based on the requested absoulte path
 std::string Response::handleStaticContent(Path &absPath, Location *location, Server &server) { // add argument location (so that I can use prepend root)
     wsutils::log("HANDLING STATIC REQUEST: " + absPath.getPath(), "./logs");
-    Path index;
 
     // TODO: http://zwong.42.fr:8080/public/uploads/ | http://zwong.42.fr:8080/public/uploads (no slash won't work)
     if (absPath.getType() == DIRECTORY) {
-        index = find_default_index(absPath, location);
+        
+        Path index = find_default_index(absPath, location);
 
         if (index != absPath) {
             return (readFile(index, server));
@@ -144,7 +144,7 @@ std::string Response::handleStaticContent(Path &absPath, Location *location, Ser
             return (parse_error_pages("403", "Forbidden", server));
         }
     }
-    return (readFile(index, server));
+    return (readFile(absPath, server));
 }
 
 std::string Response::handle_GET_request(Request &request, Location *location, Server &server) {
@@ -197,9 +197,9 @@ std::string Response::deleteResource(Path &absPath, Server &server) {
 //         return (deleteResource(absPath, server));
 // }
 
-Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
-    for (std::map<int, Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
-        Server& currentServer = it->second;
+Server &Response::findServer(Request &request, std::map<int, Server*> &servers) {
+    for (std::map<int, Server*>::iterator it = servers.begin(); it != servers.end(); ++it) {
+        Server& currentServer = *(it->second);
 
         // Check hosts
         for (size_t j = 0; j < currentServer.hosts.size(); ++j) {
@@ -223,19 +223,39 @@ Server &Response::findServer(Request &request, std::map<int, Server> &servers) {
     throw InvalidServerException();
 }
 
-// START HERE - MAIN RESPONSE FUNCTION
-std::string Response::generateResponse(Request &request, std::map<int, Server> &servers) {
+std::string httpRedirection(std::string statusCode, std::string url) {
+    std::string statusMessage;
 
-    Server server;
+    if (statusCode == "301") {
+        statusMessage = "Moved Permanently";
+    } else if (statusCode == "302") {
+        statusMessage = "Found";
+    } else if (statusCode == "303") {
+        statusMessage = "See Other";
+    } else if (statusCode == "307") {
+        statusMessage = "Temporary Redirect";
+    } else if (statusCode == "308") {
+        statusMessage = "Permanent Redirect";
+    } else {
+        statusMessage = "Moved Permanently";
+    }
+
+    return (
+        "HTTP/1.1 "
+        + statusCode
+        + ' '
+        + statusMessage
+        + "\r\nLocation: "
+        + url
+        + "\r\n\r\n"
+    );
+}
+
+// START HERE - MAIN RESPONSE FUNCTION
+std::string Response::generateResponse(Request &request, Server &server) {
+
     std::string method = request.getMethod();
     Path request_uri = request.getURI();
-        
-    try {
-        // Find the correct server based the HOST and PORT and SERVER NAME (e.g. 127.0.0.1:8080)
-        server = findServer(request, servers);
-    } catch (InvalidServerException &err) {
-        return (parse_error_pages("502", "Bad Server Gateway", server));
-    }
 
     // Projected is lmited to 3 http methods only (further lmitation is handled later on)
     if (method != "GET" && method != "POST" && method != "DELETE") {
@@ -253,6 +273,10 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     if (std::find(location->allowedHttpMethods.begin(), location->allowedHttpMethods.end(), method) == location->allowedHttpMethods.end()) {
         return (parse_error_pages("405", "Method not allowed", server));
     }
+    
+    if (location->isHttpRedirection) {
+        return httpRedirection(location->redirectionStatusCode, location->redirectURL);
+    }
 
     // Once server and location is matched, get absolute resource path
     Path absPath;
@@ -264,6 +288,7 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
     } catch (Path::InvalidPathException &err) {
         return (parse_error_pages("404", err.what(), server));
     }
+
 
     if (absPath.getType() == DIRECTORY) {
         absPath = find_default_index(absPath, location);
