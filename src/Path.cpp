@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 12:05:44 by zwong            ###   ########.fr       */
+/*   Updated: 2024/02/01 12:20:28 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,6 +255,15 @@ Path Path::prepend(std::string otherPath, enum pathType type) {
 	return prepend(other);
 }
 
+bool Path::operator==(const Path& other) {
+	return (_path == other.getPath() && _type == other.getType());
+}
+
+bool Path::operator!=(const Path& other) {
+	return !(*this == other);
+}
+
+
 /**
  * @param requestUri: the request uri
  * @param uriPrefix: the uri prefix
@@ -414,7 +423,7 @@ std::string Path::getFileExtension(void) const {
 Path Path::getDirectory(void) const {
 	size_t dirDelimiter = _path.find_last_of('/');
 	if (dirDelimiter == std::string::npos) {
-		throw InvalidOperationException("No Parent directory found for" + _path);
+		return Path(".");
 	}
 
 	return Path(_path.substr(0, dirDelimiter), DIRECTORY);

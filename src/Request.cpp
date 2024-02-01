@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/31 09:02:24 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 12:03:44 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@ std::string Request::getMethod() const {
     return (_method);
 }
 
-Path& Request::getPath() {
-    return (_path);
+Path& Request::getURI() {
+    return (_uri);
 }
 
 std::string Request::getVersion() const {
@@ -64,6 +64,10 @@ void Request::setBody(std::string body) {
     _body = body;
 }
 
+void Request::setURI(Path& uri) {
+    _uri = uri;
+}
+
 
 // example of raw string is:
 // GET /foo/bar HTTP/1.1
@@ -84,7 +88,7 @@ void Request::parseRequest(const std::string& rawReqString) {
         temp_path = temp_path.substr(0, queryParamSeparator);
     }
 
-    _path = Path(temp_path, URI);
+    _uri = Path(temp_path, URI);
 
     // Read headers until an empty line is encountered
     std::string line;

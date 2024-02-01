@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/01 11:35:45 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 12:10:36 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,17 +99,21 @@ std::string Response::readFile(Path &absPath, Server &server) {
 }
 
 Path Response::find_default_index(Path &abs_path, Location *location) {
-    abs_path = Path(abs_path.getPath(), DIRECTORY);
+    if (abs_path.getType() != DIRECTORY) {
+        return abs_path;
+    }
+
     // Check for location default indexes specified in the location config block
     if (location->index.size() != 0) {
         std::vector<std::string>::iterator it = location->index.begin();
         std::vector<std::string>::iterator ite = location->index.end();
         for (; it != ite; it++) {
             Path index(*it, URI);
-            Path temp_index = abs_path.concat(index.getPath(), URI);
-            if (Path::isAccessible(temp_index.getPath().c_str())) {
-                // If index is found, then break and readFile() in the main function
+            try {
+                Path temp_index = abs_path.concat(index.getPath());
                 return (temp_index);
+            } catch (...) {
+                // Continue looping
             }
         }
     }
@@ -123,21 +127,24 @@ bool Response::isStaticContent(Path& uri, Server& server) {
 // Handle static content based on the requested absoulte path
 std::string Response::handleStaticContent(Path &absPath, Location *location, Server &server) { // add argument location (so that I can use prepend root)
     wsutils::log("HANDLING STATIC REQUEST: " + absPath.getPath(), "./logs");
+    Path index;
 
     // TODO: http://zwong.42.fr:8080/public/uploads/ | http://zwong.42.fr:8080/public/uploads (no slash won't work)
     if (absPath.getType() == DIRECTORY) {
-        absPath = find_default_index(absPath, location);
+        index = find_default_index(absPath, location);
+
+        if (index != absPath) {
+            return (readFile(index, server));
+        }
 
         // If still cannot find default index, then list directory
-        if (absPath.getType() == DIRECTORY) {
-            if (location->autoindex == true) {
-                return (absPath.generateDirectoryListing());
-            } else {
-                return (parse_error_pages("403", "Forbidden", server));
-            }
+        if (location->autoindex == true) {
+            return (absPath.generateDirectoryListing());
+        } else {
+            return (parse_error_pages("403", "Forbidden", server));
         }
     }
-    return (readFile(absPath, server));
+    return (readFile(index, server));
 }
 
 std::string Response::handle_GET_request(Request &request, Location *location, Server &server) {
@@ -147,7 +154,7 @@ std::string Response::handle_GET_request(Request &request, Location *location, S
 }
 
 std::string Response::handle_POST_request(Request &request, Location *location, Server &server) {
-    if (find(server.cgi_extensions.begin(), server.cgi_extensions.end(), request.getPath().getFileExtension()) == server.cgi_extensions.end()) {
+    if (find(server.cgi_extensions.begin(), server.cgi_extensions.end(), request.getURI().getFileExtension()) == server.cgi_extensions.end()) {
         return (parse_error_pages("405", "Method not allowed ", server));
     }
     else if (request.getHeader("Content-Length") != "" && location->max_client_body_size != 0 && // CHECK: max_client_body_size when not defined?
@@ -221,7 +228,7 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
 
     Server server;
     std::string method = request.getMethod();
-    Path request_uri = request.getPath();
+    Path request_uri = request.getURI();
         
     try {
         // Find the correct server based the HOST and PORT and SERVER NAME (e.g. 127.0.0.1:8080)
@@ -258,7 +265,10 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
         return (parse_error_pages("404", err.what(), server));
     }
 
-    // wsutils::log(absPath.getPath(), std::cerr);
+    if (absPath.getType() == DIRECTORY) {
+        absPath = find_default_index(absPath, location);
+    }
+
     // Check if the resource is a STATIC file by file extentions (e.g. .html, .py, .png)
     if (isStaticContent(absPath, server)) {
         wsutils::log("Static Content", "./logs");

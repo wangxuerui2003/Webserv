@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:16:57 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/30 17:41:38 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 12:01:36 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ public:
     Request(const std::string& rawReqString);
 
     std::string getMethod() const;
-    Path&       getPath();
+    Path&       getURI();
     std::string getVersion() const;
     std::string getHost() const;
     std::string getPort() const;
@@ -36,10 +36,11 @@ public:
     const std::string& getQueryParams(void) const;
 
     void setBody(std::string body);
+    void setURI(Path& uri);
 
 private:
     std::string _method;
-    Path _path;
+    Path _uri;
     std::string _httpVersion;
     std::string _host;
     std::string _port;

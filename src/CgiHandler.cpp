@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 11:42:42 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 12:19:20 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,14 @@ CgiHandler::~CgiHandler() {}
 // Method to handle CGI execution
 std::string CgiHandler::handleCgi(Request &request, Server &server, Location &location) {
 	// Getting the absolute path of (e.g. ./www/upload/upload.py) - considering the best fit location block
-    Path cgiPath = Path::mapURLToFS(request.getPath(), location.uri, location.root, location.isCustomRoot);
+    Path cgiPath = Path::mapURLToFS(request.getURI(), location.uri, location.root, location.isCustomRoot);
+    if (cgiPath.getType() == DIRECTORY) {
+        // if the CGI script is the index of the directory, find it
+        cgiPath = Response::find_default_index(cgiPath, &location);
+    }
     if (cgiPath.isExecutable() == false) {
         return Response::parse_error_pages("500", "CGI is not executable", server);
     }
-
-	std::string cgiPathStr = cgiPath.getPath();
 
     int pipefd_input[2];
     int pipefd_output[2];
@@ -48,26 +50,20 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
             dup2(pipefd_stderror[1], STDERR_FILENO);
 
             // Let CGI script current directory have the correct relative path access
-            try {
-                std::string cgiDir = cgiPath.getDirectory().getPath();
-                if (chdir(cgiDir.c_str()) != 0) {
-                    throw Path::InvalidOperationException("Fail to chdir");
-                }
-            } catch (...) {
-                wsutils::log("Fail to chdir", std::cerr);
-            }
+            std::string cgiDir = cgiPath.getDirectory().getPath();
+            chdir(cgiDir.c_str());
 
-            std::string cgiFilename = cgiPath.getFilename();
+            std::string cgiRelativePath = cgiPath.getFilename();
 
             char *argv[] = {
-                const_cast<char *>(cgiFilename.c_str()),
+                const_cast<char *>(cgiRelativePath.c_str()),
                 NULL
             };
             
             // Execute CGI script
             char **envp = setEnv(request);
-            if (execve(cgiFilename.c_str(), argv, envp) == -1) {
-				ret = Response::parse_error_pages("500", "Internal Server Error", server);
+            if (execve(cgiRelativePath.c_str(), argv, envp) == -1) {
+				ret = Response::parse_error_pages("500", "Internal Server Error execve", server);
 				write(STDOUT_FILENO, ret.c_str(), ret.length());
                 exit(3);
             }
@@ -118,7 +114,7 @@ char **CgiHandler::setEnv(Request &request) {
     envp[i++] = strdup((std::string("REQUEST_METHOD=") + request.getMethod()).c_str());
 
     // Add ROUTE
-    envp[i++] = strdup((std::string("ROUTE=") + request.getPath().getPath()).c_str());
+    envp[i++] = strdup((std::string("ROUTE=") + request.getURI().getPath()).c_str());
 
     // Add QUERY_STRING
     envp[i++] = strdup((std::string("QUERY_STRING=") + request.getQueryParams()).c_str());

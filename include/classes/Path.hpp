@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 12:05:56 by zwong            ###   ########.fr       */
+/*   Updated: 2024/02/01 12:20:38 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,9 @@ class Path {
 
 		Path getDirectory(void) const;
 		std::string getFilename(void) const;
+
+		bool operator==(const Path& other);
+		bool operator!=(const Path& other);
 
 		class InvalidPathException : public std::exception {
 			private:
