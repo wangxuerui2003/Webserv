@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:01:20 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 11:49:09 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 21:58:18 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 #include <cstdlib>
 
 #define USAGE "Usage: ./webserv <config_file>"
-#define DEFAULT_CONFIG "./conf/example.conf"
+#define DEFAULT_CONFIG "./conf/test.conf"
 #define HTTP_REQUEST_TERMINATOR "\r\n\r\n"
 
 

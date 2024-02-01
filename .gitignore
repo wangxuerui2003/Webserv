@@ -10,8 +10,8 @@ webserv
 # debug files
 *.dSYM
 
-# testing config file
-test.conf
+# local config file
+local.conf
 
 log*
 
