@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 16:50:22 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 18:19:19 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,7 +184,7 @@ bool Path::isExecutable(void) const {
 /**
  * @brief Concatenate another path to the current path object and return a new path object.
 */
-Path Path::concat(Path& other) {
+Path Path::concat(Path& other) const {
 	return concat(other.getPath(), other.getType());
 }
 
@@ -192,8 +192,8 @@ Path Path::concat(Path& other) {
  * @brief Concatenate another path in the form of string and type to the current path object
  * and return a new path object.
 */
-Path Path::concat(std::string otherPath, enum pathType type) {
-	if (_type != DIRECTORY) {
+Path Path::concat(std::string otherPath, enum pathType type) const {
+	if (type != IGNORE && _type != DIRECTORY) {
 		throw InvalidOperationException(_path + " is not a directory");
 	}
 	
@@ -212,7 +212,7 @@ Path Path::concat(std::string otherPath, enum pathType type) {
  * @brief Concatenate another path in the form of string and type to the current path object
  * and return a new path object.
 */
-Path Path::concat(std::string otherPath) {
+Path Path::concat(std::string otherPath) const {
 	if (_type != DIRECTORY) {
 		throw InvalidOperationException(_path + " is not a directory");
 	}
@@ -231,7 +231,7 @@ Path Path::concat(std::string otherPath) {
 /**
  * @brief Prepend another path to the current path object and return a new path object.
 */
-Path Path::prepend(Path& other) {
+Path Path::prepend(Path& other) const {
 	if (other.getType() != DIRECTORY) {
 		throw InvalidOperationException(other.getPath() + " is not a directory");
 	}
@@ -253,7 +253,7 @@ Path Path::prepend(Path& other) {
  * @brief Prepend another path in the form of string and type to the current path object
  * and return the path object.
 */
-Path Path::prepend(std::string otherPath, enum pathType type) {
+Path Path::prepend(std::string otherPath, enum pathType type) const {
 	Path other(otherPath, type);
 	return prepend(other);
 }
@@ -388,7 +388,7 @@ void Path::write(std::string filePath, std::string content) {
     outputFile.close();
 }
 
-std::string Path::generateDirectoryListing(void) const {
+std::string Path::generateDirectoryListing(Path& uri) const {
 	if (_type != DIRECTORY)
 		throw InvalidOperationException("File " + _path + " is not a directory");
     std::string html = "<html>\n<head><title>Index of " + _path + "</title></head>\n<body>\n<h1>Index of " + _path + "</h1>\n<ul>\n";
@@ -397,8 +397,8 @@ std::string Path::generateDirectoryListing(void) const {
     if (dir != NULL) {
         struct dirent* entry;
         while ((entry = readdir(dir)) != NULL) {
-            const std::string entryName = entry->d_name;
-            html += "<li><a href=\"" + entryName + "\">" + entryName + "</a></li>\n";
+            std::string entryName = entry->d_name;
+            html += "<li><a href=\"" + uri.concat(entryName, IGNORE).getPath() + "\">" + entryName + "</a></li>\n";
         }
         closedir(dir);
     }

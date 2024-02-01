@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 16:48:52 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 18:17:31 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,12 +57,12 @@ class Path {
 
 		static enum pathType getFileType(const char *path);
 
-		Path concat(Path& other);
-		Path concat(std::string otherPath, enum pathType type);
-		Path concat(std::string otherPath);
+		Path concat(Path& other) const;
+		Path concat(std::string otherPath, enum pathType type) const;
+		Path concat(std::string otherPath) const;
 
-		Path prepend(Path& other);
-		Path prepend(std::string otherPath, enum pathType type);
+		Path prepend(Path& other) const;
+		Path prepend(std::string otherPath, enum pathType type) const;
 
 		bool isReadable(void) const;
 		bool isWritable(void) const;
@@ -71,7 +71,7 @@ class Path {
 		std::string read(void) const;
 		static void write(std::string filePath, std::string content);
 
-		std::string generateDirectoryListing(void) const;
+		std::string generateDirectoryListing(Path& uri) const;
 
 		std::string getFileExtension(void) const;
 

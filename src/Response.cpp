@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/01 14:20:19 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 18:17:45 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,7 @@ bool Response::isStaticContent(Path& uri, Server& server) {
 }
 
 // Handle static content based on the requested absoulte path
-std::string Response::handleStaticContent(Path &absPath, Location *location, Server &server) { // add argument location (so that I can use prepend root)
+std::string Response::handleStaticContent(Request& request, Path &absPath, Location *location, Server &server) {
     wsutils::log("HANDLING STATIC REQUEST: " + absPath.getPath(), "./logs");
 
     // TODO: http://zwong.42.fr:8080/public/uploads/ | http://zwong.42.fr:8080/public/uploads (no slash won't work)
@@ -139,7 +139,7 @@ std::string Response::handleStaticContent(Path &absPath, Location *location, Ser
 
         // If still cannot find default index, then list directory
         if (location->autoindex == true) {
-            return (absPath.generateDirectoryListing());
+            return (absPath.generateDirectoryListing(request.getURI()));
         } else {
             return (parse_error_pages("403", "Forbidden", server));
         }
@@ -299,7 +299,7 @@ std::string Response::generateResponse(Request &request, Server &server) {
         wsutils::log("Static Content", "./logs");
         // Only GET method is alloed for static content
         if (request.getMethod() == "GET")
-            return (handleStaticContent(absPath, location, server));
+            return (handleStaticContent(request, absPath, location, server));
         else if (request.getMethod() == "DELETE")
             return (deleteResource(absPath, server));
         else
