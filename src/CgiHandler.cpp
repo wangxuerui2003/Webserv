@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 16:16:07 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 19:48:29 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,16 @@ CgiHandler::~CgiHandler() {}
 std::string CgiHandler::handleCgi(Request &request, Server &server, Location &location) {
 	// Getting the absolute path of (e.g. ./www/upload/upload.py) - considering the best fit location block
     Path cgiPath = Path::mapURLToFS(request.getURI(), location.uri, location.root, location.isCustomRoot);
+    cgiPath = wsutils::getRealPath(cgiPath.getPath());
     if (cgiPath.getType() == DIRECTORY) {
         // if the CGI script is the index of the directory, find it
         cgiPath = Response::find_default_index(cgiPath, &location);
     }
-    if (cgiPath.isExecutable() == false) {
-        return Response::parse_error_pages("500", "CGI is not executable", server);
+
+    std::string cgiHandler = server.cgiHandlers[cgiPath.getFileExtension()];
+
+    if (cgiHandler != "" && cgiPath.isExecutable() == false) {
+        return Response::parse_error_pages("500", "CGI script is not executable", server);
     }
 
     int pipefd_input[2];
@@ -55,14 +59,20 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
 
             std::string cgiRelativePath = cgiPath.getFilename();
 
+            if (cgiHandler == "") {
+                // if CGI has no interpreter, the file itself becomes the handler/first arg for execve()
+                cgiHandler = cgiRelativePath;
+            }
+
             char *argv[] = {
+                const_cast<char *>(cgiHandler.c_str()),
                 const_cast<char *>(cgiRelativePath.c_str()),
                 NULL
             };
             
             // Execute CGI script
-            char **envp = setEnv(request, location);
-            if (execve(cgiRelativePath.c_str(), argv, envp) == -1) {
+            char **envp = setEnv(request, location, cgiPath);
+            if (execve(argv[0], argv, envp) == -1) {
 				ret = Response::parse_error_pages("500", "Internal Server Error execve", server);
 				write(STDOUT_FILENO, ret.c_str(), ret.length());
                 exit(3);
@@ -106,11 +116,15 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
     return (ret);
 }
 
-char **CgiHandler::setEnv(Request& request, Location& location) {
+char **CgiHandler::setEnv(Request& request, Location& location, Path& cgiPath) {
     std::vector<std::string> customEnvp;
     customEnvp.push_back("REQUEST_METHOD=" + request.getMethod());
     customEnvp.push_back("ROUTE=" + request.getURI().getPath());
     customEnvp.push_back("QUERY_STRING=" + request.getQueryParams());
+    customEnvp.push_back("REDIRECT_STATUS=200");
+    customEnvp.push_back("DOCUMENT_ROOT=" + cgiPath.getDirectory().getPath());
+    customEnvp.push_back("SCRIPT_FILENAME=" + cgiPath.getPath());
+    customEnvp.push_back("SERVER_PROTOCOL=HTTP/1.1");
     if (location.accept_upload == true) {
         customEnvp.push_back("UPLOAD_STORE=" + location.upload_store.getPath());
     }

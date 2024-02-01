@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:02:56 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 09:12:15 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 19:47:54 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,3 +63,12 @@ void wsutils::log(std::string msg, std::string filename) {
     outputFile.close();
 }
 
+std::string wsutils::getRealPath(std::string relativePath) {
+    char fullPath[PATH_MAX];
+
+    if (realpath(relativePath.c_str(), fullPath) != NULL) {
+        return fullPath;
+    } else {
+        return "";
+    }
+}

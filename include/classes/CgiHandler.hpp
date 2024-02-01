@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:30 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 16:14:47 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 19:30:33 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ public:
 
 private:
     // Private helper methods for CGI handling
-    char **setEnv(Request &request, Location& location);
+    char **setEnv(Request &request, Location& location, Path& cgiPath);
 };
 
 #endif

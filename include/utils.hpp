@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:07:17 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 09:12:50 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 19:48:13 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ namespace wsutils {
 	size_t convertSizeStringToBytes(const std::string& sizeString);
 	void log(std::string msg, std::ostream& os);
 	void log(std::string msg, std::string filename);
+	std::string getRealPath(std::string relativePath);
 
 	template <typename T>
 	std::string toString(const T& arg) {

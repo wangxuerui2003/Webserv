@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 17:55:47 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 14:25:45 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 18:40:56 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ struct Server {
 	Path root;
 	std::vector<std::string> index;
 	std::map<std::string, Path> error_pages;
-	std::vector<std::string> cgi_extensions;
+	std::map<std::string, std::string> cgiHandlers;
 
 	std::vector<Location> locations;
 };

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/01 20:03:09 by zwong            ###   ########.fr       */
+/*   Updated: 2024/02/01 20:11:08 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,7 +121,14 @@ Path Response::find_default_index(Path &abs_path, Location *location) {
 }
 
 bool Response::isStaticContent(Path& uri, Server& server) {
-    return find(server.cgi_extensions.begin(), server.cgi_extensions.end(), uri.getFileExtension()) == server.cgi_extensions.end();
+    std::map<std::string, std::string>::iterator it = server.cgiHandlers.begin();
+    for (; it != server.cgiHandlers.end(); ++it) {
+        if (it->first == uri.getFileExtension()) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 // Handle static content based on the requested absoulte path
@@ -154,7 +161,7 @@ std::string Response::handle_GET_request(Request &request, Location *location, S
 }
 
 std::string Response::handle_POST_request(Request &request, Location *location, Server &server) {
-    if (find(server.cgi_extensions.begin(), server.cgi_extensions.end(), request.getURI().getFileExtension()) == server.cgi_extensions.end()) {
+    if (isStaticContent(request.getURI(), server)) {
         return (parse_error_pages("405", "Method not allowed ", server));
     }
     else if (request.getHeader("Content-Length") != "" && location->max_client_body_size != 0 && // CHECK: max_client_body_size when not defined?
@@ -247,7 +254,11 @@ std::string httpRedirection(std::string statusCode, std::string url) {
         + statusMessage
         + "\r\nLocation: "
         + url
-        + "\r\n\r\n"
+        + "\r\n"
+        + "Content-Type: text/html; charset=utf-8\r\n"
+        + "Content-Length: 0\r\n"
+        + "Connection: close\r\n"
+        + "\r\n"
     );
 }
 

@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 16:49:11 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 19:45:37 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,25 @@ void Parser::parse(std::string configFilePath) {
                         _server.root = Path("./www");
                     _server.index = getKeywordValues("index", serverLines);
                     _server.server_name = getKeywordValues("server_name", serverLines);
-                    _server.cgi_extensions = getKeywordValues("cgi_extension", serverLines);
+
+                    std::vector<std::string> cgi_handlers = getKeywordValues("cgi_handler", serverLines);
+                    if (cgi_handlers.empty() == false) {
+                        for (size_t cgiIndex = 0; cgiIndex < cgi_handlers.size(); ++cgiIndex) {
+                            if (cgiIndex + 1 == cgi_handlers.size()) {
+                                _server.cgiHandlers[cgi_handlers[cgiIndex]] = "";
+                            } else if (cgi_handlers[cgiIndex + 1][0] == '.' && cgi_handlers[cgiIndex + 1][1] != '/') {
+                                // The next string is a file extension, means current cgi has no handler
+                                _server.cgiHandlers[cgi_handlers[cgiIndex]] = "";
+                            } else {
+                                Path handler(cgi_handlers[cgiIndex + 1]);
+                                if (handler.isExecutable() == false) {
+                                    throw Path::InvalidPathException(cgi_handlers[cgiIndex + 1] + " is not executable");
+                                }
+                                _server.cgiHandlers[cgi_handlers[cgiIndex]] = handler.getPath();
+                                cgiIndex++;
+                            }
+                        }
+                    }
 
                     // [404, 404.html, 501, 501.html]
                     std::vector<std::string> errorPages = getKeywordValues("error_page", serverLines);
