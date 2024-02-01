@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/01 18:17:45 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 20:03:09 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -259,7 +259,7 @@ std::string Response::generateResponse(Request &request, Server &server) {
 
     // Projected is lmited to 3 http methods only (further lmitation is handled later on)
     if (method != "GET" && method != "POST" && method != "DELETE") {
-        return (parse_error_pages("501", "Method not implemented", server));
+        return (parse_error_pages("405", "Method Not Allowed", server));
     }
     
     // Finding the correct location block from the short URI given (crosshecks config file)
@@ -284,7 +284,7 @@ std::string Response::generateResponse(Request &request, Server &server) {
         // Map URL to filesystem
         absPath = Path::mapURLToFS(request_uri, location->uri, location->root, location->isCustomRoot);
     } catch (Path::InvalidOperationException &err) {
-        return (parse_error_pages("501", err.what(), server));
+        return (parse_error_pages("500", err.what(), server));
     } catch (Path::InvalidPathException &err) {
         return (parse_error_pages("404", err.what(), server));
     }
