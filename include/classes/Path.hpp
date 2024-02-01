@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 11:40:24 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 12:05:56 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,8 @@ class Path {
 		std::string generateDirectoryListing(void) const;
 
 		std::string getFileExtension(void) const;
+
+		std::string urlDecode(std::string &str);
 
 		Path getDirectory(void) const;
 		std::string getFilename(void) const;

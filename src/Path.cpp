@@ -3,21 +3,40 @@
 /*                                                        :::      ::::::::   */
 /*   Path.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 11:41:15 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 12:05:44 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Path.hpp"
 
-Path::Path() : _path(""), _type(ERROR_PATH) {
+Path::Path() : _path(""), _type(ERROR_PATH) {}
 
+// decodes url that has %20 to " " (spaces), or %50 etc...
+std::string Path::urlDecode(std::string &str) {
+    std::stringstream decoded;
+    char ch;
+    size_t i = 0;
+    while (i < str.length()) {
+        if (str[i] == '%' && i + 2 < str.length()) {
+            int hex;
+            std::istringstream(str.substr(i + 1, 2)) >> std::hex >> hex;
+            ch = static_cast<char>(hex);
+            decoded << ch;
+            i += 3;
+        } else {
+            decoded << str[i];
+            ++i;
+        }
+    }
+	wsutils::log("decoded string is: " + decoded.str(), "./logs");
+    return (decoded.str());
 }
 
 // Auto detect the path type (regfile, symlink or directory only), throw error if invalid path.
-Path::Path(std::string path) : _path(path) {
+Path::Path(std::string path) : _path(urlDecode(path)) {
 	// Remove trailing '/' to avoid error in stat() function
 	if (_path != "/" && _path[_path.length() - 1] == '/') {
 		_path.erase(_path.length() - 1);
@@ -32,7 +51,7 @@ Path::Path(std::string path) : _path(path) {
 }
 
 // throw exception if the path is invalid or type is not the same as input
-Path::Path(std::string path, enum pathType expectedType) : _path(path), _type(expectedType) {
+Path::Path(std::string path, enum pathType expectedType) : _path(urlDecode(path)), _type(expectedType) {
 	if (_type == ERROR_PATH) {
 		throw InvalidOperationException(path + " is an invalid filesystem path");
 	}
