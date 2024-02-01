@@ -7,7 +7,7 @@ BASE_URL = 'http://localhost:8080'
 # Function to send GET requests for static files
 def test_static_files():
     print(Fore.YELLOW + f"Testing GET static files...\n")
-    files = ['/index.html', '/public/image/cat/1.png', '/nonexistent.html']
+    files = ['/index.html', '/public/image/cat/1.png', '/upload/uploads/testpdf.pdf', '/nonexistent.html']
     for file in files:
         response = requests.get(BASE_URL + file)
         expected_status = 200 if file != '/nonexistent.html' else 404
