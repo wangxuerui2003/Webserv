@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 14:22:20 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 17:18:03 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include "Response.hpp"
 
 #include <algorithm>
+#include <list>
 
 #include <sys/socket.h>
 #include <sys/select.h>
