@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 23:08:08 by zwong            ###   ########.fr       */
+/*   Updated: 2024/02/01 10:48:25 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -238,7 +238,6 @@ void ConnectionHandler::serverListen(void) {
 	char commonBuffer[COMMON_BUFFER_SIZE];
 	// Forever listen for new connection or new data to be read
 	while (true) {
-		wsutils::log(wsutils::toString(_activeConnections.size()) + " connections left", std::cerr);
 		tempFds = _readFds;
 
 		// Monitor read event only

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/01/31 23:08:40 by zwong            ###   ########.fr       */
+/*   Updated: 2024/02/01 11:04:52 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ std::string Response::handleStaticContent(Path &absPath, Location *location, Ser
     wsutils::log("HANDLING STATIC REQUEST: " + absPath.getPath(), "./logs");
 
     // TODO: http://zwong.42.fr:8080/public/uploads/ | http://zwong.42.fr:8080/public/uploads (no slash won't work)
-    if (absPath.getPath()[absPath.getPath().length() - 1] == '/') {
+    if (absPath.getType() == DIRECTORY) {
         absPath = find_default_index(absPath, location);
 
         // If still cannot find default index, then list directory
@@ -237,6 +237,8 @@ std::string Response::generateResponse(Request &request, std::map<int, Server> &
         absPath = Path::mapURLToFS(request_uri, location->uri, location->root, location->isCustomRoot);
     } catch (Path::InvalidOperationException &err) {
         return (parse_error_pages("501", err.what(), server));
+    } catch (Path::InvalidPathException &err) {
+        return (parse_error_pages("404", err.what(), server));
     }
 
     // Check if the resource is a STATIC file by file extentions (e.g. .html, .py, .png)

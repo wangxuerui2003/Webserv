@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/30 18:36:59 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 10:53:37 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ class Path {
 
 		Path concat(Path& other);
 		Path concat(std::string otherPath, enum pathType type);
+		Path concat(std::string otherPath);
 
 		Path prepend(Path& other);
 		Path prepend(std::string otherPath, enum pathType type);
@@ -72,6 +73,8 @@ class Path {
 		std::string generateDirectoryListing(void) const;
 
 		std::string getFileExtension(void) const;
+
+		Path getDirectory(void) const;
 
 		class InvalidPathException : public std::exception {
 			private:

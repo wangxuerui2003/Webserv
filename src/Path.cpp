@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/01/31 09:08:53 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 11:04:33 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,11 @@ Path::Path() : _path(""), _type(ERROR_PATH) {
 
 // Auto detect the path type (regfile, symlink or directory only), throw error if invalid path.
 Path::Path(std::string path) : _path(path) {
+	// Remove trailing '/' to avoid error in stat() function
+	if (_path != "/" && _path[_path.length() - 1] == '/') {
+		_path.erase(_path.length() - 1);
+	}
+
 	enum pathType type = getFileType(_path.c_str());
 	if (type == ERROR_PATH) {
 		throw InvalidPathException(path + " is an invalid filesystem path");
@@ -30,6 +35,11 @@ Path::Path(std::string path) : _path(path) {
 Path::Path(std::string path, enum pathType expectedType) : _path(path), _type(expectedType) {
 	if (_type == ERROR_PATH) {
 		throw InvalidOperationException(path + " is an invalid filesystem path");
+	}
+
+	// Remove trailing '/' to avoid error in stat() function
+	if (_path != "/" && _path[_path.length() - 1] == '/') {
+		_path.erase(_path.length() - 1);
 	}
 
 	enum pathType realPathType = getFileType(_path.c_str());
@@ -177,6 +187,26 @@ Path Path::concat(std::string otherPath, enum pathType type) {
 }
 
 /**
+ * @brief Concatenate another path in the form of string and type to the current path object
+ * and return a new path object.
+*/
+Path Path::concat(std::string otherPath) {
+	if (_type != DIRECTORY) {
+		throw InvalidOperationException(_path + " is not a directory");
+	}
+	
+	std::string delimiter = "/";
+	if (_path[_path.length() - 1] == '/') {
+		delimiter = "";
+	}
+
+	if (otherPath[0] == '/') {
+		return Path(_path + delimiter + otherPath.substr(1));
+	}
+	return Path(_path + delimiter + otherPath);
+}
+
+/**
  * @brief Prepend another path to the current path object and return a new path object.
 */
 Path Path::prepend(Path& other) {
@@ -235,7 +265,7 @@ Path Path::mapURLToFS(Path& requestUri, Path& uriPrefix, Path& root, bool isCust
 	const std::string& uriPrefixRef = uriPrefix.getPath();
 
 	if (isCustomRoot == false) {
-		return root.concat(uriRef, URI);
+		return root.concat(uriRef);
 	}
 
 	if (uriRef.substr(0, uriPrefixRef.length()) != uriPrefixRef) {
@@ -243,7 +273,7 @@ Path Path::mapURLToFS(Path& requestUri, Path& uriPrefix, Path& root, bool isCust
 	}
 
 	size_t postfixStart = uriPrefixRef.length();
-	return root.concat(uriRef.substr(postfixStart), URI);
+	return root.concat(uriRef.substr(postfixStart));
 }
 
 /**
@@ -360,4 +390,13 @@ std::string Path::getFileExtension(void) const {
 		return "";
 	}
 	return _path.substr(extentionIndex);
+}
+
+Path Path::getDirectory(void) const {
+	size_t dirDelimiter = _path.find_last_of('/');
+	if (dirDelimiter == std::string::npos) {
+		throw InvalidOperationException("No Parent directory found for" + _path);
+	}
+
+	return Path(_path.substr(0, dirDelimiter), DIRECTORY);
 }
