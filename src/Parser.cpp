@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 21:51:59 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 22:29:51 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void Parser::parse(std::string configFilePath) {
 
     std::ifstream configFile(configFilePath.c_str(), std::ios_base::in);
 	if (!configFile.is_open()) {
-        std::cerr << "Error opening config file." << std::endl;
+        wsutils::errorExit("Error opening config file.");
         return ;
     }
 
@@ -79,9 +79,11 @@ void Parser::parse(std::string configFilePath) {
                                 _location.isCustomRoot = false;
                             } else {
                                 _location.root = Path(getKeywordValues("root", locationLines)[0]);
+                                if (_location.root.getPath()[0] != '/') {
+                                    throw Path::InvalidPathException("root directives should be in Absolute Path format");
+                                }
                                 _location.isCustomRoot = true;
                             }
-                            ("ROOT is: " + _location.root.getPath(), "./logs");
                             
                             // If location doesn't have index vector, get from server block
                             std::vector<std::string> index = getKeywordValues("index", locationLines);
@@ -133,10 +135,14 @@ void Parser::parse(std::string configFilePath) {
                         }
                         _server.hosts.push_back(std::make_pair(host, port));
                     }
-                    if (!getKeywordValues("root", serverLines).empty())
+                    if (!getKeywordValues("root", serverLines).empty()) {
                         _server.root = Path(getKeywordValues("root", serverLines)[0], DIRECTORY);
-                    else
-                        _server.root = Path("./www");
+                        if (_server.root.getPath()[0] != '/') {
+                            throw Path::InvalidPathException("root directives should be in Absolute Path format");
+                        }
+                    } else {
+                        throw Path::InvalidPathException("No root in server block");
+                    }
                     _server.index = getKeywordValues("index", serverLines);
                     _server.server_name = getKeywordValues("server_name", serverLines);
 

@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 21:51:56 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 22:28:29 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ CgiHandler::~CgiHandler() {}
 std::string CgiHandler::handleCgi(Request &request, Server &server, Location &location) {
 	// Getting the absolute path of (e.g. ./www/upload/upload.py) - considering the best fit location block
     Path cgiPath = Path::mapURLToFS(request.getURI(), location.uri, location.root, location.isCustomRoot);
-    cgiPath = wsutils::getRealPath(cgiPath.getPath());
     if (cgiPath.getType() == DIRECTORY) {
         // if the CGI script is the index of the directory, find it
         cgiPath = Response::find_default_index(cgiPath, &location);
