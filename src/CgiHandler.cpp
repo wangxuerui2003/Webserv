@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 12:19:20 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 16:16:07 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
             };
             
             // Execute CGI script
-            char **envp = setEnv(request);
+            char **envp = setEnv(request, location);
             if (execve(cgiRelativePath.c_str(), argv, envp) == -1) {
 				ret = Response::parse_error_pages("500", "Internal Server Error execve", server);
 				write(STDOUT_FILENO, ret.c_str(), ret.length());
@@ -106,18 +106,20 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
     return (ret);
 }
 
-char **CgiHandler::setEnv(Request &request) {
-    char **envp = new char*[request.getHeaderMap().size() + 3 + 1]; // Add 3 for custom, add 1 for the null terminator
-    int i = 0;
-
-    // Add REQUEST_METHOD
-    envp[i++] = strdup((std::string("REQUEST_METHOD=") + request.getMethod()).c_str());
-
-    // Add ROUTE
-    envp[i++] = strdup((std::string("ROUTE=") + request.getURI().getPath()).c_str());
-
-    // Add QUERY_STRING
-    envp[i++] = strdup((std::string("QUERY_STRING=") + request.getQueryParams()).c_str());
+char **CgiHandler::setEnv(Request& request, Location& location) {
+    std::vector<std::string> customEnvp;
+    customEnvp.push_back("REQUEST_METHOD=" + request.getMethod());
+    customEnvp.push_back("ROUTE=" + request.getURI().getPath());
+    customEnvp.push_back("QUERY_STRING=" + request.getQueryParams());
+    if (location.accept_upload == true) {
+        customEnvp.push_back("UPLOAD_STORE=" + location.upload_store.getPath());
+    }
+    
+    char **envp = new char*[request.getHeaderMap().size() + customEnvp.size() + 1];
+    size_t i = 0;
+    for (; i < customEnvp.size(); ++i) {
+        envp[i] = const_cast<char *>(strdup(customEnvp[i].c_str()));
+    }
 
     // Add other header fields
     std::map<std::string, std::string>::iterator it = request.getHeaderMap().begin();

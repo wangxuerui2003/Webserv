@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 14:28:57 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 16:49:11 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ void Parser::parse(std::string configFilePath) {
                             // upload_store
                             std::vector<std::string> uploadStoreStrs = getKeywordValues("upload_store", locationLines);
                             if (uploadStoreStrs.empty() == false) {
-                                _location.upload_store = uploadStoreStrs[0];
+                                _location.upload_store = Path(uploadStoreStrs[0], IGNORE);
                                 _location.accept_upload = true;
                             } else {
                                 _location.accept_upload = false;

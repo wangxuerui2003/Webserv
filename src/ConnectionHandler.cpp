@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 14:23:02 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/01 17:21:18 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,18 @@ ConnectionBuffer::~ConnectionBuffer() {
 */
 ConnectionHandler::ConnectionHandler(const std::vector<Server>& servers) {
 	int listenSocket;
+	std::list<std::string> usedPorts;
+
 	for (std::vector<Server>::const_iterator serverConfig = servers.begin(); serverConfig != servers.end(); ++serverConfig) {
 		for (size_t i = 0; i < serverConfig->hosts.size(); ++i) {
-			listenSocket = createListenSocket(serverConfig->hosts[i].first, serverConfig->hosts[i].second);
+			const std::pair<std::string, std::string>& hostPortPair = serverConfig->hosts[i];
+			if (find(usedPorts.begin(), usedPorts.end(), hostPortPair.second) != usedPorts.end()) {
+				continue;
+			}
+			
+			listenSocket = createListenSocket(hostPortPair.first, hostPortPair.second);
 			_servers[listenSocket] = const_cast<Server *>(&(*serverConfig));
+			usedPorts.push_back(hostPortPair.second);
 		}
 	}
 
