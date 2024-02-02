@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:02:56 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 22:21:15 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/02 12:47:38 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,4 +61,29 @@ void wsutils::log(std::string msg, std::string filename) {
     // outputFile << "\n----------LOG END----------" << std::endl;
 
     outputFile.close();
+}
+
+bool wsutils::isIPv4(const std::string& str) {
+    if (str == "localhost") {
+        return true;
+    }
+
+    std::istringstream iss(str);
+    std::string segment;
+    int num;
+    char delim = '.';
+    int count = 0;
+
+    while (std::getline(iss, segment, delim)) {
+        if (!(std::istringstream(segment) >> num) || num < 0 || num > 255) {
+            return false; // Invalid segment
+        }
+        count++;
+    }
+
+    return count == 4; // Check for exactly four segments
+}
+
+bool wsutils::isCorrectIP(std::string reqIP, std::string hostIP) {
+    return (reqIP == hostIP || (reqIP == "localhost" && hostIP == "127.0.0.1") || hostIP == "0.0.0.0");
 }

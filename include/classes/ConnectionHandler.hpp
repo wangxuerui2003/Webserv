@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 17:18:03 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/02 13:06:37 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <list>
+#include <set>
 
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -39,7 +40,7 @@ struct ConnectionBuffer {
 	bool waitingForMsgBody;
 	bool isChunkedRequest;
 
-	Server *server;
+	// Server *connectedServer;
 };
 
 
@@ -48,8 +49,9 @@ class ConnectionHandler {
 		ConnectionHandler(const std::vector<Server>& servers);
 		~ConnectionHandler();
 
-		int createListenSocket(std::string host, std::string port) const;
+		int createListenSocket(std::string port) const;
 		void createNewConnection(int listenSocket);
+		Server &findServer(Request& request);
 		bool handleConnectionSocketEvent(int connectionSocket, char commonBuffer[COMMON_BUFFER_SIZE]);
 		bool handleChunkedRequest(int connectionSocket, char commonBuffer[COMMON_BUFFER_SIZE], bool newEvent);
 		bool receiveMsgBody(int connectionSocket, bool newEvent);
@@ -60,8 +62,10 @@ class ConnectionHandler {
 		// connectionSocket => Read buffer (waiting for full http request end with \r\n\r\n)
 		std::map<int, ConnectionBuffer> _activeConnections;
 
-		// listenSocket => Server config struct
-		std::map<int, Server*> _servers;
+		std::vector<Server> _servers;
+
+		// // listenSocket => Server config struct
+		std::map<int, Server*> _listenServers;
 		
 		fd_set _readFds;
 		int _maxFd;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:07:17 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 22:21:18 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/02 12:47:46 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ namespace wsutils {
 	size_t convertSizeStringToBytes(const std::string& sizeString);
 	void log(std::string msg, std::ostream& os);
 	void log(std::string msg, std::string filename);
+	bool isIPv4(const std::string& str);
+	bool isCorrectIP(std::string reqIP, std::string hostIP);
 
 	template <typename T>
 	std::string toString(const T& arg) {
