@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 22:28:29 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/02 12:21:47 by zwong            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,6 +123,14 @@ char **CgiHandler::setEnv(Request& request, Location& location, Path& cgiPath) {
     customEnvp.push_back("DOCUMENT_ROOT=" + cgiPath.getDirectory().getPath());
     customEnvp.push_back("SCRIPT_FILENAME=" + cgiPath.getPath());
     customEnvp.push_back("SERVER_PROTOCOL=HTTP/1.1");
+    // Special case HTTP envs
+    customEnvp.push_back("HTTP_USER_AGENT=" + request.getHeader("User-Agent"));
+    customEnvp.push_back("HTTP_ACCEPT=" + request.getHeader("Accept"));
+    customEnvp.push_back("HTTP_REFERER=" + request.getHeader("Referer"));
+    // Cookie header not always present
+    if (!request.getHeader("Cookie").empty())
+        customEnvp.push_back("HTTP_COOKIE=" + request.getHeader("Cookie"));
+
     if (location.accept_upload == true) {
         customEnvp.push_back("UPLOAD_STORE=" + location.upload_store.getPath());
     }
@@ -152,6 +160,10 @@ char **CgiHandler::setEnv(Request& request, Location& location, Path& cgiPath) {
         i++;
     }
     envp[i] = NULL;
+    wsutils::log("ENVP:\n", "./logs");
+    int j = 0;
+    while (envp[j])
+        wsutils::log(envp[j++], "./logs");
     return (envp);
 }
 
