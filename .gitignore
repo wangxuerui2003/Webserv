@@ -13,8 +13,10 @@ webserv
 # local config file
 local.conf
 
+# logs
 log*
 
 # test files
 large_file.txt
 be-deleted.txt
+conf/test.conf
