@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 17:21:18 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/02 13:07:47 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ ConnectionBuffer::ConnectionBuffer() {
 	request = NULL;
 	waitingForMsgBody = false;
 	isChunkedRequest = false;
+	// connectedServer = NULL;
 }
 
 ConnectionBuffer::~ConnectionBuffer() {
@@ -29,20 +30,20 @@ ConnectionBuffer::~ConnectionBuffer() {
  * Generate listening sockets for each Server object
  * And map the listening socket to it's corresponding Server object
 */
-ConnectionHandler::ConnectionHandler(const std::vector<Server>& servers) {
+ConnectionHandler::ConnectionHandler(const std::vector<Server>& servers) : _servers(servers) {
 	int listenSocket;
-	std::list<std::string> usedPorts;
+	std::set<std::string> usedPorts;
 
-	for (std::vector<Server>::const_iterator serverConfig = servers.begin(); serverConfig != servers.end(); ++serverConfig) {
+	for (std::vector<Server>::const_iterator serverConfig = _servers.begin(); serverConfig != _servers.end(); ++serverConfig) {
 		for (size_t i = 0; i < serverConfig->hosts.size(); ++i) {
 			const std::pair<std::string, std::string>& hostPortPair = serverConfig->hosts[i];
-			if (find(usedPorts.begin(), usedPorts.end(), hostPortPair.second) != usedPorts.end()) {
+			if (usedPorts.find(hostPortPair.second) != usedPorts.end()) {
 				continue;
 			}
-			
-			listenSocket = createListenSocket(hostPortPair.first, hostPortPair.second);
-			_servers[listenSocket] = const_cast<Server *>(&(*serverConfig));
-			usedPorts.push_back(hostPortPair.second);
+
+			listenSocket = createListenSocket(hostPortPair.second);
+			_listenServers[listenSocket] = const_cast<Server*>(&(*serverConfig));
+			usedPorts.insert(hostPortPair.second);
 		}
 	}
 
@@ -50,7 +51,7 @@ ConnectionHandler::ConnectionHandler(const std::vector<Server>& servers) {
 }
 
 ConnectionHandler::~ConnectionHandler() {
-	for (std::map<int, Server*>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+	for (std::map<int, Server*>::iterator it = _listenServers.begin(); it != _listenServers.end(); ++it) {
 		close(it->first);
 	}
 
@@ -92,6 +93,7 @@ std::string unchunkRequest(std::string& req) {
     return output.str();
 }
 
+
 bool ConnectionHandler::handleChunkedRequest(int connectionSocket, char commonBuffer[COMMON_BUFFER_SIZE], bool newEvent) {
 	ConnectionBuffer& conn = _activeConnections[connectionSocket];
 
@@ -121,7 +123,8 @@ bool ConnectionHandler::handleChunkedRequest(int connectionSocket, char commonBu
 
 		conn.request->getHeaderMap()["Content-Length"] = wsutils::toString(body.length());
 		conn.request->setBody(body);
-		std::string response = Response::generateResponse(*(conn.request), *conn.server);
+		Server& responseServer = findServer(*(conn.request));
+		std::string response = Response::generateResponse(*(conn.request), responseServer);
 		delete conn.request;
 		conn.request = NULL;
 		conn.isChunkedRequest = false;
@@ -160,7 +163,8 @@ bool ConnectionHandler::receiveMsgBody(int connectionSocket, bool newEvent) {
 	if (conn.requestString.length() >= contentLength) {
 		conn.request->setBody(conn.requestString.substr(0, contentLength));
 		conn.requestString = conn.requestString.substr(contentLength);
-		std::string response = Response::generateResponse(*(conn.request), *conn.server);
+		Server& responseServer = findServer(*(conn.request));
+		std::string response = Response::generateResponse(*(conn.request), responseServer);
 		delete conn.request;
 		conn.request = NULL;
 		conn.waitingForMsgBody = false;
@@ -170,6 +174,32 @@ bool ConnectionHandler::receiveMsgBody(int connectionSocket, bool newEvent) {
 	return true;
 }
 
+Server &ConnectionHandler::findServer(Request& request) {
+	bool reqHostIsIPv4 = wsutils::isIPv4(request.getHost());
+	
+	for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+        Server& currentServer = *it;
+
+		if (reqHostIsIPv4 == true) {
+			// Check hosts if it's an ip address
+			for (size_t j = 0; j < currentServer.hosts.size(); ++j) {
+				std::pair<std::string, std::string> &hostPair = currentServer.hosts[j];
+				if (wsutils::isCorrectIP(request.getHost(), hostPair.first)
+					&& request.getPort() == hostPair.second) {
+					return currentServer;
+				}
+			}
+		} else {
+			// Check server names
+			if (find(currentServer.server_name.begin(), currentServer.server_name.end(), request.getHost()) != currentServer.server_name.end()) {
+				return currentServer;
+			}
+		}
+        
+    }
+
+	throw Response::InvalidServerException();
+}
 
 bool ConnectionHandler::handleConnectionSocketEvent(int connectionSocket, char commonBuffer[COMMON_BUFFER_SIZE]) {
 	ConnectionBuffer& conn = _activeConnections[connectionSocket];
@@ -207,7 +237,8 @@ bool ConnectionHandler::handleConnectionSocketEvent(int connectionSocket, char c
 			} else if ((headers.find("Transfer-Encoding") != headers.end()) && (headers["Transfer-Encoding"] == "chunked")) {
 				conn.isChunkedRequest = true;
 			} else {
-				std::string response = Response::generateResponse(*(conn.request), *conn.server);
+				Server& responseServer = findServer(*(conn.request));
+				std::string response = Response::generateResponse(*(conn.request), responseServer);
 				delete conn.request;
 				conn.request = NULL;
 				send(connectionSocket, response.c_str(), response.length(), 0);
@@ -238,7 +269,7 @@ void ConnectionHandler::serverListen(void) {
 	fd_set tempFds;
 
 	// Let the kernel to monitor all listening sockets events
-	for (std::map<int, Server*>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+	for (std::map<int, Server*>::iterator it = _listenServers.begin(); it != _listenServers.end(); ++it) {
 		int listenSocket = it->first;
 		FD_SET(listenSocket, &_readFds);
 	}
@@ -255,7 +286,7 @@ void ConnectionHandler::serverListen(void) {
 		}
 
 		// Check for listen sockets events
-		for (std::map<int, Server*>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+		for (std::map<int, Server*>::iterator it = _listenServers.begin(); it != _listenServers.end(); ++it) {
 			int listenSocket = it->first;
 			if (FD_ISSET(listenSocket, &tempFds)) {
 				createNewConnection(listenSocket);
@@ -267,8 +298,14 @@ void ConnectionHandler::serverListen(void) {
 		for (std::map<int, ConnectionBuffer>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
 			int connectionSocket = it->first;
 			if (FD_ISSET(connectionSocket, &tempFds)) {
-				if (handleConnectionSocketEvent(connectionSocket, commonBuffer) == false) {
-					// connection has been closed
+				try {
+					if (handleConnectionSocketEvent(connectionSocket, commonBuffer) == false) {
+						// connection has been closed
+						socketsToErase.push_back(connectionSocket);
+					}
+				} catch (Response::InvalidServerException& e) {
+					FD_CLR(connectionSocket, &_readFds);
+					close(connectionSocket);
 					socketsToErase.push_back(connectionSocket);
 				}
 			}
@@ -300,18 +337,17 @@ void ConnectionHandler::createNewConnection(int listenSocket) {
 	}
 
 	_activeConnections[connectionSocket] = ConnectionBuffer();
-	_activeConnections[connectionSocket].server = _servers[listenSocket];
 
 	// std::cout << "Accepted connection from " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }
 
-int ConnectionHandler::createListenSocket(std::string host, std::string port) const {
+int ConnectionHandler::createListenSocket(std::string port) const {
 	struct addrinfo hints, *addressInfo;
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;  // Use IPv4
 	hints.ai_socktype = SOCK_STREAM;  // Use TCP
 
-	int status = getaddrinfo(host.c_str(), port.c_str(), &hints, &addressInfo);
+	int status = getaddrinfo("0.0.0.0", port.c_str(), &hints, &addressInfo);
 	if (status != 0) {
 		wsutils::errorExit(gai_strerror(status));
 	}
