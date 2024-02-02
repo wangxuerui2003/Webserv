@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/02 13:07:47 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/02 14:24:35 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,24 +26,36 @@ ConnectionBuffer::~ConnectionBuffer() {
 	delete request;
 }
 
+
 /**
  * Generate listening sockets for each Server object
- * And map the listening socket to it's corresponding Server object
+ * 
 */
 ConnectionHandler::ConnectionHandler(const std::vector<Server>& servers) : _servers(servers) {
-	int listenSocket;
-	std::set<std::string> usedPorts;
+	std::map<std::string, std::set<std::string> > hostsToBind;
 
 	for (std::vector<Server>::const_iterator serverConfig = _servers.begin(); serverConfig != _servers.end(); ++serverConfig) {
 		for (size_t i = 0; i < serverConfig->hosts.size(); ++i) {
-			const std::pair<std::string, std::string>& hostPortPair = serverConfig->hosts[i];
-			if (usedPorts.find(hostPortPair.second) != usedPorts.end()) {
-				continue;
-			}
+			const std::pair<std::string, std::string>& hostPair = serverConfig->hosts[i];
+			hostsToBind[hostPair.second].insert(hostPair.first);
+		}
+	}
 
-			listenSocket = createListenSocket(hostPortPair.second);
-			_listenServers[listenSocket] = const_cast<Server*>(&(*serverConfig));
-			usedPorts.insert(hostPortPair.second);
+	int listenSocket;
+
+	std::map<std::string, std::set<std::string> >::iterator it = hostsToBind.begin();
+	for (; it != hostsToBind.end(); ++it) {
+		std::set<std::string>& hostsOfPort = it->second;
+		// If there is 0.0.0.0 for this port, bind only to 0.0.0.0
+		if (hostsOfPort.find(std::string("0.0.0.0")) != hostsOfPort.end()) {
+			listenSocket = createListenSocket("0.0.0.0", it->first);
+			_listenSockets.push_back(listenSocket);
+		} else {
+			// 1 or multiple (but distinct) hosts binded to the same port
+			for (std::set<std::string>::iterator host = hostsOfPort.begin(); host != hostsOfPort.end(); ++host) {
+				listenSocket = createListenSocket(*host, it->first);
+				_listenSockets.push_back(listenSocket);
+			}
 		}
 	}
 
@@ -51,8 +63,8 @@ ConnectionHandler::ConnectionHandler(const std::vector<Server>& servers) : _serv
 }
 
 ConnectionHandler::~ConnectionHandler() {
-	for (std::map<int, Server*>::iterator it = _listenServers.begin(); it != _listenServers.end(); ++it) {
-		close(it->first);
+	for (std::list<int>::iterator it = _listenSockets.begin(); it != _listenSockets.end(); ++it) {
+		close(*it);
 	}
 
 	for (std::map<int, ConnectionBuffer>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
@@ -269,8 +281,8 @@ void ConnectionHandler::serverListen(void) {
 	fd_set tempFds;
 
 	// Let the kernel to monitor all listening sockets events
-	for (std::map<int, Server*>::iterator it = _listenServers.begin(); it != _listenServers.end(); ++it) {
-		int listenSocket = it->first;
+	for (std::list<int>::iterator lsock = _listenSockets.begin(); lsock != _listenSockets.end(); ++lsock) {
+		int listenSocket = *lsock;
 		FD_SET(listenSocket, &_readFds);
 	}
 
@@ -286,8 +298,8 @@ void ConnectionHandler::serverListen(void) {
 		}
 
 		// Check for listen sockets events
-		for (std::map<int, Server*>::iterator it = _listenServers.begin(); it != _listenServers.end(); ++it) {
-			int listenSocket = it->first;
+		for (std::list<int>::iterator lsock = _listenSockets.begin(); lsock != _listenSockets.end(); ++lsock) {
+			int listenSocket = *lsock;
 			if (FD_ISSET(listenSocket, &tempFds)) {
 				createNewConnection(listenSocket);
 			}
@@ -341,13 +353,13 @@ void ConnectionHandler::createNewConnection(int listenSocket) {
 	// std::cout << "Accepted connection from " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }
 
-int ConnectionHandler::createListenSocket(std::string port) const {
+int ConnectionHandler::createListenSocket(std::string host, std::string port) const {
 	struct addrinfo hints, *addressInfo;
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;  // Use IPv4
 	hints.ai_socktype = SOCK_STREAM;  // Use TCP
 
-	int status = getaddrinfo("0.0.0.0", port.c_str(), &hints, &addressInfo);
+	int status = getaddrinfo(host.c_str(), port.c_str(), &hints, &addressInfo);
 	if (status != 0) {
 		wsutils::errorExit(gai_strerror(status));
 	}
@@ -381,6 +393,8 @@ int ConnectionHandler::createListenSocket(std::string port) const {
 		close(listenSocket);
 		wsutils::errorExit(strerror(errno));
 	}
+
+	std::cerr << "Binded " << host << ':' << port << std::endl;
 
 	return listenSocket;
 }

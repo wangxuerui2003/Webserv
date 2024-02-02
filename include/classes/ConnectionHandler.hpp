@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/02 13:06:37 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/02 13:57:10 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ class ConnectionHandler {
 		ConnectionHandler(const std::vector<Server>& servers);
 		~ConnectionHandler();
 
-		int createListenSocket(std::string port) const;
+		int createListenSocket(std::string host, std::string port) const;
 		void createNewConnection(int listenSocket);
 		Server &findServer(Request& request);
 		bool handleConnectionSocketEvent(int connectionSocket, char commonBuffer[COMMON_BUFFER_SIZE]);
@@ -61,11 +61,11 @@ class ConnectionHandler {
 	private:
 		// connectionSocket => Read buffer (waiting for full http request end with \r\n\r\n)
 		std::map<int, ConnectionBuffer> _activeConnections;
-
+		std::list<int> _listenSockets;
 		std::vector<Server> _servers;
 
 		// // listenSocket => Server config struct
-		std::map<int, Server*> _listenServers;
+		// std::map<int, Server*> _listenServers;
 		
 		fd_set _readFds;
 		int _maxFd;
