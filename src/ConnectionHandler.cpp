@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/02 17:01:44 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/02 21:14:33 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,7 @@ bool ConnectionHandler::handleChunkedRequest(int connectionSocket, bool newEvent
 			return false;
 		} else if (bytesRead == 0) {
 			// Client closed the connection
+			// close(connectionSocket);
 			return false;
 		}
 
@@ -162,8 +163,7 @@ bool ConnectionHandler::receiveMsgBody(int connectionSocket, bool newEvent) {
 			return false;
 		} else if (bytesRead == 0) {
 			// Client closed the connection
-			FD_CLR(connectionSocket, &_readFds);
-			close(connectionSocket);
+			// close(connectionSocket);
 			return false;
 		}
 	}
@@ -207,6 +207,7 @@ bool ConnectionHandler::connectionSocketRecv(int connectionSocket) {
 		return false;
 	} else if (bytesRead == 0) {
 		// Client closed the connection
+		// close(connectionSocket);
 		return false;
 	} else {
 		conn.requestString.append(buffer, bytesRead);
@@ -294,6 +295,7 @@ void ConnectionHandler::initFds(void) {
 void ConnectionHandler::serverListen(void) {
 	// Forever listen for new connection or new data to be read
 	while (true) {
+		// usleep(2000);
 		initFds();
 		// std::cout << "Active Connections Left: " + wsutils::toString(_activeConnections.size()) << std::endl;
 		// std::cout << "Max FD: " + wsutils::toString(_maxFd) << std::endl;
@@ -319,9 +321,15 @@ void ConnectionHandler::serverListen(void) {
 			// write events (ready to send response back to client)
 			if (FD_ISSET(connectionSocket, &_writeFds)) {
 				std::string& responseString = _activeConnections[connectionSocket].responseString;
-				send(connectionSocket, responseString.c_str(), responseString.length(), 0);
-				_activeConnections[connectionSocket].readyToResponse = false;
-				_activeConnections[connectionSocket].responseString = "";
+				size_t bytesSent = send(connectionSocket, responseString.c_str(), responseString.length(), 0);
+				if (bytesSent < 0) {
+					socketsToErase.push_back(connectionSocket);
+				} else if (bytesSent < responseString.length()) {
+					responseString = responseString.substr(bytesSent - 1);
+				} else {
+					_activeConnections[connectionSocket].readyToResponse = false;
+					_activeConnections[connectionSocket].responseString = "";
+				}
 			}
 			
 			// read events (ready to read data sent from client)
@@ -353,13 +361,6 @@ void ConnectionHandler::createNewConnection(int listenSocket) {
 	if (connectionSocket == -1) {
 		wsutils::warningOutput(strerror(errno));
 		return;
-	}
-
-	// Add the conenction socket to readFds
-	FD_SET(connectionSocket, &_readFds);
-	
-	if (connectionSocket > _maxFd) {
-		_maxFd = connectionSocket;
 	}
 
 	_activeConnections[connectionSocket] = ConnectionBuffer();
