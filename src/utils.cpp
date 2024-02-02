@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:02:56 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/02 12:47:38 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/02 15:35:34 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,4 +86,37 @@ bool wsutils::isIPv4(const std::string& str) {
 
 bool wsutils::isCorrectIP(std::string reqIP, std::string hostIP) {
     return (reqIP == hostIP || (reqIP == "localhost" && hostIP == "127.0.0.1") || hostIP == "0.0.0.0");
+}
+
+std::string wsutils::unchunkRequest(std::string& req) {
+	std::istringstream input(req);
+    std::ostringstream output;
+
+    std::string line;
+    while (!input.eof()) {
+        std::getline(input, line);
+
+        // Parse the hexadecimal chunk size
+        std::istringstream sizeStream(line);
+        size_t chunkSize = 0;
+        sizeStream >> std::hex >> chunkSize;
+
+        if (chunkSize == 0) {
+            // End of chunks
+            break;
+        }
+
+        // Read the chunk data
+        char buffer[chunkSize + 1];
+        input.read(buffer, chunkSize);
+        buffer[chunkSize] = '\0';
+
+        // Append the chunk data to the output
+        output.write(buffer, chunkSize);
+
+        // Read and discard the CRLF following the chunk
+        input.ignore(2);
+    }
+
+    return output.str();
 }

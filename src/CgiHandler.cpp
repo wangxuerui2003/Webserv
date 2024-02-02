@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/02 12:21:47 by zwong            ###   ########.fr       */
+/*   Updated: 2024/02/02 16:03:26 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,13 +168,13 @@ char **CgiHandler::setEnv(Request& request, Location& location, Path& cgiPath) {
 }
 
 std::string	CgiHandler::parseCgiOutput(int pipefd_output, int pipefd_error) {
-	char buffer[COMMON_BUFFER_SIZE];
+	char buffer[READ_BUFFER_SIZE];
 	std::string output;
 	int rec_byte;
 
-	while ((rec_byte = read(pipefd_output, buffer, COMMON_BUFFER_SIZE)) != 0)
+	while ((rec_byte = read(pipefd_output, buffer, READ_BUFFER_SIZE)) != 0)
 		output.append(buffer, rec_byte);
-	while ((rec_byte = read(pipefd_error, buffer, COMMON_BUFFER_SIZE)) != 0)
+	while ((rec_byte = read(pipefd_error, buffer, READ_BUFFER_SIZE)) != 0)
 		output.append(buffer,rec_byte);
 	return (output);
 }

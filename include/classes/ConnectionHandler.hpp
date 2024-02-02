@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/02 13:57:10 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/02 16:40:39 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,8 @@ struct ConnectionBuffer {
 	bool waitingForMsgBody;
 	bool isChunkedRequest;
 
-	// Server *connectedServer;
+	bool readyToResponse;
+	std::string responseString;
 };
 
 
@@ -52,10 +53,11 @@ class ConnectionHandler {
 		int createListenSocket(std::string host, std::string port) const;
 		void createNewConnection(int listenSocket);
 		Server &findServer(Request& request);
-		bool handleConnectionSocketEvent(int connectionSocket, char commonBuffer[COMMON_BUFFER_SIZE]);
-		bool handleChunkedRequest(int connectionSocket, char commonBuffer[COMMON_BUFFER_SIZE], bool newEvent);
+		bool connectionSocketRecv(int connectionSocket);
+		bool handleChunkedRequest(int connectionSocket, bool newEvent);
 		bool receiveMsgBody(int connectionSocket, bool newEvent);
 
+		void initFds(void);
 		void serverListen(void);
 
 	private:
@@ -68,6 +70,7 @@ class ConnectionHandler {
 		// std::map<int, Server*> _listenServers;
 		
 		fd_set _readFds;
+		fd_set _writeFds;
 		int _maxFd;
 };
 
