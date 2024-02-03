@@ -6,12 +6,13 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:47:59 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 13:37:18 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 14:52:58 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 #include "Select.hpp"
+#include "Poll.hpp"
 #include "Parser.hpp"
 
 int main(int ac, char **av) {
@@ -36,7 +37,7 @@ int main(int ac, char **av) {
 	const std::vector<Server>& servers = parser.getServers();
 
 	// Spawn the connection handler from the configurations
-	Select handler(servers);
+	Poll handler(servers);
 
 	// Infinite loop handle connections
 	handler.serverListen();

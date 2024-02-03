@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 11:43:50 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 11:52:58 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 15:30:27 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void Select::initFds(void) {
 	// reset _maxFd
 	_maxFd = -1;
 	
-	// monitor all listening sockets
+	// monitor all listening sockets on read events only
 	// increment _maxFd if needed
 	for (std::list<int>::iterator lsock = _listenSockets.begin(); lsock != _listenSockets.end(); ++lsock) {
 		FD_SET(*lsock, &_readFds);
@@ -82,20 +82,23 @@ void Select::serverListen(void) {
 		}
 
 		// Check for listen sockets events
-		for (std::list<int>::iterator lsock = _listenSockets.begin(); lsock != _listenSockets.end(); ++lsock) {
-			int listenSocket = *lsock;
-			if (FD_ISSET(listenSocket, &_readFds)) {
-				createNewConnection(listenSocket);
+		std::list<int>::iterator lsock;
+		for (lsock = _listenSockets.begin(); lsock != _listenSockets.end() && nready > 0; ++lsock) {
+			if (FD_ISSET(*lsock, &_readFds)) {
+				--nready;
+				createNewConnection(*lsock);
 			}
 		}
 
 		// Check for connection sockets events
 		std::list<int> socketsToErase;
-		for (std::map<int, ConnectionBuffer>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
-			int connectionSocket = it->first;
+		std::map<int, ConnectionBuffer>::iterator csock;
+		for (csock = _activeConnections.begin(); csock != _activeConnections.end() && nready > 0; ++csock) {
+			int connectionSocket = csock->first;
 
 			// write events (ready to send response back to client)
 			if (FD_ISSET(connectionSocket, &_writeFds)) {
+				--nready;
 				std::string& responseString = _activeConnections[connectionSocket].responseString;
 				int bytesSent = send(connectionSocket, responseString.c_str(), responseString.length(), 0);
 				if (bytesSent < 0) {
@@ -110,6 +113,7 @@ void Select::serverListen(void) {
 			
 			// read events (ready to read data sent from client)
 			else if (FD_ISSET(connectionSocket, &_readFds)) {
+				--nready;
 				try {
 					if (connectionSocketRecv(connectionSocket) == false) {
 						socketsToErase.push_back(connectionSocket);
@@ -124,6 +128,5 @@ void Select::serverListen(void) {
 			close(*it);
 			_activeConnections.erase(*it);
 		}
-		socketsToErase.clear();
 	}
 }

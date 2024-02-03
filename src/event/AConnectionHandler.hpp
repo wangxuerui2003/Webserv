@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 12:58:30 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 14:35:18 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,10 +44,11 @@ class AConnectionHandler {
 		bool handleChunkedRequest(int connectionSocket, bool newEvent);
 		bool receiveMsgBody(int connectionSocket, bool newEvent);
 
-		virtual void initFds(void) = 0;
 		virtual void serverListen(void) = 0;
 
 	protected:
+		virtual void initFds(void) = 0;
+		
 		// connectionSocket => Read buffer (waiting for full http request end with \r\n\r\n)
 		std::map<int, ConnectionBuffer> _activeConnections;
 

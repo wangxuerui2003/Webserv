@@ -6,7 +6,7 @@
 #    By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/12 11:48:29 by wxuerui           #+#    #+#              #
-#    Updated: 2024/02/03 14:17:28 by wxuerui          ###   ########.fr        #
+#    Updated: 2024/02/03 14:26:18 by wxuerui          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -55,7 +55,7 @@ INCLUDES	=	-I$(INC_DIR) \
 ############################
 
 CGI_FILES	=	CgiHandler
-EVENT_FILES	=	AConnectionHandler Select
+EVENT_FILES	=	AConnectionHandler Select Poll
 HTTP_FILES	=	Request Response
 CONFIG_FILES=	Parser Config
 PATH_FILES	=	Path
