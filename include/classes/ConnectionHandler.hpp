@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/02 16:40:39 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 11:06:23 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ class ConnectionHandler {
 		bool handleChunkedRequest(int connectionSocket, bool newEvent);
 		bool receiveMsgBody(int connectionSocket, bool newEvent);
 
-		void initFds(void);
+		int selectInitFds(fd_set *readFds, fd_set *writeFds);
 		void serverListen(void);
 
 	private:
@@ -65,13 +65,6 @@ class ConnectionHandler {
 		std::map<int, ConnectionBuffer> _activeConnections;
 		std::list<int> _listenSockets;
 		std::vector<Server> _servers;
-
-		// // listenSocket => Server config struct
-		// std::map<int, Server*> _listenServers;
-		
-		fd_set _readFds;
-		fd_set _writeFds;
-		int _maxFd;
 };
 
 #endif

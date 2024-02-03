@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConnectionHandler.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/02 21:14:33 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 11:22:43 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,6 @@ ConnectionHandler::ConnectionHandler(const std::vector<Server>& servers) : _serv
 			}
 		}
 	}
-
-	_maxFd = listenSocket;
 }
 
 ConnectionHandler::~ConnectionHandler() {
@@ -244,38 +242,43 @@ bool ConnectionHandler::connectionSocketRecv(int connectionSocket) {
 	return true;
 }
 
-void ConnectionHandler::initFds(void) {
+/**
+ * @return maxFd
+*/
+int ConnectionHandler::selectInitFds(fd_set *readFds, fd_set *writeFds) {
 	// clear all states in read and write fd sets
-	FD_ZERO(&_readFds);
-	FD_ZERO(&_writeFds);
+	FD_ZERO(readFds);
+	FD_ZERO(writeFds);
 
-	// reset _maxFd
-	_maxFd = -1;
+	// reset maxFd
+	int maxFd = -1;
 	
 	// monitor all listening sockets
-	// increment _maxFd if needed
+	// increment maxFd if needed
 	for (std::list<int>::iterator lsock = _listenSockets.begin(); lsock != _listenSockets.end(); ++lsock) {
-		FD_SET(*lsock, &_readFds);
-		if (*lsock > _maxFd) {
-			_maxFd = *lsock;
+		FD_SET(*lsock, readFds);
+		if (*lsock > maxFd) {
+			maxFd = *lsock;
 		}
 	}
 
 	// for active connections:
 	// if ready to response, add to write fd set
 	// if not yet ready, add to read fd set
-	// increment _maxFd if needed
+	// increment maxFd if needed
 	for (std::map<int, ConnectionBuffer>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
 		if (it->second.readyToResponse == true) {
-			FD_SET(it->first, &_writeFds);
+			FD_SET(it->first, writeFds);
 		} else {
-			FD_SET(it->first, &_readFds);
+			FD_SET(it->first, readFds);
 		}
 
-		if (it->first > _maxFd) {
-			_maxFd = it->first;
+		if (it->first > maxFd) {
+			maxFd = it->first;
 		}
 	}
+
+	return maxFd;
 }
 
 
@@ -293,14 +296,16 @@ void ConnectionHandler::initFds(void) {
  * When a connection socket recv() returns 0, means client closed the connection.
 */
 void ConnectionHandler::serverListen(void) {
+	fd_set readFds;
+	fd_set writeFds;
+	int maxFd;
 	// Forever listen for new connection or new data to be read
 	while (true) {
-		// usleep(2000);
-		initFds();
+		maxFd = selectInitFds(&readFds, &writeFds);
 		// std::cout << "Active Connections Left: " + wsutils::toString(_activeConnections.size()) << std::endl;
-		// std::cout << "Max FD: " + wsutils::toString(_maxFd) << std::endl;
+		// std::cout << "Max FD: " + wsutils::toString(maxFd) << std::endl;
 
-		int nready = select(_maxFd + 1, &_readFds, &_writeFds, NULL, NULL);
+		int nready = select(maxFd + 1, &readFds, &writeFds, NULL, NULL);
 		if (nready == -1) {
 			wsutils::errorExit(strerror(errno));
 		}
@@ -308,7 +313,7 @@ void ConnectionHandler::serverListen(void) {
 		// Check for listen sockets events
 		for (std::list<int>::iterator lsock = _listenSockets.begin(); lsock != _listenSockets.end(); ++lsock) {
 			int listenSocket = *lsock;
-			if (FD_ISSET(listenSocket, &_readFds)) {
+			if (FD_ISSET(listenSocket, &readFds)) {
 				createNewConnection(listenSocket);
 			}
 		}
@@ -319,21 +324,21 @@ void ConnectionHandler::serverListen(void) {
 			int connectionSocket = it->first;
 
 			// write events (ready to send response back to client)
-			if (FD_ISSET(connectionSocket, &_writeFds)) {
+			if (FD_ISSET(connectionSocket, &writeFds)) {
 				std::string& responseString = _activeConnections[connectionSocket].responseString;
-				size_t bytesSent = send(connectionSocket, responseString.c_str(), responseString.length(), 0);
+				int bytesSent = send(connectionSocket, responseString.c_str(), responseString.length(), 0);
 				if (bytesSent < 0) {
 					socketsToErase.push_back(connectionSocket);
-				} else if (bytesSent < responseString.length()) {
+				} else if (bytesSent < static_cast<int>(responseString.length())) {
 					responseString = responseString.substr(bytesSent - 1);
 				} else {
-					_activeConnections[connectionSocket].readyToResponse = false;
 					_activeConnections[connectionSocket].responseString = "";
+					_activeConnections[connectionSocket].readyToResponse = false;
 				}
 			}
 			
 			// read events (ready to read data sent from client)
-			else if (FD_ISSET(connectionSocket, &_readFds)) {
+			else if (FD_ISSET(connectionSocket, &readFds)) {
 				try {
 					if (connectionSocketRecv(connectionSocket) == false) {
 						socketsToErase.push_back(connectionSocket);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/02 13:39:23 by zwong            ###   ########.fr       */
+/*   Updated: 2024/02/03 11:23:22 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,10 +133,15 @@ void Parser::parse(std::string configFilePath) {
                             std::getline(iss, host, ':');
                             std::getline(iss, port);
                         }
-                        std::vector<std::pair<std::string, std::string> >::iterator listen_result = std::find(_server.hosts.begin(), _server.hosts.end(), std::make_pair(host, port));
-                        if (listen_result != _server.hosts.end())
-                            throw Path::InvalidPathException("duplicate listen in server block");
-                        _server.hosts.push_back(std::make_pair(host, port));
+                        std::pair<std::string, std::string> currHostPair = std::make_pair(host, port);
+                        std::vector<std::pair<std::string, std::string> >::iterator hostPair;
+                        for (hostPair = _server.hosts.begin(); hostPair != _server.hosts.end(); ++hostPair) {
+                            if (currHostPair.first == hostPair->first && currHostPair.second == hostPair->second) {
+                                throw Path::InvalidPathException("duplicate listen in server block");
+                            }
+                        }
+                        
+                        _server.hosts.push_back(currHostPair);
                     }
                     if (!getKeywordValues("root", serverLines).empty()) {
                         _server.root = Path(getKeywordValues("root", serverLines)[0], DIRECTORY);
