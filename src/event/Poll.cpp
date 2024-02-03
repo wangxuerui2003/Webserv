@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 14:25:42 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 15:26:23 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 15:44:33 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,24 +21,13 @@ Poll::~Poll() {
 }
 
 void	Poll::initFds(void) {
-
-	// Reset pollfds to -1 (kernel will ignore -1 fds)
-	for (int i = 0; i < MAX_POLL_FDS; ++i) {
-		_monitorFds[i].fd = -1;
-	}
-
-	// reset _maxFd
-	_maxFd = 0;
-
+	// Resize to just enough size for all listening and connection sockets
+	_monitorFds.resize(_listenSockets.size() + _activeConnections.size());
 	int currPollFd = 0;
 
 	// monitor all listening sockets on read events only
 	// increment _maxFd if needed
 	for (std::list<int>::iterator lsock = _listenSockets.begin(); lsock != _listenSockets.end(); ++lsock) {
-		if (currPollFd >= MAX_POLL_FDS - 1) {
-			break;
-		}
-
 		_monitorFds[currPollFd].fd = *lsock;
 		_monitorFds[currPollFd].events = POLLIN;
 		currPollFd++;
@@ -49,10 +38,6 @@ void	Poll::initFds(void) {
 	// if not yet ready, monitor read events
 	// increment _maxFd if needed
 	for (std::map<int, ConnectionBuffer>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
-		if (currPollFd >= MAX_POLL_FDS - 1) {
-			break;
-		}
-
 		_monitorFds[currPollFd].fd = it->first;
 		if (it->second.readyToResponse == true) {
 			_monitorFds[currPollFd].events = POLLOUT;
@@ -62,8 +47,6 @@ void	Poll::initFds(void) {
 
 		currPollFd++;
 	}
-
-	_maxFd = currPollFd;
 }
 
 
@@ -87,49 +70,50 @@ void	Poll::serverListen(void) {
 		// std::cout << "Active Connections Left: " + wsutils::toString(_activeConnections.size()) << std::endl;
 		// std::cout << "Max FD: " + wsutils::toString(_maxFd) << std::endl;
 
-		int nready = poll(_monitorFds, _maxFd + 1, -1);  // -1 for block forever if no event
+		int nready = poll(_monitorFds.data(), _monitorFds.size(), -1);  // -1 for block forever if no event
 		if (nready == -1) {
 			wsutils::errorExit(strerror(errno));
 		}
 
 		std::list<int> socketsToErase;
-		for (int i = 0; i < _maxFd + 1 && nready > 0; ++i) {
+		std::vector<struct pollfd>::iterator it;
+		for (it = _monitorFds.begin(); it != _monitorFds.end() && nready > 0; ++it) {
 			// current fd has event returned
-			if (_monitorFds[i].revents != 0) {
+			if (it->revents != 0) {
 				--nready;
-				int fd = _monitorFds[i].fd;
+				int eventSock = it->fd;
 
 				// for listen sockets, only have read events, no need to check revents
-				if (std::find(_listenSockets.begin(), _listenSockets.end(), fd) != _listenSockets.end()) {
-					createNewConnection(fd);
+				if (std::find(_listenSockets.begin(), _listenSockets.end(), eventSock) != _listenSockets.end()) {
+					createNewConnection(eventSock);
 				}
 				
 				// connection socket event
 				else {
-					short revent = _monitorFds[i].revents;
+					short revent = it->revents;
 
 					// write events (ready to send response back to client)
 					if (revent & POLLOUT) {
-						std::string& responseString = _activeConnections[fd].responseString;
-						int bytesSent = send(fd, responseString.c_str(), responseString.length(), 0);
+						std::string& responseString = _activeConnections[eventSock].responseString;
+						int bytesSent = send(eventSock, responseString.c_str(), responseString.length(), 0);
 						if (bytesSent < 0) {
-							socketsToErase.push_back(fd);
+							socketsToErase.push_back(eventSock);
 						} else if (bytesSent < static_cast<int>(responseString.length())) {
 							responseString = responseString.substr(bytesSent - 1);
 						} else {
-							_activeConnections[fd].responseString = "";
-							_activeConnections[fd].readyToResponse = false;
+							_activeConnections[eventSock].responseString = "";
+							_activeConnections[eventSock].readyToResponse = false;
 						}
 					}
 					
 					// read events (ready to read data sent from client)
 					else if (revent & POLLIN) {
 						try {
-							if (connectionSocketRecv(fd) == false) {
-								socketsToErase.push_back(fd);
+							if (connectionSocketRecv(eventSock) == false) {
+								socketsToErase.push_back(eventSock);
 							}
 						} catch (Response::InvalidServerException& e) {
-							socketsToErase.push_back(fd);
+							socketsToErase.push_back(eventSock);
 						}
 					}
 
