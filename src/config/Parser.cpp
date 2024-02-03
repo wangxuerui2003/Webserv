@@ -6,13 +6,14 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 13:03:41 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 16:40:02 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
 
 Parser::Parser() {
+    _eventHandlerType = SELECT;  // default is select()
 }
 
 Parser& Parser::getInstance() {
@@ -22,6 +23,10 @@ Parser& Parser::getInstance() {
 
 const std::vector<Server>& Parser::getServers(void) const {
 	return _servers;
+}
+
+enum event Parser::getEventHandlerType(void) const {
+    return _eventHandlerType;
 }
 
 void Parser::parse(std::string configFilePath) {
@@ -43,6 +48,29 @@ void Parser::parse(std::string configFilePath) {
 
     // check for server blocks and location blocks
     for (size_t i = 0; i < configLines.size(); i++) {
+        if (configLines[i].find("event {") != std::string::npos) {
+            std::vector<std::string> eventLines;
+            while (++i < configLines.size()) {
+                eventLines.push_back(configLines[i]);
+                if (configLines[i].find("}") != std::string::npos) {
+                    std::vector<std::string> eventHandlerVect = getKeywordValues("event_handler", eventLines);
+                    if (eventHandlerVect.size() > 1) {
+                        wsutils::errorExit("Too many event handlers");
+                    } else if (eventHandlerVect.empty()) {
+                        wsutils::errorExit("No event handler specified in event context");
+                    }
+                    if (eventHandlerVect[0] == "select") {
+                        _eventHandlerType = SELECT;
+                    } else if (eventHandlerVect[0] == "poll") {
+                        _eventHandlerType = POLL;
+                    } else {
+                        wsutils::errorExit("Invalid event handler");
+                    }
+                    break;
+                }
+            }
+        }
+
         if (configLines[i].find("server {") != std::string::npos) {
             std::vector<std::string> serverLines;
             std::vector<Location> _locations;
@@ -193,7 +221,7 @@ void Parser::parse(std::string configFilePath) {
     }
 }
 
-std::vector<std::string> Parser::getKeywordValues(std::string keyword, std::vector<std::string> serverLines) {
+std::vector<std::string> Parser::getKeywordValues(std::string keyword, std::vector<std::string>& serverLines) {
     std::vector<std::string> values;
     for (size_t i = 0; i < serverLines.size(); ++i) {
         std::string value;

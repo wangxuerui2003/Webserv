@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:47:59 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 14:52:58 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 16:31:03 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,18 @@ int main(int ac, char **av) {
 
 	const std::vector<Server>& servers = parser.getServers();
 
-	// Spawn the connection handler from the configurations
-	Poll handler(servers);
+	AConnectionHandler *connectionHandler;
+	if (parser.getEventHandlerType() == SELECT) {
+		connectionHandler = new Select(servers);
+	} else {
+		connectionHandler = new Poll(servers);
+	}
 
 	// Infinite loop handle connections
-	handler.serverListen();
+	connectionHandler->serverListen();
+
+	// although will never execute
+	delete connectionHandler;
 
 	return 0;
 }

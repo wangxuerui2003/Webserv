@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 17:55:47 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 13:37:25 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 16:37:56 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,9 @@ class Parser {
 		static Parser& getInstance(void);
 
 		const std::vector<Server>& getServers(void) const;
+		enum event getEventHandlerType(void) const;
 	
-		std::vector<std::string> getKeywordValues(std::string keyword, std::vector<std::string> serverLines);
+		std::vector<std::string> getKeywordValues(std::string keyword, std::vector<std::string>& serverLines);
 
 		void parse(std::string configFilePath);
 
@@ -37,6 +38,7 @@ class Parser {
 		Parser(const Parser& copy);
 		Parser& operator=(const Parser& copy);
 
+		enum event _eventHandlerType;
 		std::vector<Server> _servers;
 };
 

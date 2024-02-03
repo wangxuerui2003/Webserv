@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 13:02:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 13:12:34 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 16:25:23 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,11 @@
 
 #include "webserv.hpp"
 #include "Path.hpp"
+
+enum event {
+	SELECT,
+	POLL
+};
 
 struct Location {
 	Location();
