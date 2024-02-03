@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:01:20 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/02 16:03:26 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 12:01:38 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,32 @@
 
 #define READ_BUFFER_SIZE 1024
 
-#include "Parser.hpp"
-#include "Path.hpp"
-#include "ConnectionHandler.hpp"
+#include <cstdlib>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <cstring>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
+#include <algorithm>
+#include <list>
+#include <set>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <utility>
+#include <exception>
+#include <vector>
+#include <map>
+
+#include "Path.hpp"
 #include "colors.hpp"
 #include "utils.hpp"
-
-#include <cstdlib>
 
 #define USAGE "Usage: ./webserv <config_file>"
 #define DEFAULT_CONFIG "./conf/local.conf"

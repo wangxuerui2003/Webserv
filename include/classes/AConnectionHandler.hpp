@@ -1,34 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ConnectionHandler.hpp                              :+:      :+:    :+:   */
+/*   AConnectionHandler.hpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 11:06:23 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 11:56:27 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CONNECTIONHANDLER_HPP
-#define CONNECTIONHANDLER_HPP
+#ifndef ACONNECTIONHANDLER_HPP
+#define ACONNECTIONHANDLER_HPP
 
-#include "Parser.hpp"
-#include "Path.hpp"
-#include "utils.hpp"
+#include "webserv.hpp"
 #include "Response.hpp"
-
-#include <algorithm>
-#include <list>
-#include <set>
-
-#include <sys/socket.h>
-#include <sys/select.h>
-#include <sys/types.h>
-#include <cstring>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
 
 
 struct ConnectionBuffer {
@@ -45,10 +31,10 @@ struct ConnectionBuffer {
 };
 
 
-class ConnectionHandler {
+class AConnectionHandler {
 	public:
-		ConnectionHandler(const std::vector<Server>& servers);
-		~ConnectionHandler();
+		AConnectionHandler(const std::vector<Server>& servers);
+		virtual ~AConnectionHandler();
 
 		int createListenSocket(std::string host, std::string port) const;
 		void createNewConnection(int listenSocket);
@@ -57,12 +43,13 @@ class ConnectionHandler {
 		bool handleChunkedRequest(int connectionSocket, bool newEvent);
 		bool receiveMsgBody(int connectionSocket, bool newEvent);
 
-		int selectInitFds(fd_set *readFds, fd_set *writeFds);
-		void serverListen(void);
+		virtual void initFds(void) = 0;
+		virtual void serverListen(void) = 0;
 
-	private:
+	protected:
 		// connectionSocket => Read buffer (waiting for full http request end with \r\n\r\n)
 		std::map<int, ConnectionBuffer> _activeConnections;
+
 		std::list<int> _listenSockets;
 		std::vector<Server> _servers;
 };

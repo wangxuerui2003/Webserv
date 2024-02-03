@@ -6,25 +6,14 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 18:17:31 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 11:59:55 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PATH_HPP
 #define PATH_HPP
 
-#include <string>
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <exception>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <sys/types.h>
-#include <dirent.h>
-
-#include "utils.hpp"
+#include "webserv.hpp"
 
 enum pathType {
 	REG_FILE,

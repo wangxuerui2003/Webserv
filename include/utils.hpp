@@ -3,20 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:07:17 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/02 15:35:44 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 12:02:00 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include "colors.hpp"
+#include "webserv.hpp"
 
 namespace wsutils {
 	void errorExit(const char *msg);

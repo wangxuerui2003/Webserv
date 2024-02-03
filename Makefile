@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: zwong <zwong@student.42kl.edu.my>          +#+  +:+       +#+         #
+#    By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/12 11:48:29 by wxuerui           #+#    #+#              #
-#    Updated: 2024/01/29 13:47:08 by zwong            ###   ########.fr        #
+#    Updated: 2024/02/03 11:44:05 by wxuerui          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,7 +33,8 @@ vpath %.o	$(OBJ_DIR)
 SRC_FILES	=	main \
 				Parser \
 				Path \
-				ConnectionHandler \
+				AConnectionHandler \
+				Select \
 				Request	\
 				Response \
 				utils \

@@ -6,11 +6,12 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:47:59 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 14:26:30 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 12:04:19 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
+#include "Select.hpp"
 
 int main(int ac, char **av) {
 	if (ac > 2) {
@@ -33,8 +34,8 @@ int main(int ac, char **av) {
 
 	const std::vector<Server>& servers = parser.getServers();
 
-	// Spawn the servers from the configurations
-	ConnectionHandler handler(servers);
+	// Spawn the connection handler from the configurations
+	Select handler(servers);
 
 	// Infinite loop handle connections
 	handler.serverListen();

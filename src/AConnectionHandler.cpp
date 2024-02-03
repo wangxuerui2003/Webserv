@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ConnectionHandler.cpp                              :+:      :+:    :+:   */
+/*   AConnectionHandler.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 18:00:03 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 11:22:43 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 11:29:04 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ConnectionHandler.hpp"
+#include "AConnectionHandler.hpp"
 #include "webserv.hpp"
 
 
@@ -33,7 +33,7 @@ ConnectionBuffer::~ConnectionBuffer() {
  * for port that has a bind on host 0.0.0.0, bind once for 0.0.0.0 only.
  * For port that has multiple hosts to bind, bind only the unique hosts, duplicates are ignored.
 */
-ConnectionHandler::ConnectionHandler(const std::vector<Server>& servers) : _servers(servers) {
+AConnectionHandler::AConnectionHandler(const std::vector<Server>& servers) : _servers(servers) {
 	std::map<std::string, std::set<std::string> > hostsToBind;
 	// use a set to maintain unique hosts for one port
 
@@ -63,7 +63,7 @@ ConnectionHandler::ConnectionHandler(const std::vector<Server>& servers) : _serv
 	}
 }
 
-ConnectionHandler::~ConnectionHandler() {
+AConnectionHandler::~AConnectionHandler() {
 	for (std::list<int>::iterator it = _listenSockets.begin(); it != _listenSockets.end(); ++it) {
 		close(*it);
 	}
@@ -73,7 +73,7 @@ ConnectionHandler::~ConnectionHandler() {
 	}
 }
 
-Server &ConnectionHandler::findServer(Request& request) {
+Server &AConnectionHandler::findServer(Request& request) {
 	bool reqHostIsIPv4 = wsutils::isIPv4(request.getHost());
 	
 	for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
@@ -100,7 +100,7 @@ Server &ConnectionHandler::findServer(Request& request) {
 	throw Response::InvalidServerException();
 }
 
-bool ConnectionHandler::handleChunkedRequest(int connectionSocket, bool newEvent) {
+bool AConnectionHandler::handleChunkedRequest(int connectionSocket, bool newEvent) {
 	ConnectionBuffer& conn = _activeConnections[connectionSocket];
 	char buffer[READ_BUFFER_SIZE];
 
@@ -141,7 +141,7 @@ bool ConnectionHandler::handleChunkedRequest(int connectionSocket, bool newEvent
 	return true;
 }
 
-bool ConnectionHandler::receiveMsgBody(int connectionSocket, bool newEvent) {
+bool AConnectionHandler::receiveMsgBody(int connectionSocket, bool newEvent) {
 	ConnectionBuffer& conn = _activeConnections[connectionSocket];
 	size_t contentLength = wsutils::stringToNumber<size_t>(conn.request->getHeader("Content-Length"));
 	
@@ -187,7 +187,7 @@ bool ConnectionHandler::receiveMsgBody(int connectionSocket, bool newEvent) {
  * @return true for nothing, false for closing this connection socket
  * 
 */
-bool ConnectionHandler::connectionSocketRecv(int connectionSocket) {
+bool AConnectionHandler::connectionSocketRecv(int connectionSocket) {
 	ConnectionBuffer& conn = _activeConnections[connectionSocket];
 
 	if (conn.isChunkedRequest == true) {
@@ -242,122 +242,7 @@ bool ConnectionHandler::connectionSocketRecv(int connectionSocket) {
 	return true;
 }
 
-/**
- * @return maxFd
-*/
-int ConnectionHandler::selectInitFds(fd_set *readFds, fd_set *writeFds) {
-	// clear all states in read and write fd sets
-	FD_ZERO(readFds);
-	FD_ZERO(writeFds);
-
-	// reset maxFd
-	int maxFd = -1;
-	
-	// monitor all listening sockets
-	// increment maxFd if needed
-	for (std::list<int>::iterator lsock = _listenSockets.begin(); lsock != _listenSockets.end(); ++lsock) {
-		FD_SET(*lsock, readFds);
-		if (*lsock > maxFd) {
-			maxFd = *lsock;
-		}
-	}
-
-	// for active connections:
-	// if ready to response, add to write fd set
-	// if not yet ready, add to read fd set
-	// increment maxFd if needed
-	for (std::map<int, ConnectionBuffer>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
-		if (it->second.readyToResponse == true) {
-			FD_SET(it->first, writeFds);
-		} else {
-			FD_SET(it->first, readFds);
-		}
-
-		if (it->first > maxFd) {
-			maxFd = it->first;
-		}
-	}
-
-	return maxFd;
-}
-
-
-/**
- * Use select to listen on multiple listen sockets and connection sockets
- * After select returns:
- * 	if the event is on a listen socket, create a new connection socket
- * 	if the event is on a connection socket
- *  - if the event is for read: read the client's data
- *  - if the event is for write: send the buffered response to client
- * 
- * When a connection socket reaches a "\r\n\r\n", buffer the Http header
- * - If have Content-Length, recv body in the next recvs
- * - If have Transfer-Encoding: chunked, recv chunked requests
- * When a connection socket recv() returns 0, means client closed the connection.
-*/
-void ConnectionHandler::serverListen(void) {
-	fd_set readFds;
-	fd_set writeFds;
-	int maxFd;
-	// Forever listen for new connection or new data to be read
-	while (true) {
-		maxFd = selectInitFds(&readFds, &writeFds);
-		// std::cout << "Active Connections Left: " + wsutils::toString(_activeConnections.size()) << std::endl;
-		// std::cout << "Max FD: " + wsutils::toString(maxFd) << std::endl;
-
-		int nready = select(maxFd + 1, &readFds, &writeFds, NULL, NULL);
-		if (nready == -1) {
-			wsutils::errorExit(strerror(errno));
-		}
-
-		// Check for listen sockets events
-		for (std::list<int>::iterator lsock = _listenSockets.begin(); lsock != _listenSockets.end(); ++lsock) {
-			int listenSocket = *lsock;
-			if (FD_ISSET(listenSocket, &readFds)) {
-				createNewConnection(listenSocket);
-			}
-		}
-
-		// Check for connection sockets events
-		std::list<int> socketsToErase;
-		for (std::map<int, ConnectionBuffer>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
-			int connectionSocket = it->first;
-
-			// write events (ready to send response back to client)
-			if (FD_ISSET(connectionSocket, &writeFds)) {
-				std::string& responseString = _activeConnections[connectionSocket].responseString;
-				int bytesSent = send(connectionSocket, responseString.c_str(), responseString.length(), 0);
-				if (bytesSent < 0) {
-					socketsToErase.push_back(connectionSocket);
-				} else if (bytesSent < static_cast<int>(responseString.length())) {
-					responseString = responseString.substr(bytesSent - 1);
-				} else {
-					_activeConnections[connectionSocket].responseString = "";
-					_activeConnections[connectionSocket].readyToResponse = false;
-				}
-			}
-			
-			// read events (ready to read data sent from client)
-			else if (FD_ISSET(connectionSocket, &readFds)) {
-				try {
-					if (connectionSocketRecv(connectionSocket) == false) {
-						socketsToErase.push_back(connectionSocket);
-					}
-				} catch (Response::InvalidServerException& e) {
-					socketsToErase.push_back(connectionSocket);
-				}
-			}
-		}
-
-		for (std::list<int>::iterator it = socketsToErase.begin(); it != socketsToErase.end(); ++it) {
-			close(*it);
-			_activeConnections.erase(*it);
-		}
-		socketsToErase.clear();
-	}
-}
-
-void ConnectionHandler::createNewConnection(int listenSocket) {
+void AConnectionHandler::createNewConnection(int listenSocket) {
 	struct sockaddr_in clientAddr;
 	socklen_t clientLen = sizeof(clientAddr);
 
@@ -373,7 +258,7 @@ void ConnectionHandler::createNewConnection(int listenSocket) {
 	// std::cout << "Accepted connection from " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 }
 
-int ConnectionHandler::createListenSocket(std::string host, std::string port) const {
+int AConnectionHandler::createListenSocket(std::string host, std::string port) const {
 	struct addrinfo hints, *addressInfo;
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;  // Use IPv4
