@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:01:20 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 12:01:38 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 13:37:05 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,9 @@
 #include <vector>
 #include <map>
 
-#include "Path.hpp"
 #include "colors.hpp"
 #include "utils.hpp"
+
 
 #define USAGE "Usage: ./webserv <config_file>"
 #define DEFAULT_CONFIG "./conf/local.conf"

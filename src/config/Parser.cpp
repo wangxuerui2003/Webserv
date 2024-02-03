@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 11:23:22 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 13:03:41 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,16 +265,4 @@ void Parser::print_values(std::vector<Server> _servers) {
             print_location(*location);
         }
     }
-}
-
-Server::Server() {}
-
-Location::Location() {
-    isCustomRoot = false;
-    isHttpRedirection = false;
-    autoindex = false;
-    accept_upload = false;
-    allowedHttpMethods.push_back("GET");
-    allowedHttpMethods.push_back("POST");
-    allowedHttpMethods.push_back("DELETE");
 }

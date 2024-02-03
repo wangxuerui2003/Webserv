@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 11:59:55 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 14:13:38 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,6 @@ enum pathType {
 	ERROR_PATH
 };
 
-struct Location;
-
 class Path {
 	public:
 		Path();
@@ -42,8 +40,6 @@ class Path {
 
 		static Path mapURLToFS(Path& reqestUri, Path& uriPrefix, Path& root, bool isCustomRoot);
 
-		static Location *getBestFitLocation(std::vector<Location>& locations, Path& requestUri);
-
 		static enum pathType getFileType(const char *path);
 
 		Path concat(Path& other) const;
@@ -59,8 +55,6 @@ class Path {
 
 		std::string read(void) const;
 		static void write(std::string filePath, std::string content);
-
-		std::string generateDirectoryListing(Path& uri) const;
 
 		std::string getFileExtension(void) const;
 
@@ -94,7 +88,5 @@ class Path {
 		std::string _path;
 		enum pathType _type;
 };
-
-#include "Parser.hpp"
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:56:29 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 11:56:27 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 12:58:30 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "webserv.hpp"
 #include "Response.hpp"
+#include "Request.hpp"
 
 
 struct ConnectionBuffer {

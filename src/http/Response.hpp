@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:27:18 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/03 12:03:15 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 14:19:10 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 #include "webserv.hpp"
 #include "Request.hpp"
+#include "Path.hpp"
+#include "Config.hpp"
 #include "CgiHandler.hpp"
 
 struct Location;
@@ -36,6 +38,9 @@ class Response {
         static std::string handle_GET_request(Request &request, Location *location, Server &server);
         static std::string handle_POST_request(Request &request, Location *location, Server &server);
         static std::string handle_DELETE_request(Path &abspath, Location *location, Server &server);
+
+        static Location *getBestFitLocation(std::vector<Location>& locations, Path& requestUri);
+        static std::string generateDirectoryListing(Path& dirPath, Path& uri);
 
         static std::string deleteResource(Path &absPath, Server &server);
 

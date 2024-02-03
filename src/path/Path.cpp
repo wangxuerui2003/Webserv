@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/01 18:19:19 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 14:11:38 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -307,60 +307,6 @@ Path Path::mapURLToFS(Path& requestUri, Path& uriPrefix, Path& root, bool isCust
 	return root.concat(uriRef.substr(postfixStart));
 }
 
-/**
- * @param locations: a vector of location patterns/ uri prefix
- * @param requestUri: the request uri
- * 
- * @brief Get the best fit location that the request URI is requesting for.
- * 
- * @return Path * - the path pointer to the best fit uri prefix. NULL for no match
-*/
-Location *Path::getBestFitLocation(std::vector<Location>& locations, Path& requestUri) {
-	Location *bestFit = NULL;
-	size_t layersMatched = 0;
-
-	for (size_t i = 0; i < locations.size(); ++i) {
-		const std::string& uriRef = requestUri.getPath();
-		const std::string& uriPrefixRef = locations[i].uri.getPath();
-		size_t start = 0;
-		size_t layersMatchedTemp = 0;
-		
-		while (start < uriPrefixRef.length()) {
-			size_t uriDelimiter = uriRef.find('/', start);
-			if (uriDelimiter == std::string::npos) {
-				uriDelimiter = uriRef.length();
-			}
-			
-			size_t uriPrefixDelimiter = uriPrefixRef.find('/', start);
-			if (uriPrefixDelimiter == std::string::npos) {
-				uriPrefixDelimiter = uriPrefixRef.length();
-			}
-
-			// The position of the next / doesn't match, wrong location
-			if (uriDelimiter != uriPrefixDelimiter) {
-				layersMatchedTemp = 0;
-				break;
-			}
-
-			// The segment of uri and uriPrefix doesn't match, wrong location
-			if (uriRef.substr(start, uriDelimiter - start) != uriPrefixRef.substr(start, uriPrefixDelimiter - start)) {
-				layersMatchedTemp = 0;
-				break;
-			}
-
-			start = uriDelimiter + 1;
-			layersMatchedTemp++;
-		}
-
-		if (layersMatchedTemp > layersMatched) {
-			layersMatched = layersMatchedTemp;
-			bestFit = &(locations[i]);
-		}
-	}
-
-	return bestFit;
-}
-
 std::string Path::read(void) const {
 	std::ifstream infile(_path.c_str(), std::ios_base::in);
 
@@ -386,33 +332,6 @@ void Path::write(std::string filePath, std::string content) {
     outputFile << content;
 
     outputFile.close();
-}
-
-std::string Path::generateDirectoryListing(Path& uri) const {
-	if (_type != DIRECTORY)
-		throw InvalidOperationException("File " + _path + " is not a directory");
-    std::string html = "<html>\n<head><title>Index of " + _path + "</title></head>\n<body>\n<h1>Index of " + _path + "</h1>\n<ul>\n";
-
-    DIR* dir = opendir(_path.c_str());
-    if (dir != NULL) {
-        struct dirent* entry;
-        while ((entry = readdir(dir)) != NULL) {
-            std::string entryName = entry->d_name;
-            html += "<li><a href=\"" + uri.concat(entryName, IGNORE).getPath() + "\">" + entryName + "</a></li>\n";
-        }
-        closedir(dir);
-    }
-
-    html += "</ul>\n</body>\n</html>\n";
-
-	std::string response;
-
-	response += "HTTP/1.1 200 OK\r\n";
-	response += "Content-Type: text/html\r\n";
-	response += ("Content-Length: " + wsutils::toString<size_t>(html.length()) + "\r\n");
-	response += "\r\n";
-	response += html;
-	return (response);
 }
 
 std::string Path::getFileExtension(void) const {

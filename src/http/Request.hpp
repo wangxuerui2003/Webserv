@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:16:57 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/03 12:00:07 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/03 12:59:57 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define REQUEST_HPP
 
 #include "webserv.hpp"
+#include "Path.hpp"
 
 class Request {
 public:

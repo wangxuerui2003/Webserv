@@ -6,45 +6,89 @@
 #    By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/12 11:48:29 by wxuerui           #+#    #+#              #
-#    Updated: 2024/02/03 11:44:05 by wxuerui          ###   ########.fr        #
+#    Updated: 2024/02/03 14:17:28 by wxuerui          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-# variables
+
 NAME		=	webserv
 CXX			=	c++
-CXXFLAGS	=	-Wall -Werror -Wextra -std=c++98 $(HEADER)
-HEADER		=	-I$(INC_DIR) -I$(INC_DIR)/classes
+CXXFLAGS	=	-Wall -Werror -Wextra -std=c++98 $(INCLUDES)
 ASAN		=	-fsanitize=address -g3
-INC_DIR		=	include
-SRC_DIR		=	src/
-OBJ_DIR		=	obj/
 
 ifeq ($(DB), 1)
 	CXXFLAGS += -fsanitize=address -g3
 endif
 
+############################
+# FOLDERS
+############################
 
-# sources
-vpath %.cpp	$(SRC_DIR)
-vpath %.h	$(INC_DIR)
-vpath %.o	$(OBJ_DIR)
+SRC_DIR		=	src/
+OBJ_DIR		=	obj/
 
-SRC_FILES	=	main \
-				Parser \
-				Path \
-				AConnectionHandler \
-				Select \
-				Request	\
-				Response \
-				utils \
-				CgiHandler
-
-SRC			=	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(SRC_FILES)))
-OBJ			=	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_FILES)))
+CGI_DIR		=	cgi/
+EVENT_DIR	=	event/
+HTTP_DIR	=	http/
+CONFIG_DIR	=	config/
+UTILS_DIR	=	utils/
+PATH_DIR	=	path/
 
 
-# colors
+############################
+# INCLUDES
+############################
+
+INC_DIR		=	include/
+
+INCLUDES	=	-I$(INC_DIR) \
+				-I$(SRC_DIR)$(CGI_DIR) \
+				-I$(SRC_DIR)$(EVENT_DIR) \
+				-I$(SRC_DIR)$(HTTP_DIR) \
+				-I$(SRC_DIR)$(CONFIG_DIR) \
+				-I$(SRC_DIR)$(PATH_DIR) \
+				-I$(SRC_DIR)$(UTILS_DIR)
+
+
+############################
+# FILES
+############################
+
+CGI_FILES	=	CgiHandler
+EVENT_FILES	=	AConnectionHandler Select
+HTTP_FILES	=	Request Response
+CONFIG_FILES=	Parser Config
+PATH_FILES	=	Path
+UTILS_FILES	=	utils
+MAIN		=	main
+
+
+############################
+# SRC
+############################
+
+SRC			=	$(addsuffix .cpp, $(MAIN)) \
+				$(addprefix $(CGI_DIR), $(addsuffix .cpp, $(CGI_FILES))) \
+				$(addprefix $(EVENT_DIR), $(addsuffix .cpp, $(EVENT_FILES))) \
+				$(addprefix $(HTTP_DIR), $(addsuffix .cpp, $(HTTP_FILES))) \
+				$(addprefix $(CONFIG_DIR), $(addsuffix .cpp, $(CONFIG_FILES))) \
+				$(addprefix $(PATH_DIR), $(addsuffix .cpp, $(PATH_FILES))) \
+				$(addprefix $(UTILS_DIR), $(addsuffix .cpp, $(UTILS_FILES)))
+
+OBJ_SUBDIR	=	$(addprefix $(OBJ_DIR), $(CGI_DIR)) \
+				$(addprefix $(OBJ_DIR), $(EVENT_DIR)) \
+				$(addprefix $(OBJ_DIR), $(HTTP_DIR)) \
+				$(addprefix $(OBJ_DIR), $(CONFIG_DIR)) \
+				$(addprefix $(OBJ_DIR), $(PATH_DIR)) \
+				$(addprefix $(OBJ_DIR), $(UTILS_DIR))
+			
+OBJ = $(addprefix $(OBJ_DIR), $(SRC:cpp=o))
+
+
+############################
+# COLORS
+############################
+
 DEF_COLOR	=	\033[0;39m
 GRAY		=	\033[0;90m
 RED			=	\033[0;91m
@@ -60,9 +104,7 @@ RESET		=	\033[0m
 ##############################################
 
 
-all:
-	@make obj_dir_create
-	@make $(NAME)
+all:	$(NAME)
 	@make ascii_art
 
 ifeq ($(DB), 1)
@@ -70,13 +112,14 @@ ifeq ($(DB), 1)
 endif
 
 
-obj_dir_create:
+$(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(OBJ_SUBDIR)
 
 $(OBJ_DIR)%.o:	$(SRC_DIR)%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(NAME):	$(OBJ)
+$(NAME): $(OBJ_DIR) $(OBJ)
 	$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME)
 
 clean:
