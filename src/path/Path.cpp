@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 14:11:38 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/04 16:58:45 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -321,6 +321,25 @@ std::string Path::read(void) const {
 
 	return buffer.str();
 }
+
+std::vector<std::string> *Path::readLines(void) const {
+	std::ifstream infile(_path.c_str(), std::ios_base::in);
+
+	if (!infile.is_open()) {
+		return NULL;
+	}
+
+	std::vector<std::string> *lines = new std::vector<std::string>();
+	std::string buffer;
+
+	while (std::getline(infile, buffer)) {
+		lines->push_back(buffer);
+	}
+
+	infile.close();
+	return lines;
+}
+
 
 void Path::write(std::string filePath, std::string content) {
 	std::ofstream outputFile(filePath.c_str(), std::ios::out | std::ios::trunc);

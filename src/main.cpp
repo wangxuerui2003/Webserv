@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:47:59 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 16:31:03 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/04 17:25:50 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,24 +20,27 @@ int main(int ac, char **av) {
 		wsutils::errorExit(USAGE);
 	}
 
-	Parser& parser = Parser::getInstance();
+	std::string configPath;
+	if (ac == 2) {
+		configPath = av[1];
+	} else {
+		configPath = DEFAULT_CONFIG;
+	}
+
+	Config config;
 	try {
-		if (ac == 2) {
-			parser.parse(av[1]);
-		} else {
-			parser.parse(DEFAULT_CONFIG);
-		}
+		Parser::parse(configPath, config);
 	} catch (Path::InvalidPathException& e) {
 		wsutils::errorExit(e.what());
 	} catch (Path::InvalidOperationException& e) {
 		wsutils::errorExit(e.what());
 	}
-	parser.print_values(parser.getServers());
-
-	const std::vector<Server>& servers = parser.getServers();
+	
+	Parser::print_values(config.servers);
+	const std::vector<Server>& servers = config.servers;
 
 	AConnectionHandler *connectionHandler;
-	if (parser.getEventHandlerType() == SELECT) {
+	if (config.eventHandlerType == SELECT) {
 		connectionHandler = new Select(servers);
 	} else {
 		connectionHandler = new Poll(servers);

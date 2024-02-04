@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 14:13:38 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/04 15:42:27 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ class Path {
 		bool isExecutable(void) const;
 
 		std::string read(void) const;
+		std::vector<std::string> *readLines(void) const;
 		static void write(std::string filePath, std::string content);
 
 		std::string getFileExtension(void) const;

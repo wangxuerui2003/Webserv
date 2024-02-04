@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 13:02:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/04 15:19:07 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/04 17:19:27 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,13 @@ struct Server {
 	std::map<std::string, std::string> cgiHandlers;
 
 	std::vector<Location> locations;
+};
+
+struct Config {
+	Config();
+
+	enum event eventHandlerType;
+	std::vector<Server> servers;
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 13:03:19 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/04 15:22:37 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/04 17:19:58 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,4 +23,8 @@ Location::Location() {
     allowedHttpMethods.push_back("GET");
     allowedHttpMethods.push_back("POST");
     allowedHttpMethods.push_back("DELETE");
+}
+
+Config::Config() {
+    eventHandlerType = SELECT;
 }
