@@ -6,7 +6,7 @@
 #    By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/12 11:48:29 by wxuerui           #+#    #+#              #
-#    Updated: 2024/02/03 14:26:18 by wxuerui          ###   ########.fr        #
+#    Updated: 2024/02/04 15:20:34 by wxuerui          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,6 +33,7 @@ HTTP_DIR	=	http/
 CONFIG_DIR	=	config/
 UTILS_DIR	=	utils/
 PATH_DIR	=	path/
+SESSIONS_DIR=	sessions/
 
 
 ############################
@@ -47,6 +48,7 @@ INCLUDES	=	-I$(INC_DIR) \
 				-I$(SRC_DIR)$(HTTP_DIR) \
 				-I$(SRC_DIR)$(CONFIG_DIR) \
 				-I$(SRC_DIR)$(PATH_DIR) \
+				-I$(SRC_DIR)$(SESSIONS_DIR) \
 				-I$(SRC_DIR)$(UTILS_DIR)
 
 
@@ -59,6 +61,7 @@ EVENT_FILES	=	AConnectionHandler Select Poll
 HTTP_FILES	=	Request Response
 CONFIG_FILES=	Parser Config
 PATH_FILES	=	Path
+SESSIONS_FILES	=	Session
 UTILS_FILES	=	utils
 MAIN		=	main
 
@@ -73,6 +76,7 @@ SRC			=	$(addsuffix .cpp, $(MAIN)) \
 				$(addprefix $(HTTP_DIR), $(addsuffix .cpp, $(HTTP_FILES))) \
 				$(addprefix $(CONFIG_DIR), $(addsuffix .cpp, $(CONFIG_FILES))) \
 				$(addprefix $(PATH_DIR), $(addsuffix .cpp, $(PATH_FILES))) \
+				$(addprefix $(SESSIONS_DIR), $(addsuffix .cpp, $(SESSIONS_FILES))) \
 				$(addprefix $(UTILS_DIR), $(addsuffix .cpp, $(UTILS_FILES)))
 
 OBJ_SUBDIR	=	$(addprefix $(OBJ_DIR), $(CGI_DIR)) \
@@ -80,6 +84,7 @@ OBJ_SUBDIR	=	$(addprefix $(OBJ_DIR), $(CGI_DIR)) \
 				$(addprefix $(OBJ_DIR), $(HTTP_DIR)) \
 				$(addprefix $(OBJ_DIR), $(CONFIG_DIR)) \
 				$(addprefix $(OBJ_DIR), $(PATH_DIR)) \
+				$(addprefix $(OBJ_DIR), $(SESSIONS_DIR)) \
 				$(addprefix $(OBJ_DIR), $(UTILS_DIR))
 			
 OBJ = $(addprefix $(OBJ_DIR), $(SRC:cpp=o))
