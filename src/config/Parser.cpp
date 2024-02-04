@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 16:40:02 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/04 07:58:05 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -231,6 +231,9 @@ std::vector<std::string> Parser::getKeywordValues(std::string keyword, std::vect
             if (value == keyword)
                 while (!iss.eof()) {
                     iss >> value;
+                    if (value == ";") {
+                        continue;
+                    }
                     if (iss.eof() && (value[value.length() - 1] == ';' || value[value.length() - 1] == '{'))
                         values.push_back(value.substr(0, value.size() - 1));
                     else
