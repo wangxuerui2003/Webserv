@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/02 16:03:26 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/04 07:46:12 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,10 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
             dup2(pipefd_input[0], STDIN_FILENO);
             dup2(pipefd_output[1], STDOUT_FILENO);
             dup2(pipefd_stderror[1], STDERR_FILENO);
+            
+            // Execute CGI script
+            char **envp = setEnv(request, location, cgiPath);
+
 
             // Let CGI script current directory have the correct relative path access
             std::string cgiDir = cgiPath.getDirectory().getPath();
@@ -68,9 +72,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
                 const_cast<char *>(cgiRelativePath.c_str()),
                 NULL
             };
-            
-            // Execute CGI script
-            char **envp = setEnv(request, location, cgiPath);
+
             if (execve(argv[0], argv, envp) == -1) {
 				ret = Response::parse_error_pages("500", "Internal Server Error execve", server);
 				write(STDOUT_FILENO, ret.c_str(), ret.length());
