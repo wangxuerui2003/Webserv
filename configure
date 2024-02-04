@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Replace php-cgi with local machine php-cgi interpreter if it exists
-php_cgi=$(which php-gi)
+php_cgi=$(which php-cgi)
 if [ $? -eq 0 ]; then
 	sed "s|/usr/bin/php-cgi|$php_cgi|g" conf/example.conf > conf/local.conf
 else
