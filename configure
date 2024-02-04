@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Replace php-cgi with local machine php-cgi interpreter if it exists
+php_cgi=$(which php-gi)
+if [ $? -eq 0 ]; then
+	sed "s|/usr/bin/php-cgi|$php_cgi|g" conf/example.conf > conf/local.conf
+else
+	sed "s|/usr/bin/php-cgi||g" conf/example.conf > conf/local.conf
+fi
+
+# Replace servers root with local ./www in absolute path
+www=$(cd www && pwd && cd ..)
+sed -i "s|/webserver-rootpath|$www|g" conf/local.conf
