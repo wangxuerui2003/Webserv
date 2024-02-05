@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:16:57 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/03 12:59:57 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/05 13:42:13 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,17 @@ class Request {
 public:
     Request(const std::string& rawReqString);
 
-    std::string getMethod() const;
-    Path&       getURI();
-    std::string getVersion() const;
-    std::string getHost() const;
-    std::string getPort() const;
+    const std::string& getMethod() const;
+    const Path& getURI();
+    const std::string& getVersion() const;
+    const std::string& getHost() const;
+    const std::string& getPort() const;
     std::string getHeader(const std::string& headerName) const;
     std::map<std::string, std::string> &getHeaderMap();
-    std::string getBody() const;
+    const std::string& getBody() const;
     const std::string& getQueryParams(void) const;
+    const std::map<std::string, std::string>& getCookies(void) const;
+    std::string getCookieByName(std::string cookieName) const;
 
     void setBody(std::string body);
     void setURI(Path& uri);
@@ -42,9 +44,11 @@ private:
     std::map<std::string, std::string> _headers;
     std::string _body;
     std::string _queryParams;
+    std::map<std::string, std::string> _cookies;
 
     void parseRequest(const std::string& rawReqString);
     void parseHeaders(const std::string& headerPart);
+    void parseCookies(const std::string& cookies);
 };
 
 #endif

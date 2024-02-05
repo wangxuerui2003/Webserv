@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:27:18 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/03 14:19:10 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/05 13:43:16 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class Response {
         static std::string generateResponse(Request &request, Server &server);
 
         static std::string getContentType(const std::string& filePath);
-        static bool isStaticContent(Path& uri, Server& server);
+        static bool isStaticContent(const Path& uri, Server& server);
         static Path find_default_index(Path &abs_path, Location *location);
         static std::string handleStaticContent(Request& request, Path &absPath, Location *location, Server &server);
         static std::string readFile(Path &absPath, Server &server);
@@ -40,7 +40,7 @@ class Response {
         static std::string handle_DELETE_request(Path &abspath, Location *location, Server &server);
 
         static Location *getBestFitLocation(std::vector<Location>& locations, Path& requestUri);
-        static std::string generateDirectoryListing(Path& dirPath, Path& uri);
+        static std::string generateDirectoryListing(const Path& dirPath, const Path& uri);
 
         static std::string deleteResource(Path &absPath, Server &server);
 

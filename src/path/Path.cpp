@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/04 16:58:45 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/05 13:41:29 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -291,7 +291,7 @@ bool Path::operator!=(const Path& other) {
  * 
  * @return Path - the mapped filesystem path
 */
-Path Path::mapURLToFS(Path& requestUri, Path& uriPrefix, Path& root, bool isCustomRoot) {
+Path Path::mapURLToFS(const Path& requestUri, const Path& uriPrefix, const Path& root, bool isCustomRoot) {
 	const std::string& uriRef = requestUri.getPath();
 	const std::string& uriPrefixRef = uriPrefix.getPath();
 

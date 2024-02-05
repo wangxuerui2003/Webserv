@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/03 14:18:56 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/05 13:43:11 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ Path Response::find_default_index(Path &abs_path, Location *location) {
     return (abs_path);
 }
 
-bool Response::isStaticContent(Path& uri, Server& server) {
+bool Response::isStaticContent(const Path& uri, Server& server) {
     std::map<std::string, std::string>::iterator it = server.cgiHandlers.begin();
     for (; it != server.cgiHandlers.end(); ++it) {
         if (it->first == uri.getFileExtension()) {
@@ -257,7 +257,6 @@ std::string httpRedirection(std::string statusCode, std::string url) {
 
 // START HERE - MAIN RESPONSE FUNCTION
 std::string Response::generateResponse(Request &request, Server &server) {
-
     std::string method = request.getMethod();
     Path request_uri = request.getURI();
 
@@ -377,7 +376,7 @@ Location *Response::getBestFitLocation(std::vector<Location>& locations, Path& r
 	return bestFit;
 }
 
-std::string Response::generateDirectoryListing(Path& dirPath, Path& uri) {
+std::string Response::generateDirectoryListing(const Path& dirPath, const Path& uri) {
 	if (dirPath.getType() != DIRECTORY)
 		throw Path::InvalidOperationException("File " + dirPath.getPath() + " is not a directory");
     std::string html = "<html>\n<head><title>Index of " + dirPath.getPath() + "</title></head>\n<body>\n<h1>Index of " + dirPath.getPath() + "</h1>\n<ul>\n";

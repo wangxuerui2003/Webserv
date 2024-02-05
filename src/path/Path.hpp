@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/04 15:42:27 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/05 13:41:15 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ class Path {
 
 		static bool isAccessible(const char *path);
 
-		static Path mapURLToFS(Path& reqestUri, Path& uriPrefix, Path& root, bool isCustomRoot);
+		static Path mapURLToFS(const Path& reqestUri, const Path& uriPrefix, const Path& root, bool isCustomRoot);
 
 		static enum pathType getFileType(const char *path);
 

@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/01 12:03:44 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/05 13:42:06 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,23 +16,23 @@ Request::Request(const std::string& rawReqString) {
     parseRequest(rawReqString);
 }
 
-std::string Request::getMethod() const {
+const std::string& Request::getMethod() const {
     return (_method);
 }
 
-Path& Request::getURI() {
+const Path& Request::getURI() {
     return (_uri);
 }
 
-std::string Request::getVersion() const {
+const std::string& Request::getVersion() const {
     return (_httpVersion);
 }
 
-std::string Request::getHost() const {
+const std::string& Request::getHost() const {
     return (_host);
 }
 
-std::string Request::getPort() const {
+const std::string& Request::getPort() const {
     return (_port);
 }
 
@@ -45,20 +45,35 @@ std::string Request::getHeader(const std::string& headerName) const {
             break; // Exit the loop once the header is found
         }
     }
-    return (""); // When header not found
+    return std::string(""); // When header not found
 }
 
 std::map<std::string, std::string> &Request::getHeaderMap() {
     return (_headers);
 }
 
-std::string Request::getBody() const {
+const std::string& Request::getBody() const {
     return (_body);
 }
 
 const std::string& Request::getQueryParams(void) const {
     return _queryParams;
 }
+
+const std::map<std::string, std::string>& Request::getCookies(void) const {
+    return _cookies;
+}
+
+std::string Request::getCookieByName(std::string cookieName) const {
+    std::map<std::string, std::string>::const_iterator cookie = _cookies.find(cookieName);
+    if (cookie != _cookies.end()) {
+        return cookie->second;
+    }
+    
+    return "";
+}
+
+
 
 void Request::setBody(std::string body) {
     _body = body;
@@ -112,30 +127,38 @@ void Request::parseHeaders(const std::string& headerPart) {
             std::string headerName = line.substr(0, colonPos);
             std::string headerValue = line.substr(colonPos + 2);
 
-            // Extract Host and Port variable
-            if (headerName == "Host") {
-                size_t hostColonPos = headerValue.find(':');
-                if (hostColonPos != std::string::npos) {
-                    this->_host = headerValue.substr(0, hostColonPos);
-                    this->_port = headerValue.substr(hostColonPos + 1);
-                } else {
-                    this->_host = headerValue;
-                }
-            }
-            
             // Trim leading and trailing whitespaces from headerValue
             headerValue.erase(0, headerValue.find_first_not_of(" \t"));
             headerValue.erase(headerValue.find_last_not_of(" \t") + 1);
 
-            _headers.insert(std::make_pair(headerName, headerValue));
+            _headers[headerName] = headerValue;
         }
+    }
+    
+    std::string requestUri = _headers["Host"];
+    size_t hostColonPos = requestUri.find(':');
+    if (hostColonPos != std::string::npos) {
+        this->_host = requestUri.substr(0, hostColonPos);
+        this->_port = requestUri.substr(hostColonPos + 1);
+    } else {
+        this->_host = requestUri;
+        this->_port = "80";
+    }
+
+    if (_headers.find("Cookie") != _headers.end()) {
+        parseCookies(_headers["Cookie"]);
     }
 }
 
-// void Request::parseHeaders(const std::string& headerPart) {
-//     std::istringstream headerStream(headerPart);
-//     std::string headerName, headerValue;
-//     std::getline(headerStream, headerName, ':');
-//     std::getline(headerStream, headerValue);
-//     _headers.insert(std::make_pair(headerName, headerValue));
-// }
+void Request::parseCookies(const std::string& cookiesList) {
+    std::istringstream cookiesListStream(cookiesList);
+    std::string cookiePair;
+
+    while (std::getline(cookiesListStream, cookiePair, ';')) {
+        std::istringstream cookieStream(cookiePair);
+        std::string cookieName, cookieValue;
+        std::getline(cookieStream, cookieName, '=');
+        std::getline(cookieStream, cookieValue);
+        _cookies[cookieName] = cookieValue;
+    }
+}
