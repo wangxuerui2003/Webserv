@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 08:46:49 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 18:47:23 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 19:11:24 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ class Session {
 		~Session();
 
 		std::string getSessionDataById(std::string sessionId);
+		void removeExpiredSessions(void);
 		std::string addNewSession(std::string sessionData, time_t expireAfterSeconds);
 		const Path& getSessionStorePath(void) const;
 		static std::string generateNewSessionId(void);

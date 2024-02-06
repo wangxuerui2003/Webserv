@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 15:09:23 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 18:58:59 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 19:11:53 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,8 @@ const Path& Session::getSessionStorePath(void) const {
 }
 
 std::string Session::getSessionDataById(std::string sessionId) {
-	// TODO
+	// TODO: call removeExpiredSessions()
+	// TODO: read the file into a linked list, ignore the first line, check one by one see if there is a match
 	(void)sessionId;
 	return "\"sessiondata1=wxuerui;sessiondata2=2003\"";
 }
