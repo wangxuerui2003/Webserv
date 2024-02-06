@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/05 14:18:32 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 16:29:43 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,9 +122,7 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
         serverLines.push_back(configLines[currentLineIndex]);
     }
 
-    config.servers.push_back(Server());
-
-    Server& server = config.servers[config.servers.size() - 1];
+    Server server;
 
     std::vector<std::string> listens = getKeywordValues("listen", serverLines);
     for (std::vector<std::string>::iterator listen = listens.begin(); listen != listens.end(); ++listen) {
@@ -194,16 +192,19 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
 
     std::vector<std::string> sessionStore = getKeywordValues("session_store", serverLines);
     if (sessionStore.empty() == false) {
-        server.session = new Session(sessionStore[0]);
+        server.hasSessionManagement = true;
+        server.session = Session(sessionStore[0]);
     }
 
     server.locations = locations;
+
+    config.servers.push_back(server);
 }
 
 
 void Parser::parse(std::string configFilePath, Config& config) {
     Path configPath(configFilePath);
-    std::vector<std::string> *configLines = configPath.readLines();
+    std::vector<std::string> *configLines = configPath.readLines<std::vector<std::string> >();
 
     for (size_t currentLineIndex = 0;
         currentLineIndex < configLines->size(); ++currentLineIndex) {
@@ -213,6 +214,7 @@ void Parser::parse(std::string configFilePath, Config& config) {
 
         if ((*configLines)[currentLineIndex].find("server {") != std::string::npos) {
             parseServerContext(config, *configLines, currentLineIndex);
+            std::cout << "here" << std::endl;
         }
     }
 
@@ -271,8 +273,8 @@ void Parser::print_server(const Server &server) {
     for (std::map<std::string, Path>::const_iterator it = server.error_pages.begin(); it != server.error_pages.end(); ++it)
         std::cout << "Error Number: " << it->first << " | " << "Path: " << it->second.getPath() << std::endl;
 
-    if (server.session != NULL)
-        std::cout << "Session Store: " << server.session->getSessionStorePath().getPath() << std::endl;
+    if (server.hasSessionManagement)
+        std::cout << "Session Store: " << server.session.getSessionStorePath().getPath() << std::endl;
     std::cout << RESET;
 }
 

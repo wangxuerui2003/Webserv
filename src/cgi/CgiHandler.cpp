@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 12:49:06 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 16:28:38 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,13 +124,10 @@ char **CgiHandler::setEnv(Request& request, Server& server, Location& location, 
     customEnvp.push_back("HTTP_USER_AGENT=" + request.getHeader("User-Agent"));
     customEnvp.push_back("HTTP_ACCEPT=" + request.getHeader("Accept"));
     customEnvp.push_back("HTTP_REFERER=" + request.getHeader("Referer"));
-    // Cookie header not always present
-    // if (!request.getHeader("Cookie").empty())
-    //     customEnvp.push_back("HTTP_COOKIE=" + request.getHeader("Cookie"));
 
     std::string sessionId = request.getCookieByName(WEBSERV_SESSION_ID_NAME);
     if (sessionId != "") {
-        customEnvp.push_back(SESSION_DATA_CGI_HEADER "=" + server.session->getSessionDataById(sessionId));
+        customEnvp.push_back(SESSION_DATA_CGI_HEADER "=" + server.session.getSessionDataById(sessionId));
     }
 
     if (location.accept_upload == true) {

@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/05 13:41:15 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 15:48:55 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ class Path {
 		bool isExecutable(void) const;
 
 		std::string read(void) const;
-		std::vector<std::string> *readLines(void) const;
 		static void write(std::string filePath, std::string content);
 
 		std::string getFileExtension(void) const;
@@ -84,6 +83,27 @@ class Path {
 				~InvalidOperationException() throw();
 				const char *what() const throw();
 		};
+
+		template <typename Container>
+		Container *readLines(void) const {
+			std::ifstream infile(_path.c_str(), std::ios_base::in);
+
+			if (!infile.is_open()) {
+				return NULL;
+			}
+
+			Container *lines = new Container();
+			std::string buffer;
+
+			while (std::getline(infile, buffer)) {
+				lines->push_back(buffer);
+			}
+
+			infile.close();
+			return lines;
+		}
+
+		Path& operator<<(std::string text);
 
 	private:
 		std::string _path;

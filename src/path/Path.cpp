@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/05 13:41:29 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 15:48:50 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -322,24 +322,6 @@ std::string Path::read(void) const {
 	return buffer.str();
 }
 
-std::vector<std::string> *Path::readLines(void) const {
-	std::ifstream infile(_path.c_str(), std::ios_base::in);
-
-	if (!infile.is_open()) {
-		return NULL;
-	}
-
-	std::vector<std::string> *lines = new std::vector<std::string>();
-	std::string buffer;
-
-	while (std::getline(infile, buffer)) {
-		lines->push_back(buffer);
-	}
-
-	infile.close();
-	return lines;
-}
-
 
 void Path::write(std::string filePath, std::string content) {
 	std::ofstream outputFile(filePath.c_str(), std::ios::out | std::ios::trunc);
@@ -377,5 +359,19 @@ std::string Path::getFilename(void) const {
 	}
 
 	return _path.substr(dirDelimiter + 1);
+}
+
+Path& Path::operator<<(std::string text) {
+	std::ofstream outputFile(_path.c_str(), std::ios::out | std::ios::trunc);
+
+    if (!outputFile.is_open()) {
+        throw Path::InvalidPathException("File " + _path + " cannot be opened");
+    }
+    
+    outputFile << text;
+
+    outputFile.close();
+
+	return *this;
 }
 

@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 13:02:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/05 14:13:04 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 16:26:50 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,8 @@ struct Server {
 	std::map<std::string, Path> error_pages;
 	std::map<std::string, std::string> cgiHandlers;
 
-	Session *session;
+	bool hasSessionManagement;
+	Session session;
 
 	std::vector<Location> locations;
 };
