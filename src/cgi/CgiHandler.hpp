@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:30 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 12:42:54 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 18:52:22 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ public:
 private:
     // Private helper methods for CGI handling
     static char **setEnv(Request &request, Server& server, Location& location, Path& cgiPath);
+    static std::string parseXReplaceSession(std::string& cgiOutput);
+    static std::string setCookie(std::string& sessionId, time_t expireAfterSeconds);
 };
 
 #endif

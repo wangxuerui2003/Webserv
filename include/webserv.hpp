@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:01:20 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 12:41:46 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 18:41:17 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #define READ_BUFFER_SIZE 1024
 
 #include <cstdlib>
+#include <ctime>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <cstring>
@@ -44,7 +45,7 @@
 
 #define USAGE "Usage: ./webserv <config_file>"
 #define DEFAULT_CONFIG "./conf/local.conf"
-#define HTTP_REQUEST_TERMINATOR "\r\n\r\n"
+#define HTTP_HEADER_TERMINATOR "\r\n\r\n"
 
 #define WEBSERV_SESSION_ID_NAME "webserv_session_id"
 #define SESSION_DATA_CGI_HEADER "WEBSERV_SESSION_DATA"

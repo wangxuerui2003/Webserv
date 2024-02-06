@@ -210,7 +210,7 @@ bool AConnectionHandler::connectionSocketRecv(int connectionSocket) {
 	} else {
 		conn.requestString.append(buffer, bytesRead);
 		
-		size_t terminator = conn.requestString.find(HTTP_REQUEST_TERMINATOR);
+		size_t terminator = conn.requestString.find(HTTP_HEADER_TERMINATOR);
 		if (terminator != std::string::npos) {
 			conn.request = new Request(conn.requestString.substr(0, terminator + 4));
 			

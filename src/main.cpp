@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:47:59 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 16:00:46 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 18:41:46 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ int main(int ac, char **av) {
 		connectionHandler = new Poll(config.servers);
 	}
 
-	srand(time(NULL));  // initialize the random seed for generating session ids
+	srand(std::time(NULL));  // initialize the random seed for generating session ids
 
 	// Infinite loop handle connections
 	connectionHandler->serverListen();

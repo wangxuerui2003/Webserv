@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 15:48:50 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 18:24:56 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -362,7 +362,7 @@ std::string Path::getFilename(void) const {
 }
 
 Path& Path::operator<<(std::string text) {
-	std::ofstream outputFile(_path.c_str(), std::ios::out | std::ios::trunc);
+	std::ofstream outputFile(_path.c_str(), std::ios::app);
 
     if (!outputFile.is_open()) {
         throw Path::InvalidPathException("File " + _path + " cannot be opened");

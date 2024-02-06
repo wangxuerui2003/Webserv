@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 15:09:23 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 16:30:20 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 18:58:59 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,24 +51,35 @@ const Path& Session::getSessionStorePath(void) const {
 }
 
 std::string Session::getSessionDataById(std::string sessionId) {
+	// TODO
 	(void)sessionId;
 	return "\"sessiondata1=wxuerui;sessiondata2=2003\"";
 }
 
-// generate a length 16 random string (ascii 33 <= char <= 126)
+// generate a length 16 random string
+// 0-9,   A-Z,   a-z
+// 48-57, 65-98, 97-122
 std::string Session::generateNewSessionId(void) {
     char result[17];
-    int i;
-    for (i = 0; i < 16; ++i) {
+    int i = 0;
+    while (i < 16) {
         char c = rand() % 127;
-        if (c < 33) {
-            c += 33;
+        if ((c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122)) {
+			result[i] = c;
+			++i;
         }
 
-        result[i] = c;
     }
 
     result[i] = '\0';
     return result;
+}
+
+std::string Session::addNewSession(std::string sessionData, time_t expireAfterSeconds) {
+	std::string sessionId = generateNewSessionId();
+	time_t expirationTimestamp = std::time(NULL) + expireAfterSeconds;
+
+	_sessionStore << sessionId + '|' + sessionData + '|' + wsutils::toString(expirationTimestamp) + '\n';
+	return sessionId;
 }
 

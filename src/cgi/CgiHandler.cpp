@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 16:28:38 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 19:04:20 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
 
     std::string cgiHandler = server.cgiHandlers[cgiPath.getFileExtension()];
 
-    if (cgiHandler != "" && cgiPath.isExecutable() == false) {
+    if (cgiHandler == "" && cgiPath.isExecutable() == false) {
         return Response::parse_error_pages("500", "CGI script is not executable", server);
     }
 
@@ -83,32 +83,76 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
             close(pipefd_input[1]);
 
             // Read CGI output from the output pipe
-            std::string cgiBody = parseCgiOutput(pipefd_output[0], pipefd_stderror[0]);
+            std::string cgiOutput = parseCgiOutput(pipefd_output[0], pipefd_stderror[0]);
             close(pipefd_output[0]);
             close(pipefd_stderror[0]);
 
             // Wait for the child process to finish
             int status;
             waitpid(pid, &status, 0);
-            if (WIFEXITED(status) && WEXITSTATUS(status) == 3) {
+			if (WIFEXITED(status) && WEXITSTATUS(status) == 3) {
 				// ERROR: Assume full HTTP error from parseCgiOutput above
-				ret = cgiBody;
-            } else if (cgiBody.substr(0,8) != "HTTP/1.1") {
-				// SUCCESS: Without full HTTP header
-				std::string output;
-				output += std::string("HTTP/1.1") + " 200 OK\r\n";
-				output += "Content-Type: text/html\r\n";
-				output += "Content-Length: " + wsutils::toString(cgiBody.length()) + "\r\n";
-				output += "\r\n";
-				output += cgiBody;
-				ret = output;
-			}
-			else
-				// SUCCESS: With full HTTP header
-				ret = cgiBody;
+                return cgiOutput;
+            }
+            
+            std::string output;
+            output += std::string("HTTP/1.1") + " 200 OK\r\n";
+            size_t cgiHeaderTerminator = cgiOutput.find(HTTP_HEADER_TERMINATOR);
+
+            // if no header found, add a default header for the CGI output
+            if (cgiHeaderTerminator == std::string::npos) {
+                output += "Content-Type: text/html\r\n";
+                output += "Content-Length: " + wsutils::toString(cgiOutput.length()) + "\r\n";
+                output += "\r\n";
+                return output + cgiOutput;
+            }
+
+            // Found header, parse the header and extract necessary information, then return the response string
+            std::string sessionData = parseXReplaceSession(cgiOutput);
+            std::string cgiHeader = cgiOutput.substr(0, cgiHeaderTerminator);
+            std::string cgiBody = cgiOutput.substr(cgiHeaderTerminator + 4);
+            cgiHeader += "\r\nContent-Length: " + wsutils::toString(cgiBody.length()) + "\r\n";
+            if (sessionData != "") {
+                std::string sessionId = server.session.addNewSession(sessionData, 60);
+                cgiHeader += setCookie(sessionId, 60);
+            }
+            cgiHeader += "\r\n";
+            return output + cgiHeader + cgiBody;
         }
     }
     return (ret);
+}
+
+std::string CgiHandler::setCookie(std::string& sessionId, time_t expireAfterSeconds) {
+    std::time_t expirationTimestamp = std::time(NULL) + expireAfterSeconds;
+
+    const char* format = "%a, %d-%b-%Y %H:%M:%S GMT";
+
+    // Buffer to store the formatted time string
+    char timeString[100];
+
+    // Format the time string
+    std::strftime(timeString, sizeof(timeString), format, std::gmtime(&expirationTimestamp));
+
+    return "Set-Cookie: " WEBSERV_SESSION_ID_NAME "=" + sessionId + ';' + " expires=" + timeString + "\r\n";
+}
+
+std::string CgiHandler::parseXReplaceSession(std::string& cgiOutput) {
+    size_t sessionDataHeader = cgiOutput.find("X-Replace-Session: ");
+    if (sessionDataHeader == std::string::npos) {
+        return "";
+    }
+
+    size_t start = sessionDataHeader + std::strlen("X-Replace-Session: ");
+    size_t end = cgiOutput.find("\r\n", sessionDataHeader);
+    if (end == std::string::npos) {
+        throw std::runtime_error("Incorrect CGI output structure");
+    }
+
+    std::string sessionData = cgiOutput.substr(start, end - start);
+    cgiOutput.erase(sessionDataHeader, end - sessionDataHeader + 2);
+
+    return sessionData;
 }
 
 char **CgiHandler::setEnv(Request& request, Server& server, Location& location, Path& cgiPath) {
@@ -125,9 +169,11 @@ char **CgiHandler::setEnv(Request& request, Server& server, Location& location, 
     customEnvp.push_back("HTTP_ACCEPT=" + request.getHeader("Accept"));
     customEnvp.push_back("HTTP_REFERER=" + request.getHeader("Referer"));
 
-    std::string sessionId = request.getCookieByName(WEBSERV_SESSION_ID_NAME);
-    if (sessionId != "") {
-        customEnvp.push_back(SESSION_DATA_CGI_HEADER "=" + server.session.getSessionDataById(sessionId));
+    if (server.hasSessionManagement) {
+        std::string sessionId = request.getCookieByName(WEBSERV_SESSION_ID_NAME);
+        if (sessionId != "") {
+            customEnvp.push_back(SESSION_DATA_CGI_HEADER "=" + server.session.getSessionDataById(sessionId));
+        }
     }
 
     if (location.accept_upload == true) {
@@ -175,8 +221,6 @@ std::string	CgiHandler::parseCgiOutput(int pipefd_output, int pipefd_error) {
 		output.append(buffer, rec_byte);
 	while ((rec_byte = read(pipefd_error, buffer, READ_BUFFER_SIZE)) != 0)
 		output.append(buffer,rec_byte);
-
-    // TODO: parse X-Replace-Session
 
 	return (output);
 }
