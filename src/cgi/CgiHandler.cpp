@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 19:06:21 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 20:41:10 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,9 +113,8 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
             std::string cgiBody = cgiOutput.substr(cgiHeaderTerminator + 4);
             cgiHeader += "\r\nContent-Length: " + wsutils::toString(cgiBody.length()) + "\r\n";
             if (sessionData != "") {
-                // TODO: use config session expiration instead of hardcoded 60s
-                std::string sessionId = server.session.addNewSession(sessionData, 60);
-                cgiHeader += setCookie(sessionId, 60);
+                std::string sessionId = server.session.addNewSession(sessionData, server.sessionExpireSeconds);
+                cgiHeader += setCookie(sessionId, server.sessionExpireSeconds);
             }
             cgiHeader += "\r\n";
             return output + cgiHeader + cgiBody;

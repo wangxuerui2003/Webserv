@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 16:29:43 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 20:42:56 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,6 +194,12 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
     if (sessionStore.empty() == false) {
         server.hasSessionManagement = true;
         server.session = Session(sessionStore[0]);
+        std::vector<std::string> session_expire_seconds = getKeywordValues("session_expire_seconds", serverLines);
+        if (session_expire_seconds.empty()) {
+            server.sessionExpireSeconds = 60;
+        } else {
+            server.sessionExpireSeconds = wsutils::stringToNumber<time_t>(session_expire_seconds[0]);
+        }
     }
 
     server.locations = locations;
@@ -273,8 +279,11 @@ void Parser::print_server(const Server &server) {
     for (std::map<std::string, Path>::const_iterator it = server.error_pages.begin(); it != server.error_pages.end(); ++it)
         std::cout << "Error Number: " << it->first << " | " << "Path: " << it->second.getPath() << std::endl;
 
-    if (server.hasSessionManagement)
+    if (server.hasSessionManagement) {
         std::cout << "Session Store: " << server.session.getSessionStorePath().getPath() << std::endl;
+        std::cout << "Session Expire Seconds: " << server.sessionExpireSeconds << std::endl;
+    }
+
     std::cout << RESET;
 }
 
