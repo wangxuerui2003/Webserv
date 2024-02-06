@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 08:46:49 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/04 15:23:35 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 12:40:00 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@
 #include "webserv.hpp"
 #include "Path.hpp"
 
-struct SessionData {
-	SessionData();
+struct SessionInfo {
+	SessionInfo();
 
 	std::string sessionId;
 	std::map<std::string, std::string> sessionData;
@@ -26,15 +26,16 @@ struct SessionData {
 
 class Session {
 	public:
-		Session();
+		Session(std::string sessionStoreFile);
 		~Session();
 
-		SessionData *getSessionDataById(std::string sessionId);
-		void addNewSession(SessionData& sessionData);
+		std::string getSessionDataById(std::string sessionId);
+		void addNewSession(SessionInfo& sessionData);
 		static std::string generateNewSessionId(void);
+		const Path& getSessionStorePath(void) const;
 
 	private:
-		Path sessionStore;
+		Path _sessionStore;
 		
 
 };

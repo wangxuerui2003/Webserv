@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:30 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 13:36:03 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 12:42:54 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,13 @@
 
 class CgiHandler {
 public:
-    // Constructor
-    CgiHandler();
-
-    // Destructor
-    ~CgiHandler();
-
     // Method to handle CGI execution
-    std::string handleCgi(Request &request, Server &server, Location &location);
-    std::string	parseCgiOutput(int pipefd_output, int pipefd_error);
+    static std::string handleCgi(Request &request, Server &server, Location &location);
+    static std::string	parseCgiOutput(int pipefd_output, int pipefd_error);
 
 private:
     // Private helper methods for CGI handling
-    char **setEnv(Request &request, Location& location, Path& cgiPath);
+    static char **setEnv(Request &request, Server& server, Location& location, Path& cgiPath);
 };
 
 #endif

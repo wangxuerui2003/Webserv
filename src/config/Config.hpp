@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 13:02:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/04 17:19:27 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/05 14:13:04 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,13 +38,11 @@ struct Location {
 	bool isHttpRedirection;
 	std::string redirectionStatusCode;
 	std::string redirectURL;
-
-	bool hasSessionManagement;
-	Session *session;
 };
 
 struct Server {
 	Server();
+	~Server();
 
 	std::vector<std::pair<std::string, std::string> > hosts;
 	std::vector<std::string> server_name;
@@ -52,6 +50,8 @@ struct Server {
 	std::vector<std::string> index;
 	std::map<std::string, Path> error_pages;
 	std::map<std::string, std::string> cgiHandlers;
+
+	Session *session;
 
 	std::vector<Location> locations;
 };

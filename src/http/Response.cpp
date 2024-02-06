@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/05 13:43:11 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 12:43:27 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,8 +152,7 @@ std::string Response::handleStaticContent(Request& request, Path &absPath, Locat
 }
 
 std::string Response::handle_GET_request(Request &request, Location *location, Server &server) {
-    CgiHandler cgi;
-    return (cgi.handleCgi(request, server, *location));
+    return (CgiHandler::handleCgi(request, server, *location));
 }
 
 std::string Response::handle_POST_request(Request &request, Location *location, Server &server) {
@@ -164,8 +163,7 @@ std::string Response::handle_POST_request(Request &request, Location *location, 
     wsutils::stringToNumber<unsigned long long>(request.getHeader("Content-Length")) > location->max_client_body_size)
         return (parse_error_pages("413", "Payload Too Large", server));
     else {
-        CgiHandler cgi;
-        return (cgi.handleCgi(request, server, *location));
+        return (CgiHandler::handleCgi(request, server, *location));
     }
 }
 

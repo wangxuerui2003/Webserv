@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/04 17:28:39 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/05 14:18:32 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,10 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
         serverLines.push_back(configLines[currentLineIndex]);
     }
 
-    Server server;
+    config.servers.push_back(Server());
+
+    Server& server = config.servers[config.servers.size() - 1];
+
     std::vector<std::string> listens = getKeywordValues("listen", serverLines);
     for (std::vector<std::string>::iterator listen = listens.begin(); listen != listens.end(); ++listen) {
         std::string host, port;
@@ -153,10 +156,12 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
     } else {
         throw Path::InvalidPathException("No root in server block");
     }
+
     server.index = getKeywordValues("index", serverLines);
     if (server.index.empty()) {
         wsutils::errorExit("Server no index");
     }
+
     server.server_name = getKeywordValues("server_name", serverLines);
 
     std::vector<std::string> cgi_handlers = getKeywordValues("cgi_handler", serverLines);
@@ -187,9 +192,12 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
         server.error_pages[*it] = errorPagePath;
     }
 
-    server.locations = locations;
+    std::vector<std::string> sessionStore = getKeywordValues("session_store", serverLines);
+    if (sessionStore.empty() == false) {
+        server.session = new Session(sessionStore[0]);
+    }
 
-    config.servers.push_back(server);
+    server.locations = locations;
 }
 
 
@@ -262,6 +270,9 @@ void Parser::print_server(const Server &server) {
 
     for (std::map<std::string, Path>::const_iterator it = server.error_pages.begin(); it != server.error_pages.end(); ++it)
         std::cout << "Error Number: " << it->first << " | " << "Path: " << it->second.getPath() << std::endl;
+
+    if (server.session != NULL)
+        std::cout << "Session Store: " << server.session->getSessionStorePath().getPath() << std::endl;
     std::cout << RESET;
 }
 

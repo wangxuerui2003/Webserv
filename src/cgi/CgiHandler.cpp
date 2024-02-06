@@ -6,15 +6,11 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/04 07:46:12 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 12:49:06 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CgiHandler.hpp"
-
-CgiHandler::CgiHandler() {}
-
-CgiHandler::~CgiHandler() {}
 
 // Method to handle CGI execution
 std::string CgiHandler::handleCgi(Request &request, Server &server, Location &location) {
@@ -53,8 +49,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
             dup2(pipefd_stderror[1], STDERR_FILENO);
             
             // Execute CGI script
-            char **envp = setEnv(request, location, cgiPath);
-
+            char **envp = setEnv(request, server, location, cgiPath);
 
             // Let CGI script current directory have the correct relative path access
             std::string cgiDir = cgiPath.getDirectory().getPath();
@@ -116,7 +111,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
     return (ret);
 }
 
-char **CgiHandler::setEnv(Request& request, Location& location, Path& cgiPath) {
+char **CgiHandler::setEnv(Request& request, Server& server, Location& location, Path& cgiPath) {
     std::vector<std::string> customEnvp;
     customEnvp.push_back("REQUEST_METHOD=" + request.getMethod());
     customEnvp.push_back("ROUTE=" + request.getURI().getPath());
@@ -130,8 +125,13 @@ char **CgiHandler::setEnv(Request& request, Location& location, Path& cgiPath) {
     customEnvp.push_back("HTTP_ACCEPT=" + request.getHeader("Accept"));
     customEnvp.push_back("HTTP_REFERER=" + request.getHeader("Referer"));
     // Cookie header not always present
-    if (!request.getHeader("Cookie").empty())
-        customEnvp.push_back("HTTP_COOKIE=" + request.getHeader("Cookie"));
+    // if (!request.getHeader("Cookie").empty())
+    //     customEnvp.push_back("HTTP_COOKIE=" + request.getHeader("Cookie"));
+
+    std::string sessionId = request.getCookieByName(WEBSERV_SESSION_ID_NAME);
+    if (sessionId != "") {
+        customEnvp.push_back(SESSION_DATA_CGI_HEADER "=" + server.session->getSessionDataById(sessionId));
+    }
 
     if (location.accept_upload == true) {
         customEnvp.push_back("UPLOAD_STORE=" + location.upload_store.getPath());
@@ -178,5 +178,8 @@ std::string	CgiHandler::parseCgiOutput(int pipefd_output, int pipefd_error) {
 		output.append(buffer, rec_byte);
 	while ((rec_byte = read(pipefd_error, buffer, READ_BUFFER_SIZE)) != 0)
 		output.append(buffer,rec_byte);
+
+    // TODO: parse X-Replace-Session
+
 	return (output);
 }
