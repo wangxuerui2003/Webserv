@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 15:09:23 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 22:49:31 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 22:52:48 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ std::string Session::getSessionDataById(std::string sessionId) {
 	removeExpiredSessions();
 
 	// read the file into a vector, ignore the first line, check one by one see if there is a match
-	std::vector<std::string> *lines = _sessionStore.readLines<std::vector<std::string> >();
+	std::vector<std::string> *lines = _sessionStore.readLines();
 	std::string sessionData;
 	std::vector<std::string>::iterator it = lines->begin();
 
@@ -77,7 +77,7 @@ std::string Session::getSessionDataById(std::string sessionId) {
 }
 
 void Session::removeExpiredSessions(void) {
-	std::vector<std::string> *lines = _sessionStore.readLines<std::vector<std::string> >();
+	std::vector<std::string> *lines = _sessionStore.readLines();
 	std::vector<std::string>::iterator it = lines->begin();
 	std::string remainingSessions = *it + '\n';
 

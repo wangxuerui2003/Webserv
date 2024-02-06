@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 21:39:59 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 22:52:31 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -333,6 +333,39 @@ void Path::write(std::string text) {
     outputFile << text;
 
     outputFile.close();
+}
+
+std::vector<std::string> *Path::readLines(void) const {
+	std::ifstream infile(_path.c_str(), std::ios_base::in);
+
+	if (!infile.is_open()) {
+		return NULL;
+	}
+
+	std::vector<std::string> *lines = new std::vector<std::string>();
+	std::string buffer;
+
+	while (std::getline(infile, buffer)) {
+		lines->push_back(buffer);
+	}
+
+	infile.close();
+	return lines;
+}
+
+void Path::writeLines(std::vector<std::string>& lines) {
+	std::ofstream outputFile(_path.c_str(), std::ios::out | std::ios::trunc);
+
+	if (!outputFile.is_open()) {
+		throw Path::InvalidPathException("File " + _path + " cannot be opened");
+	}
+	
+	std::vector<std::string>::iterator it = lines.begin();
+	for (; it != lines.end(); ++it) {
+		outputFile << *it << '\n';
+	}
+
+	outputFile.close();
 }
 
 std::string Path::getFileExtension(void) const {

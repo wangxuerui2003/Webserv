@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 21:40:14 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 22:51:22 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,40 +84,8 @@ class Path {
 				const char *what() const throw();
 		};
 
-		template <typename Container>
-		Container *readLines(void) const {
-			std::ifstream infile(_path.c_str(), std::ios_base::in);
-
-			if (!infile.is_open()) {
-				return NULL;
-			}
-
-			Container *lines = new Container();
-			std::string buffer;
-
-			while (std::getline(infile, buffer)) {
-				lines->push_back(buffer);
-			}
-
-			infile.close();
-			return lines;
-		}
-
-		template <typename Container>
-		void writeLines(Container& list) {
-			std::ofstream outputFile(_path.c_str(), std::ios::out | std::ios::trunc);
-
-			if (!outputFile.is_open()) {
-				throw Path::InvalidPathException("File " + _path + " cannot be opened");
-			}
-			
-			typename Container::iterator it = list.begin();
-			for (; it != list.end(); ++it) {
-				outputFile << *it << '\n';
-			}
-
-			outputFile.close();
-		}
+		std::vector<std::string> *readLines(void) const;
+		void writeLines(std::vector<std::string>& lines);
 
 		Path& operator<<(std::string text);
 
