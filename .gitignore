@@ -20,3 +20,6 @@ log*
 large_file.txt
 be-deleted.txt
 conf/test.conf
+
+# session file
+sessions.csv
