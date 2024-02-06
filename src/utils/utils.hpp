@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:07:17 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 12:02:00 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 21:42:02 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ namespace wsutils {
 		std::istringstream ss(str);
 
 		if (!(ss >> value)) {
-			throw std::runtime_error("Conversion from string to int failed.");
+			return 0;
 		}
 
 		return value;

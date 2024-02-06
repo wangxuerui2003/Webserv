@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 20:41:10 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 21:33:28 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
 
             // if no header found, add a default header for the CGI output
             if (cgiHeaderTerminator == std::string::npos) {
+                std::cout << "No header" << std::endl;
                 output += "Content-Type: text/html\r\n";
                 output += "Content-Length: " + wsutils::toString(cgiOutput.length()) + "\r\n";
                 output += "\r\n";
@@ -172,7 +173,7 @@ char **CgiHandler::setEnv(Request& request, Server& server, Location& location, 
     if (server.hasSessionManagement) {
         std::string sessionId = request.getCookieByName(WEBSERV_SESSION_ID_NAME);
         if (sessionId != "") {
-            customEnvp.push_back(SESSION_DATA_CGI_HEADER "=" + server.session.getSessionDataById(sessionId));
+            customEnvp.push_back(std::string(SESSION_DATA_CGI_HEADER) + "=" + server.session.getSessionDataById(sessionId));
         }
     }
 

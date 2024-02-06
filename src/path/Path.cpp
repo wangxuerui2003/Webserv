@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 18:24:56 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 21:39:59 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -323,14 +323,14 @@ std::string Path::read(void) const {
 }
 
 
-void Path::write(std::string filePath, std::string content) {
-	std::ofstream outputFile(filePath.c_str(), std::ios::out | std::ios::trunc);
+void Path::write(std::string text) {
+	std::ofstream outputFile(_path.c_str(), std::ios::out | std::ios::trunc);
 
     if (!outputFile.is_open()) {
-        throw Path::InvalidPathException("File " + filePath + " cannot be opened");
+        throw Path::InvalidPathException("File " + _path + " cannot be opened");
     }
     
-    outputFile << content;
+    outputFile << text;
 
     outputFile.close();
 }
