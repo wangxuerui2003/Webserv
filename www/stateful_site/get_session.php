@@ -1,6 +1,6 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-	// TODO: send back the POSTed session data to webserv with a X-Replace-Session header
+	// send back the POSTed session data to webserv with a X-Replace-Session header
 	// webserv will then store the session data into a csv file and Set-Cookie for the client
     $name = $_POST["name"];
     $intra = $_POST["intra-id"];

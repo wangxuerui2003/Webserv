@@ -1,6 +1,5 @@
 <?php
-// TODO: If have session WEBSERV_SESSION_DATA, display the session data.
-// TODO: If don't have session, redirect to get_session.php
+// If have session WEBSERV_SESSION_DATA, display the session data.
 if (array_key_exists("WEBSERV_SESSION_DATA", $_SERVER)) {
 	$session_data = $_SERVER["WEBSERV_SESSION_DATA"];
 	$name_value_pairs_array = explode(';', $session_data);
@@ -11,6 +10,7 @@ if (array_key_exists("WEBSERV_SESSION_DATA", $_SERVER)) {
 	}
 	echo "</body></html>";
 } else {
+	// don't have session yet, redirect to get_session.php
 	header('Location: ' . '/stateful_site/get_session.php');
 	die();
 }
