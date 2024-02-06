@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 21:33:28 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 22:27:55 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,20 +96,35 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
             }
             
             std::string output;
-            output += std::string("HTTP/1.1") + " 200 OK\r\n";
+            output += "HTTP/1.1 ";
             size_t cgiHeaderTerminator = cgiOutput.find(HTTP_HEADER_TERMINATOR);
 
             // if no header found, add a default header for the CGI output
             if (cgiHeaderTerminator == std::string::npos) {
                 std::cout << "No header" << std::endl;
+                output += "200 OK\r\n";
                 output += "Content-Type: text/html\r\n";
                 output += "Content-Length: " + wsutils::toString(cgiOutput.length()) + "\r\n";
                 output += "\r\n";
                 return output + cgiOutput;
             }
 
+            size_t httpStatusIndex = cgiOutput.find("Status: ");
+            if (httpStatusIndex != std::string::npos) {
+                size_t end = cgiOutput.find("\r\n", httpStatusIndex);
+                if (end == std::string::npos) {
+                    throw std::runtime_error("Incorrect CGI output structure");
+                }
+                output += cgiOutput.substr(httpStatusIndex + 8, end - httpStatusIndex - 8) + "\r\n";
+                cgiOutput.erase(httpStatusIndex, end - httpStatusIndex + 2);
+            } else {
+                output += "200 OK\r\n";
+            }
+
             // Found header, parse the header and extract necessary information, then return the response string
             std::string sessionData = parseXReplaceSession(cgiOutput);
+
+            cgiHeaderTerminator = cgiOutput.find(HTTP_HEADER_TERMINATOR);
             std::string cgiHeader = cgiOutput.substr(0, cgiHeaderTerminator);
             std::string cgiBody = cgiOutput.substr(cgiHeaderTerminator + 4);
             cgiHeader += "\r\nContent-Length: " + wsutils::toString(cgiBody.length()) + "\r\n";

@@ -2,11 +2,16 @@
 // TODO: If have session WEBSERV_SESSION_DATA, display the session data.
 // TODO: If don't have session, redirect to get_session.php
 if (array_key_exists("WEBSERV_SESSION_DATA", $_SERVER)) {
-	$data = $_SERVER["WEBSERV_SESSION_DATA"];
+	$session_data = $_SERVER["WEBSERV_SESSION_DATA"];
+	$name_value_pairs_array = explode(';', $session_data);
 	echo "<html><body>";
-	echo "<h1>$data</h1>";
+	foreach ($name_value_pairs_array as $name_value_pair) {
+		[$name, $value] = explode('=', $name_value_pair);
+		echo "<h1>Your $name is: $value</h1>";
+	}
 	echo "</body></html>";
 } else {
-	print "X-Replace-Session: test1=wangxuerui;\r\n";
+	header('Location: ' . '/stateful_site/get_session.php');
+	die();
 }
 ?>

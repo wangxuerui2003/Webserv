@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 15:09:23 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 21:42:24 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/06 22:38:27 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,9 +52,28 @@ const Path& Session::getSessionStorePath(void) const {
 
 std::string Session::getSessionDataById(std::string sessionId) {
 	removeExpiredSessions();
+
 	// TODO: read the file into a linked list, ignore the first line, check one by one see if there is a match
-	(void)sessionId;
-	return "sessiondata1=wxuerui;sessiondata2=2003";
+	std::vector<std::string> *lines = _sessionStore.readLines<std::vector<std::string> >();
+	std::string sessionData;
+	std::vector<std::string>::iterator it = lines->begin();
+
+	++it;  // ignore the csv header line
+
+	for (; it != lines->end(); ++it) {
+		size_t firstSeparator = it->find_first_of('|');
+		std::string currentSessionId = it->substr(0, firstSeparator);
+		if (currentSessionId != sessionId) {
+			continue;
+		}
+
+		size_t lastSeparator = it->find_last_of('|');
+		sessionData = it->substr(firstSeparator + 1, lastSeparator - (firstSeparator + 1));
+		break;
+	}
+
+	delete lines;
+	return sessionData;
 }
 
 void Session::removeExpiredSessions(void) {
