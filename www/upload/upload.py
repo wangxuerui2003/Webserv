@@ -77,14 +77,16 @@ elif request_method == "GET":
 		<ul>
 			<li><a href="/">Home</a></li>
 			<li><a href="/upload/upload.py">Upload</a></li>
-			<li><a href="/database.html">Files</a></li>
+			<li><a href="/database.html">Database</a></li>
 			<li><a href="/about.html">About</a></li>
 		</ul>
-		<h2>Upload File</h2>
-		<form action="/upload/upload.py" method="post" enctype="multipart/form-data">
-			<input type="file" name="file" id="file"><br><br>
-			<input type="submit" value="Upload File">
-		</form>
+		<div class="block">
+			<h2>Upload File</h2>
+			<form action="/upload/upload.py" method="post" enctype="multipart/form-data">
+				<input type="file" name="file" id="file"><br><br>
+				<input type="submit" value="Upload File">
+			</form>
+		</div>
 	</body>
 	</html>
 	'''

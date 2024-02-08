@@ -1,7 +1,6 @@
 body {
 	margin: 0;
 	padding: 0;
-	overflow: hidden;
 	font-family: sans-serif;
 }
 
@@ -15,15 +14,28 @@ body {
 	background-color: white;
 }
 
+.block {
+	padding-left: 20px;
+}
+
 h1 {
 	color: green;
 	background-color: lightgrey;
 	font-size: 48px;
-	font-family: cursive;
+	font-family: monospace;
 	text-align: left;
 	margin: 0;
 	padding: 10px;
 	padding-left: 30px;
+}
+
+h2 {
+	font-size: 36px;
+}
+
+p, pre {
+	font-size: 20px;
+	font-family: sans-serif;
 }
 
 ul {
