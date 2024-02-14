@@ -10,4 +10,4 @@ fi
 
 # Replace servers root with local ./www in absolute path
 www=$(cd www && pwd && cd ..)
-sed -i "s|/webserver-rootpath|$www|g" conf/local.conf
+sed -i "" "s|/webserver-rootpath|$www|g" conf/local.conf
