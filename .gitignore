@@ -23,3 +23,6 @@ conf/test.conf
 
 # session file
 sessions.csv
+
+# siege program
+siege/
