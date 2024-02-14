@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 14:51:16 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 22:51:22 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/14 19:23:58 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,9 @@ class Path {
 		bool operator==(const Path& other);
 		bool operator!=(const Path& other);
 
+		std::vector<std::string> readLines(void) const;
+		void writeLines(std::vector<std::string>& lines) const;
+
 		class InvalidPathException : public std::exception {
 			private:
 				std::string _errorMsg;
@@ -83,9 +86,6 @@ class Path {
 				~InvalidOperationException() throw();
 				const char *what() const throw();
 		};
-
-		std::vector<std::string> *readLines(void) const;
-		void writeLines(std::vector<std::string>& lines);
 
 		Path& operator<<(std::string text);
 

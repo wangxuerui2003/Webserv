@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/05 13:42:06 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/14 19:38:22 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,7 @@ void Request::setURI(Path& uri) {
 // Accept-Encoding: gzip,deflates
 // Accept-Charset: I
 void Request::parseRequest(const std::string& rawReqString) {
+    std::cout << rawReqString << std::endl;
     std::istringstream requestStream(rawReqString);
     std::string temp_path;
     requestStream >> _method >> temp_path >> _httpVersion; // extraction operator splits by whitespaces

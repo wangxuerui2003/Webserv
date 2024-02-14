@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 22:53:13 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/14 19:28:07 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,21 +210,19 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
 
 void Parser::parse(std::string configFilePath, Config& config) {
     Path configPath(configFilePath);
-    std::vector<std::string> *configLines = configPath.readLines();
+    std::vector<std::string> configLines = configPath.readLines();
 
     for (size_t currentLineIndex = 0;
-        currentLineIndex < configLines->size(); ++currentLineIndex) {
-        if ((*configLines)[currentLineIndex].find("event {") != std::string::npos) {
-            parseEventContext(config, *configLines, currentLineIndex);
+        currentLineIndex < configLines.size(); ++currentLineIndex) {
+        if (configLines[currentLineIndex].find("event {") != std::string::npos) {
+            parseEventContext(config, configLines, currentLineIndex);
         }
 
-        if ((*configLines)[currentLineIndex].find("server {") != std::string::npos) {
-            parseServerContext(config, *configLines, currentLineIndex);
+        if (configLines[currentLineIndex].find("server {") != std::string::npos) {
+            parseServerContext(config, configLines, currentLineIndex);
             std::cout << "here" << std::endl;
         }
     }
-
-    delete configLines;
 }
 
 void    Parser::getLineValues(std::vector<std::string>& values, std::string& keyword, std::string& line) {

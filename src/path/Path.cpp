@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:28 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 22:52:31 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/14 19:23:39 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -335,25 +335,25 @@ void Path::write(std::string text) {
     outputFile.close();
 }
 
-std::vector<std::string> *Path::readLines(void) const {
+std::vector<std::string> Path::readLines(void) const {
 	std::ifstream infile(_path.c_str(), std::ios_base::in);
+	std::vector<std::string> lines;
 
 	if (!infile.is_open()) {
-		return NULL;
+		return lines;
 	}
 
-	std::vector<std::string> *lines = new std::vector<std::string>();
 	std::string buffer;
 
 	while (std::getline(infile, buffer)) {
-		lines->push_back(buffer);
+		lines.push_back(buffer);
 	}
 
 	infile.close();
 	return lines;
 }
 
-void Path::writeLines(std::vector<std::string>& lines) {
+void Path::writeLines(std::vector<std::string>& lines) const {
 	std::ofstream outputFile(_path.c_str(), std::ios::out | std::ios::trunc);
 
 	if (!outputFile.is_open()) {

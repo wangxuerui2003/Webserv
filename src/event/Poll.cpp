@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Poll.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 14:25:42 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 16:40:48 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/14 20:02:51 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,8 +67,7 @@ void	Poll::serverListen(void) {
 	// Forever listen for new connection or new data to be read
 	while (true) {
 		initFds();
-		// std::cout << "Active Connections Left: " + wsutils::toString(_activeConnections.size()) << std::endl;
-		// std::cout << "Max FD: " + wsutils::toString(_maxFd) << std::endl;
+		std::cout << "Active Connections Left: " + wsutils::toString(_activeConnections.size()) << std::endl;
 
 		int nready = poll(_monitorFds.data(), _monitorFds.size(), -1);  // -1 for block forever if no event
 		if (nready == -1) {
@@ -95,6 +94,7 @@ void	Poll::serverListen(void) {
 					// write events (ready to send response back to client)
 					if (revent & POLLOUT) {
 						std::string& responseString = _activeConnections[eventSock].responseString;
+						// std::cout << responseString << std::endl;
 						int bytesSent = send(eventSock, responseString.c_str(), responseString.length(), 0);
 						if (bytesSent < 0) {
 							socketsToErase.push_back(eventSock);

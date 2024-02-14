@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Session.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 15:09:23 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 22:52:48 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/14 19:28:47 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,13 +54,13 @@ std::string Session::getSessionDataById(std::string sessionId) {
 	removeExpiredSessions();
 
 	// read the file into a vector, ignore the first line, check one by one see if there is a match
-	std::vector<std::string> *lines = _sessionStore.readLines();
+	std::vector<std::string> lines = _sessionStore.readLines();
 	std::string sessionData;
-	std::vector<std::string>::iterator it = lines->begin();
+	std::vector<std::string>::iterator it = lines.begin();
 
 	++it;  // ignore the csv header line
 
-	for (; it != lines->end(); ++it) {
+	for (; it != lines.end(); ++it) {
 		size_t firstSeparator = it->find_first_of('|');
 		std::string currentSessionId = it->substr(0, firstSeparator);
 		if (currentSessionId != sessionId) {
@@ -72,19 +72,18 @@ std::string Session::getSessionDataById(std::string sessionId) {
 		break;
 	}
 
-	delete lines;
 	return sessionData;
 }
 
 void Session::removeExpiredSessions(void) {
-	std::vector<std::string> *lines = _sessionStore.readLines();
-	std::vector<std::string>::iterator it = lines->begin();
+	std::vector<std::string> lines = _sessionStore.readLines();
+	std::vector<std::string>::iterator it = lines.begin();
 	std::string remainingSessions = *it + '\n';
 
 	++it;  // ignore the csv header line
 
 	std::time_t now = std::time(NULL);
-	for (; it != lines->end(); ++it) {
+	for (; it != lines.end(); ++it) {
 		size_t lastSeparator = it->find_last_of('|');
 		std::string timestamp = it->substr(lastSeparator + 1);
 		std::time_t expirationTimestamp = wsutils::stringToNumber<time_t>(timestamp);
@@ -94,7 +93,6 @@ void Session::removeExpiredSessions(void) {
 		remainingSessions += *it + '\n';
 	}
 
-	delete lines;
 	_sessionStore.write(remainingSessions);
 }
 
