@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/14 19:38:22 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/15 15:18:55 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,8 @@ void Request::parseRequest(const std::string& rawReqString) {
         temp_path = temp_path.substr(0, queryParamSeparator);
     }
 
+    temp_path = formatRequestPath(temp_path);
+
     _uri = Path(temp_path, URI);
 
     // Read headers until an empty line is encountered
@@ -163,3 +165,45 @@ void Request::parseCookies(const std::string& cookiesList) {
         _cookies[cookieName] = cookieValue;
     }
 }
+
+std::string Request::formatRequestPath(std::string reqPath) {
+    std::vector<std::string> layers;
+
+    if (reqPath == "") {
+        throw InvalidRequestPathException();
+    }
+
+    if (reqPath[0] != '/') {
+        throw InvalidRequestPathException();
+    }
+
+    std::istringstream ss(reqPath.substr(1));  // ignore the first '/' character
+    std::string currPathSection;
+
+    while (std::getline(ss, currPathSection, '/')) {
+        if (currPathSection == "") {
+            throw InvalidRequestPathException();
+        } else if (currPathSection == "..") {
+            if (layers.size() == 0) {
+                throw InvalidRequestPathException();
+            }
+
+            layers.pop_back();
+        } else {
+            layers.push_back(currPathSection);
+        }
+    }
+
+    std::string finalPath = "";
+
+    for (std::vector<std::string>::iterator it = layers.begin(); it != layers.end(); ++it) {
+        finalPath.append("/").append(*it);
+    }
+
+    return finalPath;
+}
+
+const char *Request::InvalidRequestPathException::what() const throw() {
+    return "Bad Request";
+}
+

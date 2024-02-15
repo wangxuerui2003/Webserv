@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:27:18 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/05 13:43:16 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/15 14:59:07 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ class Response {
         static Server &findServer(Request &request, std::map<int, Server*> &servers);
         static std::string parse_error_pages(std::string error, std::string description, Server &server);
         static std::string parse_custom_error_pages(std::string error, std::map<std::string, Path> &error_pages);
+        static std::string custom_error_page(std::string error, std::string description);
         
         static std::string handle_GET_request(Request &request, Location *location, Server &server);
         static std::string handle_POST_request(Request &request, Location *location, Server &server);

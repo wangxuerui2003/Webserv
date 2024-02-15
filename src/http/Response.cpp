@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/06 12:43:27 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/15 15:13:09 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,20 @@ std::string Response::parse_error_pages(std::string error, std::string descripti
     
     data.append("Content-Type: text/html\r\n").append("Content-Length: ").append(wsutils::toString(temp_msg_body.length())).append("\r\n").append("\r\n");
     data.append(temp_msg_body);
+    data.append("\r\n");
+    return (data);
+}
+
+std::string Response::custom_error_page(std::string error, std::string description) {
+    std::string data;
+    
+    std::string msgBody = std::string("<html><head><title>").append(error).append(" ").append(description).append("</title></head><body><center><h1>")\
+        .append(error).append(" ").append(description).append("</h1></center></body></html>");
+	
+    data = "HTTP/1.1 " + error + " " + description + "\r\n";
+    
+    data.append("Content-Type: text/html\r\n").append("Content-Length: ").append(wsutils::toString(msgBody.length())).append("\r\n").append("\r\n");
+    data.append(msgBody);
     data.append("\r\n");
     return (data);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:16:57 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/05 13:42:13 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/15 15:02:03 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,12 @@ public:
 
     void setBody(std::string body);
     void setURI(Path& uri);
+
+    class InvalidRequestPathException : public std::exception {
+        const char *what() const throw();
+    };
+
+    std::string formatRequestPath(std::string reqPath);
 
 private:
     std::string _method;

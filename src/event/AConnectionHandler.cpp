@@ -160,8 +160,6 @@ bool AConnectionHandler::receiveMsgBody(int connectionSocket, bool newEvent) {
 			wsutils::warningOutput(strerror(errno));
 			return false;
 		} else if (bytesRead == 0) {
-			// Client closed the connection
-			// close(connectionSocket);
 			return false;
 		}
 	}
@@ -204,15 +202,22 @@ bool AConnectionHandler::connectionSocketRecv(int connectionSocket) {
 		wsutils::warningOutput(strerror(errno));
 		return false;
 	} else if (bytesRead == 0) {
-		// Client closed the connection
-		// close(connectionSocket);
 		return false;
 	} else {
 		conn.requestString.append(buffer, bytesRead);
 		
 		size_t terminator = conn.requestString.find(HTTP_HEADER_TERMINATOR);
 		if (terminator != std::string::npos) {
-			conn.request = new Request(conn.requestString.substr(0, terminator + 4));
+			try {
+				conn.request = new Request(conn.requestString.substr(0, terminator + 4));
+			} catch (Request::InvalidRequestPathException&) {
+				// Bad request path
+				conn.readyToResponse = true;
+				conn.responseString = Response::custom_error_page("400", "Bad Request");
+				delete conn.request;
+				conn.request = NULL;
+				return true;
+			}
 			
 			// std::cout << conn.requestString.substr(0, terminator + 4) << std::endl;
 
