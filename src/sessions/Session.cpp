@@ -6,7 +6,7 @@
 /*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 15:09:23 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/14 19:28:47 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/14 20:47:36 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,9 @@ const Path& Session::getSessionStorePath(void) const {
 	return _sessionStore;
 }
 
+/**
+ * @brief search for the session data record by a session ID from the session_store file
+*/
 std::string Session::getSessionDataById(std::string sessionId) {
 	removeExpiredSessions();
 
@@ -75,6 +78,9 @@ std::string Session::getSessionDataById(std::string sessionId) {
 	return sessionData;
 }
 
+/**
+ * @brief remove the expired sessions from the session_store file and rewrite remaining sessions to it
+*/
 void Session::removeExpiredSessions(void) {
 	std::vector<std::string> lines = _sessionStore.readLines();
 	std::vector<std::string>::iterator it = lines.begin();
@@ -96,9 +102,11 @@ void Session::removeExpiredSessions(void) {
 	_sessionStore.write(remainingSessions);
 }
 
-// generate a length 16 random string
-// 0-9,   A-Z,   a-z
-// 48-57, 65-98, 97-122
+/**
+ * generate a length 16 random string
+ * 0-9,   A-Z,   a-z
+ * 48-57, 65-98, 97-122
+*/
 std::string Session::generateNewSessionId(void) {
     char result[17];
     int i = 0;
@@ -108,13 +116,15 @@ std::string Session::generateNewSessionId(void) {
 			result[i] = c;
 			++i;
         }
-
     }
 
     result[i] = '\0';
     return result;
 }
 
+/**
+ * @brief Add a new session data record to the session_store file
+*/
 std::string Session::addNewSession(std::string sessionData, time_t expireAfterSeconds) {
 	std::string sessionId = generateNewSessionId();
 	time_t expirationTimestamp = std::time(NULL) + expireAfterSeconds;
