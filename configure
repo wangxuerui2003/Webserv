@@ -10,4 +10,13 @@ fi
 
 # Replace servers root with local ./www in absolute path
 www=$(cd www && pwd && cd ..)
-sed -i "" "s|/webserver-rootpath|$www|g" conf/local.conf
+
+system=$(uname)
+
+if [ "$system" = "Linux" ]; then
+    sed -i "s|/webserver-rootpath|$www|g" conf/local.conf
+elif [ "$system" = "Darwin" ]; then
+	sed -i "" "s|/webserver-rootpath|$www|g" conf/local.conf
+else
+	echo "Please run on a Linux or Mac machine."
+fi
