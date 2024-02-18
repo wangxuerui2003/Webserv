@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/18 15:10:15 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/18 16:56:09 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,9 +162,9 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
     }
 
     server.index = getKeywordValues("index", serverLines);
-    if (server.index.empty()) {
-        wsutils::errorExit("Server no index");
-    }
+    // if (server.index.empty()) {
+    //     wsutils::errorExit("Server no index");
+    // }
 
     server.server_name = getKeywordValues("server_name", serverLines);
 
@@ -221,6 +221,12 @@ void Parser::parse(std::string configFilePath, Config& config) {
     }
 
     std::vector<std::string> configLines = configPath.readLines();
+    for (size_t i = 0; i < configLines.size(); ++i) {
+        size_t commentDelimiter = configLines[i].find('#');
+        if (commentDelimiter != std::string::npos) {
+            configLines[i] = configLines[i].substr(0, commentDelimiter);
+        }
+    }
 
     for (size_t currentLineIndex = 0;
         currentLineIndex < configLines.size(); ++currentLineIndex) {
