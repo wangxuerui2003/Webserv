@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 11:41:11 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/03 14:30:18 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/18 15:46:50 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ class Select : public AConnectionHandler {
 
 		fd_set _readFds;
 		fd_set _writeFds;
+		fd_set _exceptFds;
 		int _maxFd;
 };
 

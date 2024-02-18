@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Poll.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 14:25:42 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/14 20:02:51 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/18 15:57:49 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,9 @@ void	Poll::initFds(void) {
 		} else {
 			_monitorFds[currPollFd].events = POLLIN;
 		}
+
+		_monitorFds[currPollFd].events |= POLLERR;
+		_monitorFds[currPollFd].events |= POLLHUP;
 
 		currPollFd++;
 	}
@@ -91,8 +94,13 @@ void	Poll::serverListen(void) {
 				else {
 					short revent = it->revents;
 
+					// error events
+					if ((revent & POLLERR) || (revent & POLLHUP)) {
+						socketsToErase.push_back(eventSock);
+					}
+
 					// write events (ready to send response back to client)
-					if (revent & POLLOUT) {
+					else if (revent & POLLOUT) {
 						std::string& responseString = _activeConnections[eventSock].responseString;
 						// std::cout << responseString << std::endl;
 						int bytesSent = send(eventSock, responseString.c_str(), responseString.length(), 0);

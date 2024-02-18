@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Select.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 11:43:50 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/14 20:02:55 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/18 15:49:44 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ void Select::initFds(void) {
 	// clear all states in read and write fd sets
 	FD_ZERO(&_readFds);
 	FD_ZERO(&_writeFds);
+	FD_ZERO(&_exceptFds);
 
 	// reset _maxFd
 	_maxFd = -1;
@@ -41,6 +42,7 @@ void Select::initFds(void) {
 	// for active connections:
 	// if ready to response, add to write fd set
 	// if not yet ready, add to read fd set
+	// all connection (client) sockets are monitored for any kind of exceptions
 	// increment _maxFd if needed
 	for (std::map<int, ConnectionBuffer>::iterator it = _activeConnections.begin(); it != _activeConnections.end(); ++it) {
 		if (it->second.readyToResponse == true) {
@@ -48,6 +50,8 @@ void Select::initFds(void) {
 		} else {
 			FD_SET(it->first, &_readFds);
 		}
+
+		FD_SET(it->first, &_exceptFds);
 
 		if (it->first > _maxFd) {
 			_maxFd = it->first;
@@ -76,7 +80,7 @@ void Select::serverListen(void) {
 		std::cout << "Active Connections Left: " + wsutils::toString(_activeConnections.size()) << std::endl;
 		std::cout << "Max FD: " + wsutils::toString(_maxFd) << std::endl;
 
-		int nready = select(_maxFd + 1, &_readFds, &_writeFds, NULL, NULL);
+		int nready = select(_maxFd + 1, &_readFds, &_writeFds, &_exceptFds, NULL);
 		if (nready == -1) {
 			wsutils::errorExit(strerror(errno));
 		}
@@ -96,8 +100,13 @@ void Select::serverListen(void) {
 		for (csock = _activeConnections.begin(); csock != _activeConnections.end() && nready > 0; ++csock) {
 			int connectionSocket = csock->first;
 
+			// error events (close the connection socket)
+			if (FD_ISSET(connectionSocket, &_exceptFds)) {
+				socketsToErase.push_back(connectionSocket);
+			}
+
 			// write events (ready to send response back to client)
-			if (FD_ISSET(connectionSocket, &_writeFds)) {
+			else if (FD_ISSET(connectionSocket, &_writeFds)) {
 				--nready;
 				std::string& responseString = _activeConnections[connectionSocket].responseString;
 				// std::cout << responseString << std::endl;
