@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 22:27:55 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/18 15:31:09 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
             if (httpStatusIndex != std::string::npos) {
                 size_t end = cgiOutput.find("\r\n", httpStatusIndex);
                 if (end == std::string::npos) {
-                    throw std::runtime_error("Incorrect CGI output structure");
+                    return (Response::parse_error_pages("500", "Internal Server Error", server));
                 }
                 output += cgiOutput.substr(httpStatusIndex + 8, end - httpStatusIndex - 8) + "\r\n";
                 cgiOutput.erase(httpStatusIndex, end - httpStatusIndex + 2);
@@ -162,7 +162,7 @@ std::string CgiHandler::parseXReplaceSession(std::string& cgiOutput) {
     size_t start = sessionDataHeader + std::strlen("X-Replace-Session: ");
     size_t end = cgiOutput.find("\r\n", sessionDataHeader);
     if (end == std::string::npos) {
-        throw std::runtime_error("Incorrect CGI output structure");
+        return "";
     }
 
     std::string sessionData = cgiOutput.substr(start, end - start);
