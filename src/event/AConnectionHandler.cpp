@@ -112,8 +112,6 @@ bool AConnectionHandler::handleChunkedRequest(int connectionSocket, bool newEven
 			wsutils::warningOutput(strerror(errno));
 			return false;
 		} else if (bytesRead == 0) {
-			// Client closed the connection
-			// close(connectionSocket);
 			return false;
 		}
 

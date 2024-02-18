@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/14 19:28:07 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/17 12:34:46 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,7 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
         if (configLines[currentLineIndex].find("location") != std::string::npos) {
             locations.push_back(parseLocationContext(configLines, currentLineIndex));
         }
+
         if (configLines[currentLineIndex].find("}") != std::string::npos) {
             ++currentLineIndex;
             break;
@@ -220,7 +221,6 @@ void Parser::parse(std::string configFilePath, Config& config) {
 
         if (configLines[currentLineIndex].find("server {") != std::string::npos) {
             parseServerContext(config, configLines, currentLineIndex);
-            std::cout << "here" << std::endl;
         }
     }
 }
