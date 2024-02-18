@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/15 15:18:55 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/18 16:30:23 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,6 +200,9 @@ std::string Request::formatRequestPath(std::string reqPath) {
         finalPath.append("/").append(*it);
     }
 
+    if (finalPath == "") {
+        return "/";
+    }
     return finalPath;
 }
 
