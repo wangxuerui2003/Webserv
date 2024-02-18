@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/18 14:57:06 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/18 15:10:15 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,6 +216,10 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
 
 void Parser::parse(std::string configFilePath, Config& config) {
     Path configPath(configFilePath);
+    if (configPath.getType() != REG_FILE) {
+        wsutils::errorExit("Config file path is not a regular file");
+    }
+
     std::vector<std::string> configLines = configPath.readLines();
 
     for (size_t currentLineIndex = 0;

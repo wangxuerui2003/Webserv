@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:47:59 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 18:41:46 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/18 15:08:58 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,10 @@ int main(int ac, char **av) {
 		wsutils::errorExit(e.what());
 	} catch (Path::InvalidOperationException& e) {
 		wsutils::errorExit(e.what());
+	}
+
+	if (config.servers.empty()) {
+		wsutils::errorExit("No servers in config file");
 	}
 	
 	Parser::print_values(config.servers);
