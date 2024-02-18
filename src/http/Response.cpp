@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/15 15:13:09 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/18 15:15:30 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -299,9 +299,9 @@ std::string Response::generateResponse(Request &request, Server &server) {
         // Map URL to filesystem
         absPath = Path::mapURLToFS(request_uri, location->uri, location->root, location->isCustomRoot);
     } catch (Path::InvalidOperationException &err) {
-        return (parse_error_pages("500", err.what(), server));
+        return (parse_error_pages("500", "Internal Server Error", server));
     } catch (Path::InvalidPathException &err) {
-        return (parse_error_pages("404", err.what(), server));
+        return (parse_error_pages("404", "Not Found", server));
     }
 
 
