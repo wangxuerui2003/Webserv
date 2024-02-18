@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/17 12:34:46 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/18 14:57:06 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,17 +38,7 @@ void Parser::parseEventContext(Config& config, std::vector<std::string>& configL
     }
 }
 
-Location Parser::parseLocationContext(std::vector<std::string>& serverLines, size_t& currentLineIndex) {
-    std::vector<std::string> locationLines;
-    while (currentLineIndex < serverLines.size()) {
-        if (serverLines[currentLineIndex].find("}") != std::string::npos) {
-            ++currentLineIndex;
-            break;
-        }
-        locationLines.push_back(serverLines[currentLineIndex]);
-        currentLineIndex++;
-    }
-
+Location Parser::parseLocationContext(std::vector<std::string>& serverLines, std::vector<std::string>& locationLines) {
     Location location;
     location.uri = Path(getKeywordValues("location", locationLines)[0], URI);
     
@@ -109,10 +99,20 @@ Location Parser::parseLocationContext(std::vector<std::string>& serverLines, siz
 
 void Parser::parseServerContext(Config& config, std::vector<std::string>& configLines, size_t& currentLineIndex) {
     std::vector<std::string> serverLines;
-    std::vector<Location> locations;
+    std::vector<std::vector<std::string> > locationsLines;
+
     while (++currentLineIndex < configLines.size()) {
         if (configLines[currentLineIndex].find("location") != std::string::npos) {
-            locations.push_back(parseLocationContext(configLines, currentLineIndex));
+            std::vector<std::string> locationLines;
+            while (currentLineIndex < configLines.size()) {
+                if (configLines[currentLineIndex].find("}") != std::string::npos) {
+                    ++currentLineIndex;
+                    break;
+                }
+                locationLines.push_back(configLines[currentLineIndex]);
+                currentLineIndex++;
+            }
+            locationsLines.push_back(locationLines);
         }
 
         if (configLines[currentLineIndex].find("}") != std::string::npos) {
@@ -121,6 +121,11 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
         }
 
         serverLines.push_back(configLines[currentLineIndex]);
+    }
+
+    std::vector<Location> locations;
+    for (size_t i = 0; i < locationsLines.size(); ++i) {
+        locations.push_back(parseLocationContext(serverLines, locationsLines[i]));
     }
 
     Server server;

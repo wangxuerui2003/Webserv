@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 17:55:47 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/04 17:27:03 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/18 14:54:50 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class Parser {
 		// helper functions for parse()
 		static void parseEventContext(Config& config, std::vector<std::string>& configLines, size_t& currentLineIndex);
 		static void parseServerContext(Config& config, std::vector<std::string>& configLines, size_t& currentLineIndex);
-		static Location parseLocationContext(std::vector<std::string>& configLines, size_t& currentLineIndex);
+		static Location parseLocationContext(std::vector<std::string>& configLines, std::vector<std::string>& locationLines);
 		static std::vector<std::string> getKeywordValues(std::string keyword, std::vector<std::string>& serverLines);
 		static void getLineValues(std::vector<std::string>& values, std::string& keyword, std::string& line);
 };
