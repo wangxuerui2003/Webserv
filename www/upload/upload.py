@@ -46,8 +46,8 @@ def store_file(file_object):
 
 if request_method == "POST":
 	if not content_type.startswith("multipart/form-data"):
-		print("Content-Type: text/plain")
-		print()
+		print("Content-Type: text/plain", end="\r\n")
+		print(end="\r\n")
 		print("File uploads are only allowed with multipart/form-data.")
 		sys.exit(0)
 
