@@ -6,7 +6,7 @@
 #    By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/12 11:48:29 by wxuerui           #+#    #+#              #
-#    Updated: 2024/02/04 15:20:34 by wxuerui          ###   ########.fr        #
+#    Updated: 2024/02/19 20:21:53 by wxuerui          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,8 +17,13 @@ CXXFLAGS	=	-Wall -Werror -Wextra -std=c++98 $(INCLUDES)
 ASAN		=	-fsanitize=address -g3
 
 ifeq ($(DB), 1)
+	CXXFLAGS += -g
+endif
+
+ifeq ($(ASAN), 1)
 	CXXFLAGS += -fsanitize=address -g3
 endif
+
 
 ############################
 # FOLDERS
@@ -113,6 +118,10 @@ all:	$(NAME)
 	@make ascii_art
 
 ifeq ($(DB), 1)
+	@echo "$(YELLOW)DB MODE$(RESET)"
+endif
+
+ifeq ($(ASAN), 1)
 	@echo "$(YELLOW)ASAN MODE$(RESET)"
 endif
 
