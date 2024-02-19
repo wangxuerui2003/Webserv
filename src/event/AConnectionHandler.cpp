@@ -75,9 +75,26 @@ AConnectionHandler::~AConnectionHandler() {
 
 Server &AConnectionHandler::findServer(Request& request) {
 	bool reqHostIsIPv4 = wsutils::isIPv4(request.getHost());
-	
+	std::vector<Server *> possibleServers;
+
 	for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
         Server& currentServer = *it;
+
+		for (size_t j = 0; j < currentServer.hosts.size(); ++j) {
+			std::pair<std::string, std::string> &hostPair = currentServer.hosts[j];
+			if (request.getPort() == hostPair.second) {
+				possibleServers.push_back(it.base());
+				break;
+			}
+		}
+    }
+
+	if (possibleServers.size() == 0) {
+		throw Response::InvalidServerException();
+	}
+	
+	for (std::vector<Server *>::iterator it = possibleServers.begin(); it != possibleServers.end(); ++it) {
+        Server& currentServer = *(*it);
 
 		if (reqHostIsIPv4 == true) {
 			// Check hosts if it's an ip address
@@ -97,7 +114,7 @@ Server &AConnectionHandler::findServer(Request& request) {
         
     }
 
-	throw Response::InvalidServerException();
+	return *(possibleServers[0]);
 }
 
 bool AConnectionHandler::handleChunkedRequest(int connectionSocket, bool newEvent) {
