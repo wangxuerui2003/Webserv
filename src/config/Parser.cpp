@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/18 16:56:09 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/19 09:05:58 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,9 +162,9 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
     }
 
     server.index = getKeywordValues("index", serverLines);
-    // if (server.index.empty()) {
-    //     wsutils::errorExit("Server no index");
-    // }
+    if (server.index.empty()) {
+        server.index.push_back("index.html");  // nginx behaviour
+    }
 
     server.server_name = getKeywordValues("server_name", serverLines);
 
