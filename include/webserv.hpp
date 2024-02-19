@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 16:01:20 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/06 18:41:17 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/19 09:19:39 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <cstdio>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <cstring>
