@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/18 15:31:09 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/19 09:50:53 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,6 +195,8 @@ char **CgiHandler::setEnv(Request& request, Server& server, Location& location, 
     if (location.accept_upload == true) {
         customEnvp.push_back("UPLOAD_STORE=" + location.upload_store.getPath());
     }
+
+    customEnvp.push_back("PATH_INFO=" + request.getURI().getPath());
     
     char **envp = new char*[request.getHeaderMap().size() + customEnvp.size() + 1];
     size_t i = 0;
