@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/18 16:30:23 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/19 09:01:01 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,15 +37,13 @@ const std::string& Request::getPort() const {
 }
 
 std::string Request::getHeader(const std::string& headerName) const {
-    // Need to copu into a temp because _headers is intepreted as const_iterator?
     std::map<std::string, std::string> temp = _headers;
     for (std::map<std::string, std::string>::iterator head = temp.begin(); head != temp.end(); ++head) {
         if (head->first == headerName) {
             return (head->second);
-            break; // Exit the loop once the header is found
         }
     }
-    return std::string(""); // When header not found
+    return "";
 }
 
 std::map<std::string, std::string> &Request::getHeaderMap() {
@@ -73,8 +71,6 @@ std::string Request::getCookieByName(std::string cookieName) const {
     return "";
 }
 
-
-
 void Request::setBody(std::string body) {
     _body = body;
 }
@@ -84,14 +80,19 @@ void Request::setURI(Path& uri) {
 }
 
 
-// example of raw string is:
-// GET /foo/bar HTTP/1.1
-// Host: example.org
-// User-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; fr; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8
-// Accept: */*
-// Accept-Language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3
-// Accept-Encoding: gzip,deflates
-// Accept-Charset: I
+/**
+ * @brief Parse all the information in the request string
+ * 
+ * @example
+ * Request String Example:
+ * GET /foo/bar HTTP/1.1
+ * Host: example.org
+ * User-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; fr; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8
+ * Accept-Language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3
+ * Accept-Encoding: gzip,deflates
+ * Accept-Charset: I
+ * Cookies: cookie1=value1; cookie2=value2
+*/
 void Request::parseRequest(const std::string& rawReqString) {
     std::cout << rawReqString << std::endl;
     std::istringstream requestStream(rawReqString);
@@ -116,6 +117,10 @@ void Request::parseRequest(const std::string& rawReqString) {
     }
 }
 
+/**
+ * @brief Parse all the HTTP Request Headers sent from client into a map
+ * 
+*/
 void Request::parseHeaders(const std::string& headerPart) {
     std::istringstream headerStream(headerPart);
     std::string line;
@@ -153,6 +158,9 @@ void Request::parseHeaders(const std::string& headerPart) {
     }
 }
 
+/**
+ * @brief Parse the cookies sent from client into a map
+*/
 void Request::parseCookies(const std::string& cookiesList) {
     std::istringstream cookiesListStream(cookiesList);
     std::string cookiePair;
@@ -166,6 +174,9 @@ void Request::parseCookies(const std::string& cookiesList) {
     }
 }
 
+/**
+ * @brief Format Request URL, offset all the ".."
+*/
 std::string Request::formatRequestPath(std::string reqPath) {
     std::vector<std::string> layers;
 
