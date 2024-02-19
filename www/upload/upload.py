@@ -102,13 +102,15 @@ elif request_method == "GET":
 	if not os.path.exists(file_upload_dir):
 		os.makedirs(file_upload_dir)
 
-	# List all files in the directory
-	files = os.listdir(file_upload_dir)
 
-	file_list_html = "<h2>Uploaded Files:</h2><ul>"
-	for filename in files:
-		filepath = os.path.join(os.path.join(path_info, upload_store.lstrip('/')), filename)
-		file_list_html += '<li><a href="{}">{}</a></li>'.format(filepath, filename)
-	file_list_html += "</ul>"
+	file_list_html = '<div class="block"><h2>Uploaded Files:</h2><ul>'
+	file_list_html += '<li><a href="/check_uploads">go to check_uploads </a></li>'
+	file_list_html += "</ul></div>"
+
+	# # NOT USED: List all files in the directory
+	# files = os.listdir(file_upload_dir)
+	# for filename in files:
+	# 	filepath = os.path.join(os.path.join(path_info, upload_store.lstrip('/')), filename)
+	# 	file_list_html += '<li><a href="{}">{}</a></li>'.format(filepath, filename)
 
 	print(html_content.format(file_list_html))
