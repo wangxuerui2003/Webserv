@@ -38,18 +38,18 @@ p, pre {
 	font-family: sans-serif;
 }
 
-ul {
+.nav {
 	list-style-type: none;
 	overflow: hidden;
 	background-color: #333333;
 	margin: 0;
 }
 
-li {
+.nav li {
 	float: left;
 }
 
-li a {
+.nav li a {
 	display: block;
 	color: white;
 	text-align: center;
@@ -60,7 +60,7 @@ li a {
 	font-weight: bold;
 }
 
-li a:hover {
+.nav li a:hover {
 	background-color: #111111;
 }
 
