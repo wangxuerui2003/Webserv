@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:30:17 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/18 15:15:30 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/19 09:25:24 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,8 +181,8 @@ std::string Response::handle_POST_request(Request &request, Location *location, 
     }
 }
 
-std::string Response::deleteResource(Path &absPath, Server &server) {
-    if (remove(absPath.getPath().c_str()) == -1) {
+std::string Response::handle_DELETE_request(Path &absPath, Server &server) {
+    if (std::remove(absPath.getPath().c_str()) == -1) {
 		if (errno == ENOENT) 
 			return (parse_error_pages("404", "Not Found", server));
 		else
@@ -201,15 +201,6 @@ std::string Response::deleteResource(Path &absPath, Server &server) {
         return (data);
 	}
 }
-
-// std::string Response::handle_DELETE_request(Path &absPath, Location *location, Server &server) {
-//     std::vector<std::string>::iterator head = location->allowedHttpMethods.begin();
-//     std::vector<std::string>::iterator end = location->allowedHttpMethods.end();
-//     if (std::find(head, end, "DELETE") == end) // if couldn't find DELETE, reached the end
-//         return (parse_error_pages("405", "Method not allowed", server));
-//     else
-//         return (deleteResource(absPath, server));
-// }
 
 Server &Response::findServer(Request &request, std::map<int, Server*> &servers) {
     for (std::map<int, Server*>::iterator it = servers.begin(); it != servers.end(); ++it) {
@@ -315,7 +306,7 @@ std::string Response::generateResponse(Request &request, Server &server) {
         if (request.getMethod() == "GET")
             return (handleStaticContent(request, absPath, location, server));
         else if (request.getMethod() == "DELETE")
-            return (deleteResource(absPath, server));
+            return (handle_DELETE_request(absPath, server));
         else
             return (parse_error_pages("405", "Method not allowed", server));
     }

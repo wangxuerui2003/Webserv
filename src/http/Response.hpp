@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 18:27:18 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/15 14:59:07 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/19 09:34:29 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,6 @@
 #include "Path.hpp"
 #include "Config.hpp"
 #include "CgiHandler.hpp"
-
-struct Location;
-struct Server;
 
 class Response {
     public:
@@ -38,12 +35,10 @@ class Response {
         
         static std::string handle_GET_request(Request &request, Location *location, Server &server);
         static std::string handle_POST_request(Request &request, Location *location, Server &server);
-        static std::string handle_DELETE_request(Path &abspath, Location *location, Server &server);
+        static std::string handle_DELETE_request(Path &abspath, Server &server);
 
         static Location *getBestFitLocation(std::vector<Location>& locations, Path& requestUri);
         static std::string generateDirectoryListing(const Path& dirPath, const Path& uri);
-
-        static std::string deleteResource(Path &absPath, Server &server);
 
         class InvalidServerException : public std::exception {
 			public:
