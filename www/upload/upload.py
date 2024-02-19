@@ -9,6 +9,7 @@ cgitb.enable()
 
 request_method = os.environ.get("REQUEST_METHOD").upper()
 content_type = os.environ.get("CONTENT_TYPE", "")
+path_info = os.environ.get("PATH_INFO", "")
 route = unquote("." + os.environ.get("ROUTE"))
 
 
@@ -74,12 +75,13 @@ elif request_method == "GET":
 	</head>
 	<body>
 		<h1>WEBSERV</h1>
-		<ul>
+		<ul class="nav">
 			<li><a href="/">Home</a></li>
 			<li><a href="/upload/upload.py">Upload</a></li>
 			<li><a href="/database.html">Database</a></li>
 			<li><a href="/about.html">About</a></li>
 		</ul>
+		{}
 		<div class="block">
 			<h2>Upload File</h2>
 			<form action="/upload/upload.py" method="post" enctype="multipart/form-data">
@@ -90,4 +92,23 @@ elif request_method == "GET":
 	</body>
 	</html>
 	'''
-	print(html_content)
+
+	# Custom upload location
+	current_dir = os.path.dirname(os.path.abspath(__file__))
+	upload_store = os.environ.get("UPLOAD_STORE", "")
+	file_upload_dir = os.path.join(current_dir, upload_store.lstrip('/'))
+
+	# Create the upload_store directory if not exist
+	if not os.path.exists(file_upload_dir):
+		os.makedirs(file_upload_dir)
+
+	# List all files in the directory
+	files = os.listdir(file_upload_dir)
+
+	file_list_html = "<h2>Uploaded Files:</h2><ul>"
+	for filename in files:
+		filepath = os.path.join(os.path.join(path_info, upload_store.lstrip('/')), filename)
+		file_list_html += '<li><a href="{}">{}</a></li>'.format(filepath, filename)
+	file_list_html += "</ul>"
+
+	print(html_content.format(file_list_html))
