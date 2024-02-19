@@ -77,6 +77,8 @@ Server &AConnectionHandler::findServer(Request& request) {
 	bool reqHostIsIPv4 = wsutils::isIPv4(request.getHost());
 	std::vector<Server *> possibleServers;
 
+	// filter a vector of possible servers
+	// so later if no server found then can use the first one as the default server
 	for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
         Server& currentServer = *it;
 
