@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/19 09:50:53 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/19 13:21:23 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,6 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
 
             // if no header found, add a default header for the CGI output
             if (cgiHeaderTerminator == std::string::npos) {
-                std::cout << "No header" << std::endl;
                 output += "200 OK\r\n";
                 output += "Content-Type: text/html\r\n";
                 output += "Content-Length: " + wsutils::toString(cgiOutput.length()) + "\r\n";

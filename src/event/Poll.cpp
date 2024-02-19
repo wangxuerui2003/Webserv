@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Poll.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 14:25:42 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/18 15:57:49 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/19 13:21:35 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ void	Poll::serverListen(void) {
 	// Forever listen for new connection or new data to be read
 	while (true) {
 		initFds();
-		std::cout << "Active Connections Left: " + wsutils::toString(_activeConnections.size()) << std::endl;
+		// std::cout << "Active Connections Left: " + wsutils::toString(_activeConnections.size()) << std::endl;
 
 		int nready = poll(_monitorFds.data(), _monitorFds.size(), -1);  // -1 for block forever if no event
 		if (nready == -1) {

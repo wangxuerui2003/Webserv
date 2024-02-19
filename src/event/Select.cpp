@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Select.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
+/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/03 11:43:50 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/18 15:49:44 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/19 13:21:40 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,8 +77,8 @@ void Select::serverListen(void) {
 	// Forever listen for new connection or new data to be read
 	while (true) {
 		initFds();
-		std::cout << "Active Connections Left: " + wsutils::toString(_activeConnections.size()) << std::endl;
-		std::cout << "Max FD: " + wsutils::toString(_maxFd) << std::endl;
+		// std::cout << "Active Connections Left: " + wsutils::toString(_activeConnections.size()) << std::endl;
+		// std::cout << "Max FD: " + wsutils::toString(_maxFd) << std::endl;
 
 		int nready = select(_maxFd + 1, &_readFds, &_writeFds, &_exceptFds, NULL);
 		if (nready == -1) {
