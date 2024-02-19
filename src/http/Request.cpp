@@ -6,7 +6,7 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 17:21:52 by zwong             #+#    #+#             */
-/*   Updated: 2024/02/19 09:01:01 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/19 19:56:29 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,34 @@ void Request::parseRequest(const std::string& rawReqString) {
     std::cout << rawReqString << std::endl;
     std::istringstream requestStream(rawReqString);
     std::string temp_path;
-    requestStream >> _method >> temp_path >> _httpVersion; // extraction operator splits by whitespaces
+
+    std::string requestLine;
+    std::getline(requestStream, requestLine, '\n');
+
+    if (requestLine[requestLine.length() - 1] == '\r') {
+        requestLine.erase(requestLine.length() - 1);
+    }
+    
+    std::vector<std::string> requestLineVect;
+    std::istringstream requestLineStream(requestLine);
+    std::string temp;
+    while (!requestLineStream.eof()) {
+        requestLineStream >> temp;
+        requestLineVect.push_back(temp);
+    }
+
+    if (requestLineVect.size() != 3) {
+        throw InvalidRequestPathException();
+    }
+
+    _method = requestLineVect[0];
+    temp_path = requestLineVect[1];
+    _httpVersion = requestLineVect[2];
+
+
+    if (_httpVersion != "HTTP/1.1") {
+        throw InvalidRequestPathException();
+    }
 
     size_t queryParamSeparator = temp_path.find('?');
     if (queryParamSeparator != std::string::npos) {
@@ -111,7 +138,6 @@ void Request::parseRequest(const std::string& rawReqString) {
 
     // Read headers until an empty line is encountered
     std::string line;
-    std::getline(requestStream, line, '\n');  // Skips the method, path, version -> go to headers
     while (std::getline(requestStream, line, '\n') && line != "\r") {
         parseHeaders(line);
     }
