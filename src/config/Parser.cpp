@@ -6,12 +6,15 @@
 /*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 17:48:35 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/19 09:05:58 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/19 09:14:05 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
 
+/**
+ * @brief Parse the event context
+*/
 void Parser::parseEventContext(Config& config, std::vector<std::string>& configLines, size_t& currentLineIndex) {
     std::vector<std::string> eventLines;
     while (++currentLineIndex < configLines.size()) {
@@ -38,6 +41,9 @@ void Parser::parseEventContext(Config& config, std::vector<std::string>& configL
     }
 }
 
+/**
+ * @brief Parse the location context inside a server context
+*/
 Location Parser::parseLocationContext(std::vector<std::string>& serverLines, std::vector<std::string>& locationLines) {
     Location location;
     location.uri = Path(getKeywordValues("location", locationLines)[0], URI);
@@ -97,10 +103,14 @@ Location Parser::parseLocationContext(std::vector<std::string>& serverLines, std
     return location;
 }
 
+/**
+ * @brief Parse a server context
+*/
 void Parser::parseServerContext(Config& config, std::vector<std::string>& configLines, size_t& currentLineIndex) {
     std::vector<std::string> serverLines;
     std::vector<std::vector<std::string> > locationsLines;
 
+    // store all the locations lines, and the rest are stored into serverLines
     while (++currentLineIndex < configLines.size()) {
         if (configLines[currentLineIndex].find("location") != std::string::npos) {
             std::vector<std::string> locationLines;
@@ -152,6 +162,7 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
         
         server.hosts.push_back(currHostPair);
     }
+
     if (!getKeywordValues("root", serverLines).empty()) {
         server.root = Path(getKeywordValues("root", serverLines)[0], DIRECTORY);
         if (server.root.getPath()[0] != '/') {
@@ -202,7 +213,7 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
         server.session = Session(sessionStore[0]);
         std::vector<std::string> session_expire_seconds = getKeywordValues("session_expire_seconds", serverLines);
         if (session_expire_seconds.empty()) {
-            server.sessionExpireSeconds = 60;
+            server.sessionExpireSeconds = 60;  // default session expiration is 60s
         } else {
             server.sessionExpireSeconds = wsutils::stringToNumber<time_t>(session_expire_seconds[0]);
         }
@@ -213,7 +224,9 @@ void Parser::parseServerContext(Config& config, std::vector<std::string>& config
     config.servers.push_back(server);
 }
 
-
+/**
+ * @brief Parse all information in the config file
+*/
 void Parser::parse(std::string configFilePath, Config& config) {
     Path configPath(configFilePath);
     if (configPath.getType() != REG_FILE) {
