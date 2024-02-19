@@ -9,7 +9,7 @@ conn = http.client.HTTPConnection(host, port)
 
 # Define the request headers
 headers = {
-    "Host": host,
+    "Host": f"{host}:{port}",
     "Transfer-Encoding": "chunked",  # Enable chunked encoding
     "Content-Type": "text/plain",    # Specify the content type
 }
