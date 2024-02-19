@@ -20,6 +20,7 @@ log*
 large_file.txt
 be-deleted.txt
 conf/test.conf
+YoupiBanane
 
 # session file
 sessions.csv
