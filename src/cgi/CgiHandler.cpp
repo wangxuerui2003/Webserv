@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wxuerui <wxuerui@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wxuerui <wangxuerui2003@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 18:09:24 by wxuerui           #+#    #+#             */
-/*   Updated: 2024/02/19 13:21:23 by wxuerui          ###   ########.fr       */
+/*   Updated: 2024/02/20 18:28:03 by wxuerui          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,30 +108,32 @@ std::string CgiHandler::handleCgi(Request &request, Server &server, Location &lo
                 return output + cgiOutput;
             }
 
-            size_t httpStatusIndex = cgiOutput.find("Status: ");
+            // extract header and body from cgi output
+            std::string cgiHeader = cgiOutput.substr(0, cgiHeaderTerminator);
+            std::string cgiBody = cgiOutput.substr(cgiHeaderTerminator + 4);
+            cgiHeader += "\r\nContent-Length: " + wsutils::toString(cgiBody.length()) + "\r\n";
+
+            // if cgi output has custom status, use it
+            size_t httpStatusIndex = cgiHeader.find("Status: ");
             if (httpStatusIndex != std::string::npos) {
-                size_t end = cgiOutput.find("\r\n", httpStatusIndex);
+                size_t end = cgiHeader.find("\r\n", httpStatusIndex);
                 if (end == std::string::npos) {
                     return (Response::parse_error_pages("500", "Internal Server Error", server));
                 }
-                output += cgiOutput.substr(httpStatusIndex + 8, end - httpStatusIndex - 8) + "\r\n";
-                cgiOutput.erase(httpStatusIndex, end - httpStatusIndex + 2);
+                output += cgiHeader.substr(httpStatusIndex + 8, end - httpStatusIndex - 8) + "\r\n";
+                cgiHeader.erase(httpStatusIndex, end - httpStatusIndex + 2);
             } else {
                 output += "200 OK\r\n";
             }
 
-            // Found header, parse the header and extract necessary information, then return the response string
             std::string sessionData = parseXReplaceSession(cgiOutput);
-
-            cgiHeaderTerminator = cgiOutput.find(HTTP_HEADER_TERMINATOR);
-            std::string cgiHeader = cgiOutput.substr(0, cgiHeaderTerminator);
-            std::string cgiBody = cgiOutput.substr(cgiHeaderTerminator + 4);
-            cgiHeader += "\r\nContent-Length: " + wsutils::toString(cgiBody.length()) + "\r\n";
             if (sessionData != "") {
                 std::string sessionId = server.session.addNewSession(sessionData, server.sessionExpireSeconds);
                 cgiHeader += setCookie(sessionId, server.sessionExpireSeconds);
             }
+
             cgiHeader += "\r\n";
+
             return output + cgiHeader + cgiBody;
         }
     }
