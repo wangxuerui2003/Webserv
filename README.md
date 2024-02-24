@@ -12,9 +12,11 @@ Linux, MacOS/FreeBSD
 ### Features
 - Non-Blocking I/O network operations based on select/poll
 - Supports HTTP/1.1
+- Supports GET, POST, DELETE
 - Supports defining HTTP redirection routes in config file
 - CGI: python-cgi, php-cgi
 - Cookies and Session Management
+- Supports File Upload
 
 ### Preparation
 ```bash
@@ -29,7 +31,7 @@ $ ./webserv <config-file>  # if no config provided, default will be ./conf/local
 ```
 
 ### Configuration File
-```bash
+```nginx
 # A simple example of a configuration file
 event {
 	event_handler poll;  # supports select and poll
